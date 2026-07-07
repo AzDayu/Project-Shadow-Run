@@ -89,7 +89,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
     ""name"": ""PlayerInput"",
     ""maps"": [
         {
-            ""name"": ""MoveMap"",
+            ""name"": ""InGame"",
             ""id"": ""f11f7492-da7c-4381-b5bc-10003ba027d6"",
             ""actions"": [
                 {
@@ -183,15 +183,15 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
     ],
     ""controlSchemes"": []
 }");
-        // MoveMap
-        m_MoveMap = asset.FindActionMap("MoveMap", throwIfNotFound: true);
-        m_MoveMap_Move2D = m_MoveMap.FindAction("Move2D", throwIfNotFound: true);
-        m_MoveMap_Look = m_MoveMap.FindAction("Look", throwIfNotFound: true);
+        // InGame
+        m_InGame = asset.FindActionMap("InGame", throwIfNotFound: true);
+        m_InGame_Move2D = m_InGame.FindAction("Move2D", throwIfNotFound: true);
+        m_InGame_Look = m_InGame.FindAction("Look", throwIfNotFound: true);
     }
 
     ~@PlayerInput()
     {
-        UnityEngine.Debug.Assert(!m_MoveMap.enabled, "This will cause a leak and performance issues, PlayerInput.MoveMap.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_InGame.enabled, "This will cause a leak and performance issues, PlayerInput.InGame.Disable() has not been called.");
     }
 
     /// <summary>
@@ -264,34 +264,34 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         return asset.FindBinding(bindingMask, out action);
     }
 
-    // MoveMap
-    private readonly InputActionMap m_MoveMap;
-    private List<IMoveMapActions> m_MoveMapActionsCallbackInterfaces = new List<IMoveMapActions>();
-    private readonly InputAction m_MoveMap_Move2D;
-    private readonly InputAction m_MoveMap_Look;
+    // InGame
+    private readonly InputActionMap m_InGame;
+    private List<IInGameActions> m_InGameActionsCallbackInterfaces = new List<IInGameActions>();
+    private readonly InputAction m_InGame_Move2D;
+    private readonly InputAction m_InGame_Look;
     /// <summary>
-    /// Provides access to input actions defined in input action map "MoveMap".
+    /// Provides access to input actions defined in input action map "InGame".
     /// </summary>
-    public struct MoveMapActions
+    public struct InGameActions
     {
         private @PlayerInput m_Wrapper;
 
         /// <summary>
         /// Construct a new instance of the input action map wrapper class.
         /// </summary>
-        public MoveMapActions(@PlayerInput wrapper) { m_Wrapper = wrapper; }
+        public InGameActions(@PlayerInput wrapper) { m_Wrapper = wrapper; }
         /// <summary>
-        /// Provides access to the underlying input action "MoveMap/Move2D".
+        /// Provides access to the underlying input action "InGame/Move2D".
         /// </summary>
-        public InputAction @Move2D => m_Wrapper.m_MoveMap_Move2D;
+        public InputAction @Move2D => m_Wrapper.m_InGame_Move2D;
         /// <summary>
-        /// Provides access to the underlying input action "MoveMap/Look".
+        /// Provides access to the underlying input action "InGame/Look".
         /// </summary>
-        public InputAction @Look => m_Wrapper.m_MoveMap_Look;
+        public InputAction @Look => m_Wrapper.m_InGame_Look;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
-        public InputActionMap Get() { return m_Wrapper.m_MoveMap; }
+        public InputActionMap Get() { return m_Wrapper.m_InGame; }
         /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Enable()" />
         public void Enable() { Get().Enable(); }
         /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Disable()" />
@@ -299,9 +299,9 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.enabled" />
         public bool enabled => Get().enabled;
         /// <summary>
-        /// Implicitly converts an <see ref="MoveMapActions" /> to an <see ref="InputActionMap" /> instance.
+        /// Implicitly converts an <see ref="InGameActions" /> to an <see ref="InputActionMap" /> instance.
         /// </summary>
-        public static implicit operator InputActionMap(MoveMapActions set) { return set.Get(); }
+        public static implicit operator InputActionMap(InGameActions set) { return set.Get(); }
         /// <summary>
         /// Adds <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
         /// </summary>
@@ -309,11 +309,11 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         /// <remarks>
         /// If <paramref name="instance" /> is <c>null</c> or <paramref name="instance"/> have already been added this method does nothing.
         /// </remarks>
-        /// <seealso cref="MoveMapActions" />
-        public void AddCallbacks(IMoveMapActions instance)
+        /// <seealso cref="InGameActions" />
+        public void AddCallbacks(IInGameActions instance)
         {
-            if (instance == null || m_Wrapper.m_MoveMapActionsCallbackInterfaces.Contains(instance)) return;
-            m_Wrapper.m_MoveMapActionsCallbackInterfaces.Add(instance);
+            if (instance == null || m_Wrapper.m_InGameActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_InGameActionsCallbackInterfaces.Add(instance);
             @Move2D.started += instance.OnMove2D;
             @Move2D.performed += instance.OnMove2D;
             @Move2D.canceled += instance.OnMove2D;
@@ -328,8 +328,8 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         /// <remarks>
         /// Calling this method when <paramref name="instance" /> have not previously been registered has no side-effects.
         /// </remarks>
-        /// <seealso cref="MoveMapActions" />
-        private void UnregisterCallbacks(IMoveMapActions instance)
+        /// <seealso cref="InGameActions" />
+        private void UnregisterCallbacks(IInGameActions instance)
         {
             @Move2D.started -= instance.OnMove2D;
             @Move2D.performed -= instance.OnMove2D;
@@ -340,12 +340,12 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         }
 
         /// <summary>
-        /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="MoveMapActions.UnregisterCallbacks(IMoveMapActions)" />.
+        /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="InGameActions.UnregisterCallbacks(IInGameActions)" />.
         /// </summary>
-        /// <seealso cref="MoveMapActions.UnregisterCallbacks(IMoveMapActions)" />
-        public void RemoveCallbacks(IMoveMapActions instance)
+        /// <seealso cref="InGameActions.UnregisterCallbacks(IInGameActions)" />
+        public void RemoveCallbacks(IInGameActions instance)
         {
-            if (m_Wrapper.m_MoveMapActionsCallbackInterfaces.Remove(instance))
+            if (m_Wrapper.m_InGameActionsCallbackInterfaces.Remove(instance))
                 UnregisterCallbacks(instance);
         }
 
@@ -355,27 +355,27 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         /// <remarks>
         /// If <paramref name="instance" /> is <c>null</c>, calling this method will only unregister all existing callbacks but not register any new callbacks.
         /// </remarks>
-        /// <seealso cref="MoveMapActions.AddCallbacks(IMoveMapActions)" />
-        /// <seealso cref="MoveMapActions.RemoveCallbacks(IMoveMapActions)" />
-        /// <seealso cref="MoveMapActions.UnregisterCallbacks(IMoveMapActions)" />
-        public void SetCallbacks(IMoveMapActions instance)
+        /// <seealso cref="InGameActions.AddCallbacks(IInGameActions)" />
+        /// <seealso cref="InGameActions.RemoveCallbacks(IInGameActions)" />
+        /// <seealso cref="InGameActions.UnregisterCallbacks(IInGameActions)" />
+        public void SetCallbacks(IInGameActions instance)
         {
-            foreach (var item in m_Wrapper.m_MoveMapActionsCallbackInterfaces)
+            foreach (var item in m_Wrapper.m_InGameActionsCallbackInterfaces)
                 UnregisterCallbacks(item);
-            m_Wrapper.m_MoveMapActionsCallbackInterfaces.Clear();
+            m_Wrapper.m_InGameActionsCallbackInterfaces.Clear();
             AddCallbacks(instance);
         }
     }
     /// <summary>
-    /// Provides a new <see cref="MoveMapActions" /> instance referencing this action map.
+    /// Provides a new <see cref="InGameActions" /> instance referencing this action map.
     /// </summary>
-    public MoveMapActions @MoveMap => new MoveMapActions(this);
+    public InGameActions @InGame => new InGameActions(this);
     /// <summary>
-    /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "MoveMap" which allows adding and removing callbacks.
+    /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "InGame" which allows adding and removing callbacks.
     /// </summary>
-    /// <seealso cref="MoveMapActions.AddCallbacks(IMoveMapActions)" />
-    /// <seealso cref="MoveMapActions.RemoveCallbacks(IMoveMapActions)" />
-    public interface IMoveMapActions
+    /// <seealso cref="InGameActions.AddCallbacks(IInGameActions)" />
+    /// <seealso cref="InGameActions.RemoveCallbacks(IInGameActions)" />
+    public interface IInGameActions
     {
         /// <summary>
         /// Method invoked when associated input action "Move2D" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
