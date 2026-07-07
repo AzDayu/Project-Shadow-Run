@@ -17,3 +17,10 @@ public class ItemDataList
 {
     public ItemData[] Items;
 }
+
+[System.Serializable]
+public class ItemStack
+{
+    public ItemData Item;
+    public int StackCount;
+}
