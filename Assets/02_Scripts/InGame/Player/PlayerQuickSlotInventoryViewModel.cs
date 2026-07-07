@@ -18,6 +18,24 @@ public class PlayerQuickSlotInventoryModel
         _quickSlots[quickSlotIndex] = slotData;
         _equippedWeaponSlot = slotData;
     }
+    public void UnEquipWeapon()
+    {
+        _equippedWeaponSlot = null;
+    }
+
+    public void ClearQuickSlot(int quickSlotIndex)
+    {
+        if (quickSlotIndex < 0 || quickSlotIndex >= _quickSlots.Length)
+        {
+            Debug.LogError("Invalid quick slot index: " + quickSlotIndex);
+            return;
+        }
+
+        if (_quickSlots[quickSlotIndex] == _equippedWeaponSlot)
+            _equippedWeaponSlot = null;
+
+        _quickSlots[quickSlotIndex] = null;
+    }
 }
 
 public class PlayerQuickSlotInventoryViewModel : ViewModelBase
@@ -50,6 +68,21 @@ public class PlayerQuickSlotInventoryViewModel : ViewModelBase
             return;
 
         _quickSlotModel.EquipQuickSlotItem(slotData, quickSlotIndex);
+
+        OnPropertyChanged(nameof(QuickSlots));
+        OnPropertyChanged(nameof(EquippedWeaponSlot));
+    }
+
+    public void UnEquipWeapon()
+    {
+        _quickSlotModel.UnEquipWeapon();
+
+        OnPropertyChanged(nameof(EquippedWeaponSlot));
+    }
+
+    public void ClearQuickSlot(int quickSlotIndex)
+    {
+        _quickSlotModel.ClearQuickSlot(quickSlotIndex);
 
         OnPropertyChanged(nameof(QuickSlots));
         OnPropertyChanged(nameof(EquippedWeaponSlot));
