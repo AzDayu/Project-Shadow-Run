@@ -10,7 +10,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void Awake()
     {
-        _rigidbody = this.GetComponentInChildren<Rigidbody>();
+        _rigidbody = this.GetComponent<Rigidbody>();
     }
 
     private void FixedUpdate()
@@ -22,8 +22,13 @@ public class PlayerMovement : MonoBehaviour
     {
         Vector2 input = InputHandler.MoveInput;
 
-        Vector3 moveDir = new Vector3(input.x, 0f, input.y);
+        Vector3 moveDir = transform.forward * input.y + transform.right * input.x;
+        moveDir.Normalize();
 
-        _rigidbody.linearVelocity = moveDir * MoveSpeed;
+        _rigidbody.linearVelocity = new Vector3(
+            moveDir.x * MoveSpeed,
+            _rigidbody.linearVelocity.y,
+            moveDir.z * MoveSpeed
+        );
     }
 }

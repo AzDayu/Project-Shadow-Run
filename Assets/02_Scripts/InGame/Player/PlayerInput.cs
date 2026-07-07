@@ -100,6 +100,15 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Look"",
+                    ""type"": ""Value"",
+                    ""id"": ""e05753e3-2850-487b-a84e-f8a8823d1d2d"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -157,6 +166,17 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""action"": ""Move2D"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""2b0dd25c-9c27-456a-a5d0-0bf7e82357aa"",
+                    ""path"": ""<Mouse>/delta"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Look"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -166,6 +186,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         // MoveMap
         m_MoveMap = asset.FindActionMap("MoveMap", throwIfNotFound: true);
         m_MoveMap_Move2D = m_MoveMap.FindAction("Move2D", throwIfNotFound: true);
+        m_MoveMap_Look = m_MoveMap.FindAction("Look", throwIfNotFound: true);
     }
 
     ~@PlayerInput()
@@ -247,6 +268,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
     private readonly InputActionMap m_MoveMap;
     private List<IMoveMapActions> m_MoveMapActionsCallbackInterfaces = new List<IMoveMapActions>();
     private readonly InputAction m_MoveMap_Move2D;
+    private readonly InputAction m_MoveMap_Look;
     /// <summary>
     /// Provides access to input actions defined in input action map "MoveMap".
     /// </summary>
@@ -262,6 +284,10 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "MoveMap/Move2D".
         /// </summary>
         public InputAction @Move2D => m_Wrapper.m_MoveMap_Move2D;
+        /// <summary>
+        /// Provides access to the underlying input action "MoveMap/Look".
+        /// </summary>
+        public InputAction @Look => m_Wrapper.m_MoveMap_Look;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -291,6 +317,9 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
             @Move2D.started += instance.OnMove2D;
             @Move2D.performed += instance.OnMove2D;
             @Move2D.canceled += instance.OnMove2D;
+            @Look.started += instance.OnLook;
+            @Look.performed += instance.OnLook;
+            @Look.canceled += instance.OnLook;
         }
 
         /// <summary>
@@ -305,6 +334,9 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
             @Move2D.started -= instance.OnMove2D;
             @Move2D.performed -= instance.OnMove2D;
             @Move2D.canceled -= instance.OnMove2D;
+            @Look.started -= instance.OnLook;
+            @Look.performed -= instance.OnLook;
+            @Look.canceled -= instance.OnLook;
         }
 
         /// <summary>
@@ -352,5 +384,12 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnMove2D(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Look" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnLook(InputAction.CallbackContext context);
     }
 }
