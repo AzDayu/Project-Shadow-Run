@@ -17,20 +17,20 @@ public class PlayerInputHandler : MonoBehaviour
     {
         _controls.Enable();
 
-        _controls.MoveMap.Move2D.performed += OnMove;
-        _controls.MoveMap.Move2D.canceled += OnMoveCanceled;
+        _controls.InGame.Move2D.performed += OnMove;
+        _controls.InGame.Move2D.canceled += OnMoveCanceled;
 
-        _controls.MoveMap.Look.performed += OnLook;
-        _controls.MoveMap.Look.canceled += OnLookCanceled;
+        _controls.InGame.Look.performed += OnLook;
+        _controls.InGame.Look.canceled += OnLookCanceled;
     }
 
     private void OnDisable()
     {
-        _controls.MoveMap.Move2D.performed -= OnMove;
-        _controls.MoveMap.Move2D.canceled -= OnMoveCanceled;
+        _controls.InGame.Move2D.performed -= OnMove;
+        _controls.InGame.Move2D.canceled -= OnMoveCanceled;
 
-        _controls.MoveMap.Look.performed -= OnLook;
-        _controls.MoveMap.Look.canceled -= OnLookCanceled;
+        _controls.InGame.Look.performed -= OnLook;
+        _controls.InGame.Look.canceled -= OnLookCanceled;
 
         _controls.Disable();
     }
