@@ -3,19 +3,46 @@
 public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] private PlayerInputHandler InputHandler;
-    // Test : 일시적으로 속도값을 지정
     [SerializeField] private float MoveSpeed = 5f;
+    [SerializeField] private float JumpPower = 5f;
+
+    [SerializeField] private Transform GroundCheck;
+    [SerializeField] private float GroundRadius = 0.2f;
+    [SerializeField] private LayerMask GroundMask;
+
+    private bool _isGrounded;
+
 
     private Rigidbody _rigidbody;
 
     private void Awake()
     {
-        _rigidbody = this.GetComponent<Rigidbody>();
+        _rigidbody = GetComponent<Rigidbody>();
+    }
+
+    private void OnEnable()
+    {
+        InputHandler.JumpPerformed += Jump;
+    }
+
+    private void OnDisable()
+    {
+        InputHandler.JumpPerformed -= Jump;
     }
 
     private void FixedUpdate()
     {
         Move();
+        CheckGround();
+    }
+
+    private void CheckGround()
+    {
+        _isGrounded = Physics.CheckSphere(
+            GroundCheck.position,
+            GroundRadius,
+            GroundMask
+        );
     }
 
     private void Move()
@@ -30,5 +57,13 @@ public class PlayerMovement : MonoBehaviour
             _rigidbody.linearVelocity.y,
             moveDir.z * MoveSpeed
         );
+    }
+
+    private void Jump()
+    {
+        if(_isGrounded)
+        {
+            _rigidbody.AddForce(Vector3.up * JumpPower, ForceMode.Impulse);
+        }
     }
 }
