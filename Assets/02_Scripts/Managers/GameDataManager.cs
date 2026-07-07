@@ -6,7 +6,7 @@ public class GameDataManager : MonoBehaviour
     private static GameDataManager _instance;
     public static GameDataManager Instance { get { return _instance; } }
 
-    private Dictionary<int, ItemData> _itemDataDict = new Dictionary<int, ItemData>();
+    private Dictionary<string, ItemData> _itemDataDict = new Dictionary<string, ItemData>();
 
     private void Awake()
     {
@@ -45,7 +45,7 @@ public class GameDataManager : MonoBehaviour
         Debug.Log($"GameDataManager: JSON 데이터 파싱 성공! 총 {_itemDataDict.Count}개의 아이템 데이터를 로드했습니다.");
     }
 
-    public ItemData GetItemDataById(int itemId)
+    public ItemData GetItemDataById(string itemId)
     {
         if (_itemDataDict.TryGetValue(itemId, out ItemData data))
         {
