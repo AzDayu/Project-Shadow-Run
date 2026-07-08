@@ -114,8 +114,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7240017876087990540}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.13409798, y: 0.6890352, z: -0.132022, w: -0.6998704}
-  m_LocalPosition: {x: 1.6091839, y: 0.64023167, z: -0.025109053}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.5, y: 0.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -130,6 +130,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4945378990719200201}
+  - component: {fileID: 4619849501279918116}
   - component: {fileID: 5159432160104867375}
   - component: {fileID: 5242166127282976409}
   - component: {fileID: 2594667027422455901}
@@ -160,6 +161,18 @@ Transform:
   - {fileID: 3330816053871665217}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4619849501279918116
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7834500494340706646}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9bb4510196fe9ae4e8cef1598d33aa48, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerShootingView
 --- !u!114 &5159432160104867375
 MonoBehaviour:
   m_ObjectHideFlags: 0

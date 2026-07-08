@@ -1,40 +1,49 @@
 ﻿using System.Collections.Generic;
-using UnityEngine;
 
 public class PlayerQuickSlotInventoryModel
 {
-    public HadItemSlotData[] _quickSlots { get; private set; } = new HadItemSlotData[3];
+    public HadItemSlotData[] _quickSlots = new HadItemSlotData[3];
+    public IReadOnlyList<HadItemSlotData> QuickSlots => _quickSlots;
 
-    public HadItemSlotData _equippedWeaponSlot { get; private set; }
+    public HadItemSlotData EquippedSlot { get; private set; }
 
-    public void EquipQuickSlotItem(HadItemSlotData slotData, int quickSlotIndex)
+    public bool TrySetQuickSlot(int index, HadItemSlotData itemSlot)
     {
-        if (quickSlotIndex < 0 || quickSlotIndex >= _quickSlots.Length)
-        {
-            Debug.LogError("Invalid quick slot index: " + quickSlotIndex);
-            return;
-        }
+        if (index < 0 || index >= _quickSlots.Length)
+            return false;
 
-        _quickSlots[quickSlotIndex] = slotData;
-        _equippedWeaponSlot = slotData;
+        if (itemSlot == null)
+            return false;
+
+        if (!CanRegisterQuickSlot(itemSlot))
+            return false;
+
+        _quickSlots[index] = itemSlot;
+        return true;
     }
-    public void UnEquipWeapon()
+
+    public void EquipQuickSlot(int index)
     {
-        _equippedWeaponSlot = null;
+        EquippedSlot = _quickSlots[index];
     }
 
-    public void ClearQuickSlot(int quickSlotIndex)
+    public void UnEquip()
     {
-        if (quickSlotIndex < 0 || quickSlotIndex >= _quickSlots.Length)
-        {
-            Debug.LogError("Invalid quick slot index: " + quickSlotIndex);
-            return;
-        }
+        EquippedSlot = null;
+    }
 
-        if (_quickSlots[quickSlotIndex] == _equippedWeaponSlot)
-            _equippedWeaponSlot = null;
+    public void ClearQuickSlot(int index)
+    {
+        if (_quickSlots[index] == EquippedSlot)
+            UnEquip();
 
-        _quickSlots[quickSlotIndex] = null;
+        _quickSlots[index] = null;
+    }
+
+    private bool CanRegisterQuickSlot(HadItemSlotData itemSlot)
+    {
+        return itemSlot.ItemCountAndStack.Item.ItemType == "Weapon"
+            || itemSlot.ItemCountAndStack.Item.ItemType == "Consumable";
     }
 }
 
@@ -43,11 +52,11 @@ public class PlayerQuickSlotInventoryViewModel : ViewModelBase
     private readonly InventoryModel _inventoryModel;
     private readonly PlayerQuickSlotInventoryModel _quickSlotModel;
 
-    public IReadOnlyList<HadItemSlotData> InventorySlots => _inventoryModel.hadItemSlotDataList;
+    public IReadOnlyList<HadItemSlotData> InventorySlots => _inventoryModel.HadItemSlotDataList;
 
-    public IReadOnlyList<HadItemSlotData> QuickSlots => _quickSlotModel._quickSlots;
+    public IReadOnlyList<HadItemSlotData> QuickSlots => _quickSlotModel.QuickSlots;
 
-    public HadItemSlotData EquippedWeaponSlot => _quickSlotModel._equippedWeaponSlot;
+    public HadItemSlotData EquippedItemSlot => _quickSlotModel.EquippedSlot;
 
     public PlayerQuickSlotInventoryViewModel(
         InventoryModel inventoryModel,
@@ -57,34 +66,49 @@ public class PlayerQuickSlotInventoryViewModel : ViewModelBase
         _quickSlotModel = quickSlotModel;
     }
 
-    public void EquipQuickSlotItem(int inventorySlotIndex, int quickSlotIndex)
+    public void SetQuickSlotItem(int inventorySlotIndex, int quickSlotIndex)
     {
         if (inventorySlotIndex < 0 || inventorySlotIndex >= InventorySlots.Count)
             return;
 
-        HadItemSlotData slotData = InventorySlots[inventorySlotIndex];
-
-        if (slotData == null || slotData.itemData == null)
+        if (quickSlotIndex < 0 || quickSlotIndex >= QuickSlots.Count)
             return;
 
-        _quickSlotModel.EquipQuickSlotItem(slotData, quickSlotIndex);
+        HadItemSlotData slotData = InventorySlots[inventorySlotIndex];
+
+        bool success = _quickSlotModel.TrySetQuickSlot(quickSlotIndex, slotData);
+
+        if (!success)
+            return;
 
         OnPropertyChanged(nameof(QuickSlots));
-        OnPropertyChanged(nameof(EquippedWeaponSlot));
     }
 
-    public void UnEquipWeapon()
+    public void EquipQuickSlot(int quickSlotIndex)
     {
-        _quickSlotModel.UnEquipWeapon();
+        if (quickSlotIndex < 0 || quickSlotIndex >= QuickSlots.Count)
+            return;
 
-        OnPropertyChanged(nameof(EquippedWeaponSlot));
+        _quickSlotModel.EquipQuickSlot(quickSlotIndex);
+
+        OnPropertyChanged(nameof(EquippedItemSlot));
+    }
+
+    public void UnEquip()
+    {
+        _quickSlotModel.UnEquip();
+
+        OnPropertyChanged(nameof(EquippedItemSlot));
     }
 
     public void ClearQuickSlot(int quickSlotIndex)
     {
+        if (quickSlotIndex < 0 || quickSlotIndex >= QuickSlots.Count)
+            return;
+
         _quickSlotModel.ClearQuickSlot(quickSlotIndex);
 
         OnPropertyChanged(nameof(QuickSlots));
-        OnPropertyChanged(nameof(EquippedWeaponSlot));
+        OnPropertyChanged(nameof(EquippedItemSlot));
     }
 }
