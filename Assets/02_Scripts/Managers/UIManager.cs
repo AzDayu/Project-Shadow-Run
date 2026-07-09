@@ -36,11 +36,13 @@ public class UIManager : MonoBehaviour
         var openedUI = GetCreatedUI(uiRootType, uiType);
 
         bool isSetActiveOnOpen = (isInitialHide == false); // 열었을 때 기본적으로 숨겨서 열 것인지 체크
+
         if (_openedUIDic.Contains(uiType) == false)
         {
-            openedUI.gameObject.SetActive(isSetActiveOnOpen);
             _openedUIDic.Add(uiType);
         }
+
+        openedUI.gameObject.SetActive(isSetActiveOnOpen);
 
         return openedUI;
     }
@@ -109,6 +111,10 @@ public class UIManager : MonoBehaviour
         return _createdUIDic[uiType];
     }
 
+    public bool IsUIOpened(UIType uiType)
+    {
+        return _openedUIDic.Contains(uiType);
+    }
 
     public UIBase OpenContentUI(UIType uiType)
     {
