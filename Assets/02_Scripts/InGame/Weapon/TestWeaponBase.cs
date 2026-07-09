@@ -1,53 +1,36 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-public enum WeaponPartsType 
-{
 
-}
-public struct WeaponStat
-{
-    public float Damage;
-    public float AttackInterval;
-    public int MagazineSize;
-    public float Accuracy;
-    public float Range;
-    public float ReloadTime;
-}
-public interface IDamageable
-{
-    void TakeDamage(float damage);//DamageInfo구조체를 만들어 전달하면 더 많은 정보를 전달할수 있음
-}
-public interface IWeaponOwner 
-{
-    void UseWeapon();//무기를 사용할때 공격자를 전달할수있음
-}
-public abstract class WeaponBase : MonoBehaviour
+public class TestWeaponBase : MonoBehaviour
 {
     protected WeaponData _weaponData;
 
     protected WeaponStat _baseWeaponStat = new WeaponStat();
-    protected WeaponStat _currentWeaponStat=new WeaponStat();
-    protected int _remainBullets=0;
+    protected WeaponStat _currentWeaponStat = new WeaponStat();
+    protected int _remainBullets = 0;
 
-    protected Dictionary<WeaponPartsType,WeaponPartsData> _weaponPartsDic = new Dictionary<WeaponPartsType, WeaponPartsData>();
-    public virtual void Initialize(WeaponData data) 
+    protected Dictionary<WeaponPartsType, WeaponPartsData> _weaponPartsDic = new Dictionary<WeaponPartsType, WeaponPartsData>();
+    public void Awake()
     {
-        _weaponData=data;
-
-        _baseWeaponStat.Damage = data.Damage;
-        _baseWeaponStat.AttackInterval = data.AttackInterval;
-        _baseWeaponStat.MagazineSize = data.MagazineSize;
-        _baseWeaponStat.Accuracy = data.Accuracy;
-        _baseWeaponStat.Range = data.Range;
-        _baseWeaponStat.ReloadTime = data.ReloadTime;
-        _currentWeaponStat= _baseWeaponStat;
+        Initialize();
+    }
+    public virtual void Initialize()
+    {
+        _baseWeaponStat.Damage = 10f;
+        _baseWeaponStat.AttackInterval = 1f;
+        _baseWeaponStat.MagazineSize = 10;
+        _baseWeaponStat.Accuracy = 100f;
+        _baseWeaponStat.Range = 10f;
+        _baseWeaponStat.ReloadTime = 5f;
+        _currentWeaponStat = _baseWeaponStat;
+        _remainBullets = 100;
     }
 
     //public abstract bool CanFire { get; }
 
-    public virtual void Fire(Vector3 firePosition, Vector3 direction)//현재는 사용자의 위치에서 총이 발사됨, 추후에 총의 위치에서 발사되도록 수정될수있음
+    public virtual void Fire(Vector3 firePosition, Vector3 direction)
     {
-        if (_remainBullets <= 0) 
+        if (_remainBullets <= 0)
         {
             return;
         }
@@ -57,7 +40,7 @@ public abstract class WeaponBase : MonoBehaviour
         if (Physics.Raycast(firePosition, direction.normalized, out RaycastHit hit, _currentWeaponStat.Range))
         {
             Debug.DrawRay(firePosition, direction * hit.distance, Color.red, _currentWeaponStat.Range);
-
+            Debug.Log($"명중{_remainBullets}발 남음");
             if (hit.transform.TryGetComponent<IDamageable>(out var damageable))
             {
                 damageable.TakeDamage(_currentWeaponStat.Damage);
@@ -68,7 +51,7 @@ public abstract class WeaponBase : MonoBehaviour
                 Debug.Log("빗나감");
             }
         }
-        
+
     }
 
     public virtual int Reload(int bulletAmount)
@@ -90,14 +73,14 @@ public abstract class WeaponBase : MonoBehaviour
             _remainBullets = _currentWeaponStat.MagazineSize;
             return newBulletAmonut - _currentWeaponStat.MagazineSize;
         }
-        else 
+        else
         {
             _remainBullets = newBulletAmonut;
             return 0;
         }
 
     }
-    public virtual void CalculateCurrentWeaponStat() 
+    public virtual void CalculateCurrentWeaponStat()
     {
         _currentWeaponStat = WeaponStatCalculator.CalculateWeaponStat(_baseWeaponStat, _weaponPartsDic);
     }
