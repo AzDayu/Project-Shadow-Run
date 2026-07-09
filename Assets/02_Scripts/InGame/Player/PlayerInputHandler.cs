@@ -14,6 +14,8 @@ public class PlayerInputHandler : MonoBehaviour
     public event Action InventoryPerformed;
     public bool IsGameplayInputBlocked { get; private set; }
 
+    public event Action<int> QuickSlotPerformed;
+
     private void Awake()
     {
         _controls = new PlayerInput();
@@ -34,6 +36,10 @@ public class PlayerInputHandler : MonoBehaviour
         _controls.InGame.Fire.performed += OnFire;
 
         _controls.InGame.Inventory.performed += OnInventory;
+
+        _controls.InGame.QuickSlot1.performed += OnQuickSlot1;
+        _controls.InGame.QuickSlot2.performed += OnQuickSlot2;
+        _controls.InGame.QuickSlot3.performed += OnQuickSlot3;
     }
 
     private void OnDisable()
@@ -49,6 +55,10 @@ public class PlayerInputHandler : MonoBehaviour
         _controls.InGame.Fire.performed -= OnFire;
 
         _controls.InGame.Inventory.performed -= OnInventory;
+
+        _controls.InGame.QuickSlot1.performed -= OnQuickSlot1;
+        _controls.InGame.QuickSlot2.performed -= OnQuickSlot2;
+        _controls.InGame.QuickSlot3.performed -= OnQuickSlot3;
 
         _controls.Disable();
     }
@@ -115,5 +125,38 @@ public class PlayerInputHandler : MonoBehaviour
             return;
 
         FirePerformed?.Invoke();
+    }
+
+    private void OnQuickSlot1(InputAction.CallbackContext context)
+    {
+        if (!context.performed)
+            return;
+
+        if (IsGameplayInputBlocked)
+            return;
+
+        QuickSlotPerformed?.Invoke(0);
+    }
+
+    private void OnQuickSlot2(InputAction.CallbackContext context)
+    {
+        if (!context.performed)
+            return;
+
+        if (IsGameplayInputBlocked)
+            return;
+
+        QuickSlotPerformed?.Invoke(1);
+    }
+
+    private void OnQuickSlot3(InputAction.CallbackContext context)
+    {
+        if (!context.performed)
+            return;
+
+        if (IsGameplayInputBlocked)
+            return;
+
+        QuickSlotPerformed?.Invoke(2);
     }
 }

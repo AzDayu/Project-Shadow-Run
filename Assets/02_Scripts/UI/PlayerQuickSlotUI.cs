@@ -1,0 +1,131 @@
+﻿using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+
+public static class ItemIconLoader
+{
+    private static readonly Dictionary<string, Sprite> _iconCache = new();
+
+    public static Sprite LoadIcon(ItemData item)
+    {
+        if (item == null)
+            return null;
+
+        if (string.IsNullOrEmpty(item.IconPath))
+            return null;
+
+        if (_iconCache.TryGetValue(item.IconPath, out Sprite cachedSprite))
+            return cachedSprite;
+
+        Sprite sprite = Resources.Load<Sprite>(item.IconPath);
+
+        if (sprite == null)
+        {
+            Debug.LogWarning($"아이콘 로드 실패: {item.IconPath}");
+            return null;
+        }
+
+        _iconCache.Add(item.IconPath, sprite);
+        return sprite;
+    }
+}
+
+public class PlayerQuickSlotUI : MonoBehaviour
+{
+    [SerializeField] private int QuickSlotIndex;
+
+    [Header("UI")]
+    [SerializeField] private Image IconImage;
+    [SerializeField] private TMP_Text TextCount;
+    [SerializeField] private GameObject SelectedFrame;
+
+    public int SlotIndex => QuickSlotIndex;
+
+    private void OnEnable()
+    {
+        if (InventoryManager.Instance != null)
+            InventoryManager.Instance.OnQuickSlotChanged += Refresh;
+
+        InventoryManager.Instance.OnSelectedQuickSlotChanged += RefreshSelected;
+
+        Refresh();
+    }
+
+    private void OnDisable()
+    {
+        if (InventoryManager.Instance != null)
+            InventoryManager.Instance.OnQuickSlotChanged -= Refresh;
+
+        InventoryManager.Instance.OnSelectedQuickSlotChanged -= RefreshSelected;
+    }
+
+    private void Refresh()
+    {
+        if (InventoryManager.Instance == null)
+        {
+            Clear();
+            return;
+        }
+
+        IReadOnlyList<ItemStack> quickSlots = InventoryManager.Instance.QuickSlotList;
+
+        if (QuickSlotIndex < 0 || QuickSlotIndex >= quickSlots.Count)
+        {
+            Clear();
+            return;
+        }
+
+        ItemStack stack = quickSlots[QuickSlotIndex];
+
+        if (stack == null || stack.Item == null || stack.StackCount <= 0)
+        {
+            Clear();
+            return;
+        }
+
+        SetItem(stack);
+        RefreshSelected();
+    }
+
+    private void SetItem(ItemStack stack)
+    {
+        if (IconImage != null)
+        {
+            Sprite icon = ItemIconLoader.LoadIcon(stack.Item);
+
+            IconImage.sprite = icon;
+            IconImage.gameObject.SetActive(icon != null);
+        }
+
+        if (TextCount != null)
+        {
+            TextCount.text = stack.StackCount > 1
+                ? stack.StackCount.ToString()
+                : string.Empty;
+        }
+    }
+
+    private void Clear()
+    {
+        if (IconImage != null)
+        {
+            IconImage.sprite = null;
+            IconImage.gameObject.SetActive(false);
+        }
+
+        if (TextCount != null)
+            TextCount.text = string.Empty;
+    }
+
+    private void RefreshSelected()
+    {
+        if (InventoryManager.Instance == null)
+            return;
+
+        bool selected = InventoryManager.Instance.SelectedQuickSlotIndex == QuickSlotIndex;
+
+        if (SelectedFrame != null)
+            SelectedFrame.SetActive(selected);
+    }
+}

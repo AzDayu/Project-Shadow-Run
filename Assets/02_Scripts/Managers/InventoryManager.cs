@@ -7,12 +7,21 @@ public class InventoryManager : MonoBehaviour
     public static InventoryManager Instance { get; private set; }
 
     [SerializeField] private int MaxSlotCount = 30;
+    [SerializeField] private int QuickSlotCount = 3;
+
+    private readonly ItemStack[] _quickSlotList = new ItemStack[4];
+    public IReadOnlyList<ItemStack> QuickSlotList => _quickSlotList;
+
+    public event Action OnQuickSlotChanged;
 
     private readonly List<ItemStack> _itemList = new();
 
     public IReadOnlyList<ItemStack> ItemList => _itemList;
-
     public event Action OnInventoryChanged;
+
+    private int _selectedQuickSlotIndex = -1;
+    public int SelectedQuickSlotIndex => _selectedQuickSlotIndex;
+    public event Action OnSelectedQuickSlotChanged;
 
     private void Awake()
     {
@@ -203,13 +212,19 @@ public class InventoryManager : MonoBehaviour
         return TryRemoveItem(stack.Item.ItemId, count);
     }
 
-    public bool TryRegisterQuickSlot(int slotIndex)
+    public bool TryRegisterQuickSlot(int inventorySlotIndex, int quickSlotIndex)
     {
-        ItemStack stack = GetItemStack(slotIndex);
+        if (quickSlotIndex < 0 || quickSlotIndex >= _quickSlotList.Length)
+        {
+            Debug.LogWarning($"잘못된 퀵슬롯 인덱스입니다. Index: {quickSlotIndex}");
+            return false;
+        }
+
+        ItemStack stack = GetItemStack(inventorySlotIndex);
 
         if (!IsValidStack(stack))
         {
-            Debug.LogWarning($"퀵슬롯에 등록할 수 없는 슬롯입니다. Index: {slotIndex}");
+            Debug.LogWarning($"퀵슬롯에 등록할 수 없는 인벤토리 슬롯입니다. Index: {inventorySlotIndex}");
             return false;
         }
 
@@ -219,10 +234,18 @@ public class InventoryManager : MonoBehaviour
             return false;
         }
 
-        Debug.Log($"퀵슬롯 등록 요청: {stack.Item.ItemName}");
+        _quickSlotList[quickSlotIndex] = stack;
 
-        // TODO: QuickSlotManager 연결
+        Debug.Log($"퀵슬롯 등록 완료: QuickSlot {quickSlotIndex}, Item: {stack.Item.ItemName}");
+
+        OnQuickSlotChanged?.Invoke();
+
         return true;
+    }
+
+    public bool TryRegisterQuickSlot(int inventorySlotIndex)
+    {
+        return TryRegisterQuickSlot(inventorySlotIndex, 0);
     }
 
     private bool TryUseConsumable(ItemStack stack)
@@ -230,9 +253,13 @@ public class InventoryManager : MonoBehaviour
         Debug.Log($"소모품 사용 요청: {stack.Item.ItemName}");
 
         // TODO: UseItemType / UseItemParameterList 기준으로 효과 적용
-        // 예: Heal:30, Stamina:20 등
 
-        return TryRemoveItem(stack.Item.ItemId, 1);
+        bool removed = TryRemoveItem(stack.Item.ItemId, 1);
+
+        if (removed)
+            OnQuickSlotChanged?.Invoke();
+
+        return removed;
     }
 
 
@@ -250,5 +277,57 @@ public class InventoryManager : MonoBehaviour
         return stack != null &&
                stack.Item != null &&
                stack.StackCount > 0;
+    }
+
+    public bool TrySelectQuickSlot(int quickSlotIndex)
+    {
+        if (quickSlotIndex < 0 || quickSlotIndex >= _quickSlotList.Length)
+        {
+            Debug.LogWarning($"잘못된 퀵슬롯 선택입니다. Index: {quickSlotIndex}");
+            return false;
+        }
+
+        ItemStack stack = _quickSlotList[quickSlotIndex];
+
+        if (!IsValidStack(stack))
+        {
+            Debug.LogWarning($"비어있는 퀵슬롯입니다. Index: {quickSlotIndex}");
+            return false;
+        }
+
+        _selectedQuickSlotIndex = quickSlotIndex;
+
+        Debug.Log($"퀵슬롯 선택: {quickSlotIndex}, Item: {stack.Item.ItemName}");
+
+        OnSelectedQuickSlotChanged?.Invoke();
+
+        return true;
+    }
+
+    public bool TryUseSelectedQuickSlotItem()
+    {
+        if (_selectedQuickSlotIndex < 0 || _selectedQuickSlotIndex >= _quickSlotList.Length)
+            return false;
+
+        ItemStack stack = _quickSlotList[_selectedQuickSlotIndex];
+
+        if (!IsValidStack(stack))
+            return false;
+
+        switch (stack.Item.ItemType)
+        {
+            case "Weapon":
+                Debug.Log($"선택 무기 사용 요청: {stack.Item.ItemName}");
+                // TODO: WeaponManager 없이 갈 거면 나중에 여기서 장착/발사 요청 연결
+                return true;
+
+            case "Consumable":
+                Debug.Log($"선택 소모품 사용 요청: {stack.Item.ItemName}");
+                return TryUseConsumable(stack);
+
+            default:
+                Debug.LogWarning($"퀵슬롯에서 사용할 수 없는 아이템 타입입니다. Type: {stack.Item.ItemType}");
+                return false;
+        }
     }
 }
