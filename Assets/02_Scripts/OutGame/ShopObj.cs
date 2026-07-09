@@ -11,19 +11,21 @@ public class ShopObj : MonoBehaviour
     {
         if (/*_isPlayerInside &&*/ Input.GetKeyDown(_interactKey))
         {
-            if (UIManager.Instance.IsUIOpened(UIRootType.ContentUI, UIType.ShopUI))
+            if (UIManager.Instance.IsUIOpened(UIType.ShopUI))
             {
+                Debug.Log("ShopObj: 상점 UI가 이미 열려 있습니다.");
+
                 return; 
             }
-            else
             {
                 OpenShop();
+                Debug.Log("ShopObj: 상점 UI를 열었습니다.");
             }
         }
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if(UIManager.Instance.IsUIOpened(UIRootType.ContentUI, UIType.ShopUI))
+            if(UIManager.Instance.IsUIOpened(UIType.ShopUI))
             {
                 CloseShop();
             }

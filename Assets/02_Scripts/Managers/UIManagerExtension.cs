@@ -23,7 +23,6 @@ public enum UIType
     LocalPlayerProfileUI,
     MVVMTestUI,
     ShopUI,
-    ShopItemPopupUI,
     StashUI
 }
 
@@ -71,18 +70,5 @@ public static class UIManagerExtension
     public static void CloseLoadingUI(this UIManager uiManager)
     {
         uiManager.CloseUI(UIRootType.VeryFrontUI, UIType.LoadingUI);
-    }
-
-    public static bool IsUIOpened(this UIManager uiManager, UIRootType uiRootType, UIType uiType)
-    {
-        var uiBase = uiManager.GetOpenedUI(uiRootType, uiType);
-        if (uiBase == null)
-        {
-            return false;
-        }
-        else
-        {
-            return uiBase.gameObject.activeSelf;
-        }
     }
 }

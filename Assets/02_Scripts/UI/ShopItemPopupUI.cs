@@ -5,8 +5,6 @@ using UnityEngine.InputSystem;
 
 public class ShopItemPopupUI : UIBase
 {
-    public static ShopItemPopupUI Inst;
-
     [SerializeField] private GameObject Gobj_ShopItemPopupUI;
     [SerializeField] private Image Image_ItemIcon;
     [SerializeField] private TMP_Text Text_ItemName;
@@ -15,22 +13,12 @@ public class ShopItemPopupUI : UIBase
 
     private RectTransform _popupRectTransform;
 
-    private void Awake() // 추후 UIManager가 만들어지면 씬에서 뺄 예정.
+    private void Awake() 
     {
-        if (Inst == null)
+        if (Gobj_ShopItemPopupUI != null)
         {
-            Inst = this;
+            _popupRectTransform = Gobj_ShopItemPopupUI.GetComponent<RectTransform>();
         }
-        else
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        if (Gobj_ShopItemPopupUI == null) return;
-
-        _popupRectTransform = Gobj_ShopItemPopupUI.GetComponent<RectTransform>();
-
         HidePopup();
     }
 
@@ -42,25 +30,45 @@ public class ShopItemPopupUI : UIBase
         }
     }
 
-    public void ShowPopup() // 파라미터로 아이템 정보를 가져오게 할것. 아이템 아이디 넘겨받고 정보를 가져오면 될까.
+    public void SetItemData(ItemData itemData)
+    {
+        if (itemData == null)
+        {
+            /*
+            HidePopup();
+            Debug.LogWarning("아이템데이터가 없습니다.");
+            return;
+            */
+            Text_ItemName.text = "이름 없음 (Test)";
+            Text_ItemDescription.text = "설명 없음 (Test)";
+            Text_ItemSellingPrice.text = "0 Credit";
+        }
+
+        Text_ItemName.text = itemData.ItemName;
+        Text_ItemDescription.text = itemData.ItemDescription;
+        Text_ItemSellingPrice.text = $"{itemData.SellingPrice} Credit";
+
+        ShowPopup();
+    }
+
+    public void ShowPopup() 
     {
         UpdatePopupPosition();
-
         Gobj_ShopItemPopupUI.SetActive(true);
     }
 
     public void HidePopup()
     {
+        if (Gobj_ShopItemPopupUI == null) return;
         Gobj_ShopItemPopupUI.SetActive(false);
     }
 
     private void UpdatePopupPosition()
     {
-        if (Mouse.current == null) return;
+        if (Mouse.current == null || _popupRectTransform == null) return;
 
         Vector2 mousePos = Mouse.current.position.ReadValue();
         Vector2 offset = new Vector2(10f, -10f);
-
         Vector2 targetPos = mousePos + offset;
 
         float popupWidth = _popupRectTransform.rect.width;
@@ -74,6 +82,6 @@ public class ShopItemPopupUI : UIBase
         float maxX = Screen.width - (popupWidth * (1f - _popupRectTransform.pivot.x));
         targetPos.x = Mathf.Clamp(targetPos.x, minX, maxX);
 
-        Gobj_ShopItemPopupUI.transform.position = targetPos;
+        _popupRectTransform.position = targetPos;
     }
 }
