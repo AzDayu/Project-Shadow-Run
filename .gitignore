@@ -126,9 +126,19 @@ $RECYCLE.BIN/
 
 # Built Visual Studio Code Extensions
 *.vsix
-Assets/Thirdparty_Premium
+Assets/ThirdParty_Premium/HueFolders/Editor/HueFolders.Editor.asmdef
+Assets/ThirdParty_Premium/HueFolders/Editor/HueFolders.Editor.asmdef.meta
+Assets/ThirdParty_Premium/HueFolders/Editor/HueFoldersBrowser.cs
+Assets/ThirdParty_Premium/HueFolders/Editor/HueFoldersBrowser.cs.meta
+Assets/ThirdParty_Premium/HueFolders/Editor/SettingsProvider.cs
+Assets/ThirdParty_Premium/HueFolders/Editor/SettingsProvider.cs.meta
+Assets/ThirdParty_Premium/HueFolders/Editor.meta
+Assets/ThirdParty_Premium/HueFolders/package.json
+Assets/ThirdParty_Premium/HueFolders/package.json.meta
+Assets/ThirdParty_Premium/HueFolders/Readme.pdf
+Assets/ThirdParty_Premium/HueFolders/Readme.pdf.meta
+Assets/ThirdParty_Premium/HueFolders.meta
 ProjectSettings/HueFolders_Prefs.json
-Assets/Thirdparty_Premium.meta
 Assets/Thirdparty/Enviroment/ScifiOfficeLite.meta
 Assets/Thirdparty/Enviroment/AngeloMaN87.meta
 Assets/Thirdparty/Enviroment/Barking_Dog.meta

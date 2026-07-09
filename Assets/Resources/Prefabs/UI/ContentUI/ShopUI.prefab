@@ -362,7 +362,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e597b0e4bf7734d4eb284cb107d5971b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShopUI
-  _textCurPlayerCredit: {fileID: 0}
+  Prefab_ShopItemSlotUI: {fileID: 8317191868629521531, guid: bd19f6a1c4c3aed48adaf94ab7368b9e, type: 3}
+  Text_CurPlayerCredit: {fileID: 7728047548584303726}
+  Image_DragIcon: {fileID: 0}
+  Button_CloseSelf: {fileID: 32429413389205502}
+  Transform_InventoryContent: {fileID: 5444243042843780202}
+  Transform_StashContent: {fileID: 6712952193733053555}
+  Transform_ShopContent: {fileID: 7159625293365306809}
 --- !u!1 &2490648028802215865
 GameObject:
   m_ObjectHideFlags: 0
@@ -1449,7 +1455,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.16078432}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -1744,9 +1750,9 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 127605878176364131}
+  - {fileID: 3830577135504859460}
   - {fileID: 4615643777487585580}
   - {fileID: 5771851263634648349}
-  - {fileID: 3830577135504859460}
   m_Father: {fileID: 4416002169312229735}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
