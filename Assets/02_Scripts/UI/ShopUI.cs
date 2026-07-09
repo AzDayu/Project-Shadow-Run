@@ -61,21 +61,11 @@ public class ShopUI : UIBase
 
     public void CloseShopUI()
     {
-        // UIManager 생기면 거기로 기능 이전 예정
-        gameObject.SetActive(false);
+        UIManager.Instance.CloseContentUI(UIType.ShopUI);
 
         if (ShopItemPopupUI.Inst != null)
         {
             ShopItemPopupUI.Inst.HidePopup();
         }
     }
-
-
-
-
-
-
-
-
-
 }

@@ -2,8 +2,6 @@
 
 public class ShopObj : MonoBehaviour
 {
-    [SerializeField] private ShopUI _shopUI; //지금은 직접참조로 작동만 확인. 추후 UIManager 만들어지면 동적생성으로 뺄 것. Close도 마찬가지
-
     [SerializeField] private KeyCode _interactKey = KeyCode.E;
 
     private bool _isPlayerInside = false;
@@ -11,11 +9,11 @@ public class ShopObj : MonoBehaviour
 
     private void Update()
     {
-        if (_isPlayerInside && Input.GetKeyDown(_interactKey))
+        if (/*_isPlayerInside &&*/ Input.GetKeyDown(_interactKey))
         {
-            if (_shopUI.gameObject.activeSelf)
+            if (UIManager.Instance.IsUIOpened(UIRootType.ContentUI, UIType.ShopUI))
             {
-                return;
+                return; 
             }
             else
             {
@@ -23,9 +21,12 @@ public class ShopObj : MonoBehaviour
             }
         }
 
-        if (_shopUI != null && _shopUI.gameObject.activeSelf && Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
-            CloseShop();
+            if(UIManager.Instance.IsUIOpened(UIRootType.ContentUI, UIType.ShopUI))
+            {
+                CloseShop();
+            }
         }
     }
 
@@ -53,24 +54,22 @@ public class ShopObj : MonoBehaviour
 
     private void OpenShop()
     {
-        if (_shopUI != null)
-        {
-            _shopUI.gameObject.SetActive(true);
+        UIManager.Instance.OpenContentUI(UIType.ShopUI);
 
-            // ViewModel 바인딩이 필요한 경우 여기서 처리하거나 ShopUI 내부 OnEnable에서 처리
-            _shopUI.BindViewModel(new ShopViewModel());
+        var shopUI = UIManager.Instance.GetOpenedUI(UIRootType.ContentUI, UIType.ShopUI) as ShopUI;
+        if (shopUI != null)
+        {
+            shopUI.BindViewModel(new ShopViewModel());
+            Debug.Log("ViewModel 바인딩 성공!");
         }
         else
         {
-            Debug.LogWarning("ShopObj: 연결된 ShopUI가 없습니다!");
+            Debug.LogError("shopUI를 가져오지 못했습니다!");
         }
     }
 
     private void CloseShop()
     {
-        if (_shopUI != null && _shopUI.gameObject.activeSelf)
-        {
-            _shopUI.gameObject.SetActive(false);
-        }
+        UIManager.Instance.CloseUI(UIRootType.ContentUI, UIType.ShopUI);
     }
 }

@@ -382,6 +382,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8353551260390366771}
   - component: {fileID: 3915991021625943938}
+  - component: {fileID: 4625010063628302159}
   m_Layer: 0
   m_Name: ShopObj
   m_TagString: Untagged
@@ -428,6 +429,20 @@ CapsuleCollider:
   m_Height: 9.374184
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &4625010063628302159
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1386159735329911756}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c499a7b7ec7a78d47a6f9104a6d58369, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ShopObj
+  _shopUI: {fileID: 0}
+  _interactKey: 101
 --- !u!1 &1686206885187361388
 GameObject:
   m_ObjectHideFlags: 0
