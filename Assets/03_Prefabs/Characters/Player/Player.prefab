@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8287802587785025371}
   - component: {fileID: 835714140804403075}
   - component: {fileID: 195947695576739303}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -99,7 +99,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3446955607353601217}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: PlayerCameraTarget
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -114,8 +114,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7240017876087990540}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.13409798, y: 0.6890352, z: -0.132022, w: -0.6998704}
-  m_LocalPosition: {x: 1.6091839, y: 0.64023167, z: -0.025109053}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.5, y: 0.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -133,9 +133,10 @@ GameObject:
   - component: {fileID: 5159432160104867375}
   - component: {fileID: 5242166127282976409}
   - component: {fileID: 2594667027422455901}
+  - component: {fileID: 7304968640189071439}
   - component: {fileID: 6622171463591126358}
   - component: {fileID: 7388452711277228741}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -157,6 +158,7 @@ Transform:
   m_Children:
   - {fileID: 8287802587785025371}
   - {fileID: 3446955607353601217}
+  - {fileID: 3330816053871665217}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &5159432160104867375
@@ -173,6 +175,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
   InputHandler: {fileID: 2594667027422455901}
   MoveSpeed: 5
+  JumpPower: 5
+  GroundCheck: {fileID: 3330816053871665217}
+  GroundRadius: 0.2
+  GroundMask:
+    serializedVersion: 2
+    m_Bits: 1
 --- !u!114 &5242166127282976409
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -202,6 +210,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6957016dfc70a1a4986207863762f61c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InputHandler
+--- !u!114 &7304968640189071439
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7834500494340706646}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f88ee6b4a61837f44b47b6d23958f84f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerInventoryInputController
+  InputHandler: {fileID: 2594667027422455901}
 --- !u!54 &6622171463591126358
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -250,3 +271,34 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!1 &8761221876698149512
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3330816053871665217}
+  m_Layer: 3
+  m_Name: GroundCheck
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3330816053871665217
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8761221876698149512}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.5, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4945378990719200201}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
