@@ -48,14 +48,17 @@ public static class UIManagerExtension
         // 게임 로비 UI를 여기서 오픈해주자 -> uiManager.
     }
 
-    public static void OpenInventoryPopup(this UIManager uiManger)
+    public static void OpenInventoryPopup(this UIManager uiManager)
     {
-        var uiBase = uiManger.OpenContentUI(UIType.Inventory);
+        var uiBase = uiManager.OpenContentUI(UIType.Inventory);
+
         if (uiBase == null)
         {
-            Debug.LogWarning($"UI가 생성되지 않았습니다");
+            Debug.LogWarning("Inventory UI가 생성되지 않았습니다.");
             return;
         }
+
+        SetInventoryCursorState(true);
     }
 
     public static void OpenLoadingUI(this UIManager uiManager)
@@ -84,5 +87,34 @@ public static class UIManagerExtension
         {
             return uiBase.gameObject.activeSelf;
         }
+    }
+
+    public static void CloseInventoryPopup(this UIManager uiManager)
+    {
+        uiManager.CloseContentUI(UIType.Inventory);
+        SetInventoryCursorState(false);
+    }
+
+    public static void ToggleInventoryPopup(this UIManager uiManager)
+    {
+        bool isOpened = uiManager.IsUIOpened(UIRootType.ContentUI, UIType.Inventory);
+
+        if (isOpened)
+            uiManager.CloseInventoryPopup();
+        else
+            uiManager.OpenInventoryPopup();
+    }
+
+    public static bool IsInventoryOpened(this UIManager uiManager)
+    {
+        return uiManager.IsUIOpened(UIRootType.ContentUI, UIType.Inventory);
+    }
+
+    private static void SetInventoryCursorState(bool isInventoryOpen)
+    {
+        Cursor.visible = isInventoryOpen;
+        Cursor.lockState = isInventoryOpen
+            ? CursorLockMode.None
+            : CursorLockMode.Locked;
     }
 }

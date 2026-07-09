@@ -130,10 +130,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4945378990719200201}
-  - component: {fileID: 4619849501279918116}
   - component: {fileID: 5159432160104867375}
   - component: {fileID: 5242166127282976409}
   - component: {fileID: 2594667027422455901}
+  - component: {fileID: 7304968640189071439}
   - component: {fileID: 6622171463591126358}
   - component: {fileID: 7388452711277228741}
   m_Layer: 3
@@ -161,18 +161,6 @@ Transform:
   - {fileID: 3330816053871665217}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4619849501279918116
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7834500494340706646}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9bb4510196fe9ae4e8cef1598d33aa48, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerShootingView
 --- !u!114 &5159432160104867375
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -222,6 +210,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6957016dfc70a1a4986207863762f61c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InputHandler
+--- !u!114 &7304968640189071439
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7834500494340706646}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f88ee6b4a61837f44b47b6d23958f84f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerInventoryInputController
+  InputHandler: {fileID: 2594667027422455901}
 --- !u!54 &6622171463591126358
 Rigidbody:
   m_ObjectHideFlags: 0

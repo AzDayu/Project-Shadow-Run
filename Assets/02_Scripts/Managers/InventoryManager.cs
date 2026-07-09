@@ -154,4 +154,101 @@ public class InventoryManager : MonoBehaviour
 
         return _itemList[index];
     }
+
+    public bool TryUseItem(int slotIndex)
+    {
+        ItemStack stack = GetItemStack(slotIndex);
+
+        if (!IsValidStack(stack))
+        {
+            Debug.LogWarning($"사용할 수 없는 슬롯입니다. Index: {slotIndex}");
+            return false;
+        }
+
+        string itemType = stack.Item.ItemType;
+
+        switch (itemType)
+        {
+            case "Consumable":
+                return TryUseConsumable(stack);
+
+            default:
+                Debug.LogWarning($"사용할 수 없는 아이템 타입입니다. Item: {stack.Item.ItemName}, Type: {itemType}");
+                return false;
+        }
+    }
+
+    public bool TryDropItem(int slotIndex, int count = 1)
+    {
+        ItemStack stack = GetItemStack(slotIndex);
+
+        if (!IsValidStack(stack))
+        {
+            Debug.LogWarning($"버릴 수 없는 슬롯입니다. Index: {slotIndex}");
+            return false;
+        }
+
+        if (count <= 0)
+            return false;
+
+        if (stack.StackCount < count)
+        {
+            Debug.LogWarning($"버릴 개수가 부족합니다. Item: {stack.Item.ItemName}, 보유: {stack.StackCount}, 요청: {count}");
+            return false;
+        }
+
+        Debug.Log($"아이템 드랍 요청: {stack.Item.ItemName} / Count: {count}");
+
+        // TODO: 월드 드랍 오브젝트 생성
+        return TryRemoveItem(stack.Item.ItemId, count);
+    }
+
+    public bool TryRegisterQuickSlot(int slotIndex)
+    {
+        ItemStack stack = GetItemStack(slotIndex);
+
+        if (!IsValidStack(stack))
+        {
+            Debug.LogWarning($"퀵슬롯에 등록할 수 없는 슬롯입니다. Index: {slotIndex}");
+            return false;
+        }
+
+        if (!CanRegisterQuickSlot(stack.Item))
+        {
+            Debug.LogWarning($"퀵슬롯 등록 불가 아이템입니다. Item: {stack.Item.ItemName}, Type: {stack.Item.ItemType}");
+            return false;
+        }
+
+        Debug.Log($"퀵슬롯 등록 요청: {stack.Item.ItemName}");
+
+        // TODO: QuickSlotManager 연결
+        return true;
+    }
+
+    private bool TryUseConsumable(ItemStack stack)
+    {
+        Debug.Log($"소모품 사용 요청: {stack.Item.ItemName}");
+
+        // TODO: UseItemType / UseItemParameterList 기준으로 효과 적용
+        // 예: Heal:30, Stamina:20 등
+
+        return TryRemoveItem(stack.Item.ItemId, 1);
+    }
+
+
+    private bool CanRegisterQuickSlot(ItemData item)
+    {
+        if (item == null)
+            return false;
+
+        return item.ItemType == "Weapon" ||
+               item.ItemType == "Consumable";
+    }
+
+    private bool IsValidStack(ItemStack stack)
+    {
+        return stack != null &&
+               stack.Item != null &&
+               stack.StackCount > 0;
+    }
 }

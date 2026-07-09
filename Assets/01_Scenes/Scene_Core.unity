@@ -436,7 +436,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1624054880176118043, guid: 8793eb5a13dc45e4ca0bdb2bea7483f3, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2004037385015702319, guid: 8793eb5a13dc45e4ca0bdb2bea7483f3, type: 3}
       propertyPath: m_AnchorMax.y
@@ -516,6 +516,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2994151632092799374, guid: 8793eb5a13dc45e4ca0bdb2bea7483f3, type: 3}
       propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3165582004303614422, guid: 8793eb5a13dc45e4ca0bdb2bea7483f3, type: 3}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3274102021911369574, guid: 8793eb5a13dc45e4ca0bdb2bea7483f3, type: 3}
@@ -722,6 +726,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6253849830903514681, guid: 8793eb5a13dc45e4ca0bdb2bea7483f3, type: 3}
+      propertyPath: m_AdditionalShaderChannelsFlag
+      value: 25
+      objectReference: {fileID: 0}
     - target: {fileID: 6448290751442443571, guid: 8793eb5a13dc45e4ca0bdb2bea7483f3, type: 3}
       propertyPath: m_LocalPosition.x
       value: 998.072
@@ -816,7 +824,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8416559592276546475, guid: 8793eb5a13dc45e4ca0bdb2bea7483f3, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9048621120489798048, guid: 8793eb5a13dc45e4ca0bdb2bea7483f3, type: 3}
       propertyPath: m_AnchorMax.y
@@ -1033,7 +1041,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraBinder
   PlayerCinemachineCamera: {fileID: 1556252403}
-  PlayerTransfrom: {fileID: 0}
 --- !u!114 &1556252401
 MonoBehaviour:
   m_ObjectHideFlags: 0
