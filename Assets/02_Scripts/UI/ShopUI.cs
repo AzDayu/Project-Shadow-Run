@@ -1,19 +1,74 @@
-﻿using TMPro;
+﻿using System.ComponentModel;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class ShopUI : MonoBehaviour
+public enum ShopItemSlotType
 {
-    [SerializeField] private TMP_Text _textCurPlayerCredit;
+    Inventory,
+    Stash,
+    Shop
+}
 
+public class ShopUI : UIBase 
+{
+    [SerializeField] private ShopItemSlotUI Prefab_ShopItemSlotUI;
+    [SerializeField] private TMP_Text Text_CurPlayerCredit;
+    [SerializeField] private Image Image_DragIcon;
+    [SerializeField] private Button Button_CloseSelf;
 
+    [SerializeField] private Transform Transform_InventoryContent;
+    [SerializeField] private Transform Transform_StashContent;
+    [SerializeField] private Transform Transform_ShopContent;
 
+    private ShopViewModel _vm;
+    private ShopItemSlotUI _draggedSlot;
 
+    public void BindViewModel(ShopViewModel shopViewModel)
+    {
+        _vm = shopViewModel;
+        _vm.PropertyChanged += OnPropertyChanged_View;
+        _vm.InvokeOnceOnInit();
+    }
 
+    private void Awake()
+    {
+        if (Button_CloseSelf != null)
+        {
+            Button_CloseSelf.onClick.AddListener(CloseShopUI);
+        }
+    }
 
+    private void OnDisable()
+    {
+        if (_vm != null)
+        {
+            _vm.PropertyChanged -= OnPropertyChanged_View;
+        }
+    }
 
+    private void OnPropertyChanged_View(object sender, PropertyChangedEventArgs e)
+    {
+        switch (e.PropertyName)
+        {
+            case nameof(ShopViewModel.CurPlayerCredit):
+                {
+                    Text_CurPlayerCredit.text = $"Player Credit : {_vm.CurPlayerCredit}";
+                }
+                break;
+        }
+    }
 
-    //"Player Money : {}";
+    public void CloseShopUI()
+    {
+        // UIManager 생기면 거기로 기능 이전 예정
+        gameObject.SetActive(false);
 
+        if (ShopItemPopupUI.Inst != null)
+        {
+            ShopItemPopupUI.Inst.HidePopup();
+        }
+    }
 
 
 
