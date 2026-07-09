@@ -366,6 +366,7 @@ MonoBehaviour:
   Text_CurPlayerCredit: {fileID: 7728047548584303726}
   Image_DragIcon: {fileID: 0}
   Button_CloseSelf: {fileID: 32429413389205502}
+  ShopItemPopup: {fileID: 1118460587990136849, guid: 51f800e3c72d7584ca91c452b92843bc, type: 3}
   Transform_InventoryContent: {fileID: 5444243042843780202}
   Transform_StashContent: {fileID: 6712952193733053555}
   Transform_ShopContent: {fileID: 7159625293365306809}
