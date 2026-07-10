@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.SceneManagement;
-using System.Collections;
 
 public class GameManager : MonoBehaviour
 {
@@ -27,6 +25,12 @@ public class GameManager : MonoBehaviour
         set { _currentGameState = value; }
     }
 
+    [Header("작업 공간 프리팹 설정")]
+    [SerializeField] private GameObject _outGameWorkspacePrefab;
+    [SerializeField] private GameObject _inGameWorkspacePrefab;
+
+    private GameObject _currentWorkspaceInstance;
+
     private void Awake()
     {
         if (_instance != null && _instance != this)
@@ -43,48 +47,65 @@ public class GameManager : MonoBehaviour
     private void InitializeGame()
     {
         _currentGameState = GameState.Core;
-        Debug.Log("GameManager: 코어 시스템 초기화 완료. 아웃게임(로비)으로 진입합니다.");
+        Debug.Log("GameManager: 코어 시스템 초기화 완료. 아웃게임(로비) 프리팹을 생성합니다.");
 
-        StartCoroutine(LoadOutGameRoutine());
+        ChangeState(GameState.OutGame);
+    }
+
+    public void ChangeState(GameState newState)
+    {
+        if (_currentGameState == newState && _currentWorkspaceInstance != null) return;
+
+        _currentGameState = newState;
+
+        if (_currentWorkspaceInstance != null)
+        {
+            Destroy(_currentWorkspaceInstance);
+            _currentWorkspaceInstance = null;
+        }
+
+        switch (_currentGameState)
+        {
+            case GameState.OutGame:
+                if (_outGameWorkspacePrefab != null)
+                {
+                    _currentWorkspaceInstance = Instantiate(_outGameWorkspacePrefab);
+                    _currentWorkspaceInstance.name = "[Workspace] OutGame_Lobby";
+                    Debug.Log("GameManager: 아웃게임 프리팹 배치 완료.");
+                }
+                else
+                {
+                    Debug.LogError("GameManager: OutGame 프리팹이 인스펙터에 할당되지 않았습니다!");
+                }
+                break;
+
+            case GameState.InGame:
+                if (GameObjectManager.Instance != null)
+                {
+                    GameObjectManager.Instance.ClearAllSpawnedObjects();
+                }
+
+                if (_inGameWorkspacePrefab != null)
+                {
+                    _currentWorkspaceInstance = Instantiate(_inGameWorkspacePrefab);
+                    _currentWorkspaceInstance.name = "[Workspace] InGame_Battle";
+                    Debug.Log("GameManager: 인게임 프리팹(맵+플레이어) 배치 완료.");
+                }
+                else
+                {
+                    Debug.LogError("GameManager: InGame 프리팹이 인스펙터에 할당되지 않았습니다!");
+                }
+                break;
+        }
     }
 
     public void ReturnToOutGame()
     {
-        if (_currentGameState == GameState.OutGame) return;
-        StartCoroutine(LoadOutGameRoutine());
-    }
-
-    private IEnumerator LoadOutGameRoutine()
-    {
-        _currentGameState = GameState.OutGame;
-
-        if (SceneManager.GetSceneByName("Scene_InGame").isLoaded)
-            yield return SceneManager.UnloadSceneAsync("Scene_InGame");
-        if (SceneManager.GetSceneByName("Scene_Environment").isLoaded)
-            yield return SceneManager.UnloadSceneAsync("Scene_Environment");
-
-        if (!SceneManager.GetSceneByName("Scene_OutGame").isLoaded)
-            yield return SceneManager.LoadSceneAsync("Scene_OutGame", LoadSceneMode.Additive);
-
-        Debug.Log("GameManager: 아웃게임(로비) 로드 완료");
+        ChangeState(GameState.OutGame);
     }
 
     public void StartInGame()
     {
-        if (_currentGameState == GameState.InGame) return;
-        StartCoroutine(LoadInGameRoutine());
-    }
-
-    private IEnumerator LoadInGameRoutine()
-    {
-        _currentGameState = GameState.InGame;
-
-        if (SceneManager.GetSceneByName("Scene_OutGame").isLoaded)
-            yield return SceneManager.UnloadSceneAsync("Scene_OutGame");
-
-        yield return SceneManager.LoadSceneAsync("Scene_Environment", LoadSceneMode.Additive);
-        yield return SceneManager.LoadSceneAsync("Scene_InGame", LoadSceneMode.Additive);
-
-        Debug.Log("GameManager: 인게임 맵 진입 완료 (Environment + InGame 로드)");
+        ChangeState(GameState.InGame);
     }
 }

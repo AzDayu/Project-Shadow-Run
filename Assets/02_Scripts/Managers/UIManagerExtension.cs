@@ -23,6 +23,7 @@ public enum UIType
     LocalPlayerProfileUI,
     MVVMTestUI,
     ShopUI,
+    ShopItemPopupUI,
     StashUI
 }
 
