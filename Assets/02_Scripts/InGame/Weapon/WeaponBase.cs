@@ -28,6 +28,10 @@ public abstract class WeaponBase : MonoBehaviour
     protected WeaponStat _baseWeaponStat = new WeaponStat();
     protected WeaponStat _currentWeaponStat=new WeaponStat();
     protected int _remainBullets=0;
+    public float ReloadTime => _currentWeaponStat.ReloadTime;
+    public int MagazineSize=> _currentWeaponStat.MagazineSize;
+    public int RemainBullets => _remainBullets;
+    public float AttackInterval => _currentWeaponStat.AttackInterval;
 
     protected Dictionary<WeaponPartsType,WeaponPartsData> _weaponPartsDic = new Dictionary<WeaponPartsType, WeaponPartsData>();
     public virtual void Initialize(WeaponData data) 
