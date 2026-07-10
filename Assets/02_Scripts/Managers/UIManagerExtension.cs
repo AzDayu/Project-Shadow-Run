@@ -50,7 +50,7 @@ public static class UIManagerExtension
 
     public static void OpenInventoryPopup(this UIManager uiManager)
     {
-        var uiBase = uiManager.OpenContentUI(UIType.Inventory);
+        UIBase uiBase = uiManager.OpenPopupUI(UIType.Inventory);
 
         if (uiBase == null)
         {
@@ -91,13 +91,13 @@ public static class UIManagerExtension
 
     public static void CloseInventoryPopup(this UIManager uiManager)
     {
-        uiManager.CloseContentUI(UIType.Inventory);
+        uiManager.ClosePopupUI(UIType.Inventory);
         SetInventoryCursorState(false);
     }
 
     public static void ToggleInventoryPopup(this UIManager uiManager)
     {
-        bool isOpened = uiManager.IsUIOpened(UIRootType.ContentUI, UIType.Inventory);
+        bool isOpened = uiManager.IsUIOpened(UIType.Inventory);
 
         if (isOpened)
             uiManager.CloseInventoryPopup();
@@ -107,7 +107,7 @@ public static class UIManagerExtension
 
     public static bool IsInventoryOpened(this UIManager uiManager)
     {
-        return uiManager.IsUIOpened(UIRootType.ContentUI, UIType.Inventory);
+        return uiManager.IsUIOpened(UIType.Inventory);
     }
 
     private static void SetInventoryCursorState(bool isInventoryOpen)

@@ -24,6 +24,12 @@ public class PlayerInventoryPopUpUI : UIBase
     [SerializeField] private Button ButtonRegisterQuickSlot;
     [SerializeField] private Vector2 ContextMenuOffset = new Vector2(8f, -8f);
 
+    [Header("Drag Icon")]
+    [SerializeField] private GameObject DragIconObject;
+    [SerializeField] private RectTransform DragIconRect;
+    [SerializeField] private Image DragIconImage;
+    [SerializeField] private TMP_Text TextDragIconCount;
+
     private readonly List<PlayerInventorySlotUI> _slotUIList = new();
 
     private Canvas _rootCanvas;
@@ -43,6 +49,7 @@ public class PlayerInventoryPopUpUI : UIBase
 
         HideItemTooltip(null);
         CloseContextMenu();
+        HideDragSlot ();
     }
 
     private void OnEnable()
@@ -166,19 +173,15 @@ public class PlayerInventoryPopUpUI : UIBase
         if (slot == null || !slot.HasItem)
             return;
 
+        if (InventoryManager.Instance == null)
+            return;
+
         SelectSlot(slot);
 
-        ItemStack stack = slot.ItemStack;
-        ItemData item = stack.Item;
+        InventoryManager.Instance.TryUseItem(slot.SlotIndex);
 
-        Debug.Log($"아이템 사용 시도: {item.ItemName}");
-
-        // TODO:
-        // if (item.ItemType == ItemType.Consumable)
-        // {
-        //     실제 아이템 사용 처리
-        //     InventoryManager.Instance.TryRemoveItem(item.ItemId, 1);
-        // }
+        HideItemTooltip(slot);
+        CloseContextMenu();
     }
 
     public void OpenContextMenu(PlayerInventorySlotUI slot, Vector2 mousePosition)
@@ -187,9 +190,12 @@ public class PlayerInventoryPopUpUI : UIBase
             return;
 
         _contextTargetSlot = slot;
+        SelectSlot(slot);
 
         if (ContextMenuPanel == null || ContextMenuRect == null)
             return;
+
+        RefreshContextMenuButtons(slot);
 
         ContextMenuPanel.SetActive(true);
 
@@ -309,6 +315,8 @@ public class PlayerInventoryPopUpUI : UIBase
         HideItemTooltip(slot);
         CloseContextMenu();
 
+        ShowDragSlot(slot.ItemStack, eventData.position);
+
         Debug.Log($"드래그 시작: {slot.ItemStack.Item.ItemName}");
     }
 
@@ -317,8 +325,7 @@ public class PlayerInventoryPopUpUI : UIBase
         if (_draggingSlot == null)
             return;
 
-        // TODO:
-        // 드래그 아이콘을 만들면 여기서 eventData.position을 따라가게 처리.
+        MoveDragSlot (eventData.position);
     }
 
     public void EndDragSlot(PlayerInventorySlotUI slot, PointerEventData eventData)
@@ -328,16 +335,40 @@ public class PlayerInventoryPopUpUI : UIBase
 
         Debug.Log($"드래그 종료: {_draggingSlot.ItemStack.Item.ItemName}");
 
-        // TODO:
-        // PlayerQuickSlotUI quickSlot =
-        //     eventData.pointerEnter.GetComponentInParent<PlayerQuickSlotUI>();
-        //
-        // if (quickSlot != null)
-        // {
-        //     quickSlot.SetItem(_draggingSlot.ItemStack);
-        // }
+        PlayerQuickSlotUI quickSlotUI = GetQuickSlotUnderPointer(eventData);
+
+        if (quickSlotUI != null && InventoryManager.Instance != null)
+        {
+            InventoryManager.Instance.TryRegisterQuickSlot(
+                _draggingSlot.SlotIndex,
+                quickSlotUI.SlotIndex
+            );
+
+            Debug.Log($"퀵슬롯 드롭 감지: QuickSlotIndex {quickSlotUI.SlotIndex}");
+        }
+
+        HideDragSlot();
 
         _draggingSlot = null;
+    }
+    private PlayerQuickSlotUI GetQuickSlotUnderPointer(PointerEventData eventData)
+    {
+        if (EventSystem.current == null)
+            return null;
+
+        List<RaycastResult> results = new();
+        EventSystem.current.RaycastAll(eventData, results);
+
+        foreach (RaycastResult result in results)
+        {
+            PlayerQuickSlotUI quickSlotUI =
+                result.gameObject.GetComponentInParent<PlayerQuickSlotUI>();
+
+            if (quickSlotUI != null)
+                return quickSlotUI;
+        }
+
+        return null;
     }
 
     private void OnClickUse()
@@ -346,7 +377,6 @@ public class PlayerInventoryPopUpUI : UIBase
             return;
 
         TryUseItem(_contextTargetSlot);
-        CloseContextMenu();
     }
 
     private void OnClickDrop()
@@ -354,15 +384,13 @@ public class PlayerInventoryPopUpUI : UIBase
         if (_contextTargetSlot == null || !_contextTargetSlot.HasItem)
             return;
 
-        ItemData item = _contextTargetSlot.ItemStack.Item;
+        if (InventoryManager.Instance == null)
+            return;
 
-        Debug.Log($"아이템 버리기 요청: {item.ItemName}");
-
-        // TODO:
-        // InventoryManager.Instance.TryRemoveItem(item.ItemId, 1);
-        // 월드 드랍 아이템 생성
+        InventoryManager.Instance.TryDropItem(_contextTargetSlot.SlotIndex, 1);
 
         CloseContextMenu();
+        HideItemTooltip(_contextTargetSlot);
     }
 
     private void OnClickRegisterQuickSlot()
@@ -370,13 +398,79 @@ public class PlayerInventoryPopUpUI : UIBase
         if (_contextTargetSlot == null || !_contextTargetSlot.HasItem)
             return;
 
-        ItemData item = _contextTargetSlot.ItemStack.Item;
+        if (InventoryManager.Instance == null)
+            return;
 
-        Debug.Log($"퀵슬롯 등록 요청: {item.ItemName}");
-
-        // TODO:
-        // QuickSlotManager 또는 QuickSlot UI 쪽으로 등록 요청 연결
+        InventoryManager.Instance.TryRegisterQuickSlot(_contextTargetSlot.SlotIndex);
 
         CloseContextMenu();
+        HideItemTooltip(_contextTargetSlot);
+    }
+
+    private void RefreshContextMenuButtons(PlayerInventorySlotUI slot)
+    {
+        if (slot == null || !slot.HasItem)
+            return;
+
+        ItemData item = slot.ItemStack.Item;
+
+        bool canUse = item.ItemType == "Consumable";
+        bool canRegisterQuickSlot =
+            item.ItemType == "Weapon" ||
+            item.ItemType == "Consumable";
+
+        if (ButtonUse != null)
+            ButtonUse.gameObject.SetActive(canUse);
+
+        if (ButtonRegisterQuickSlot != null)
+            ButtonRegisterQuickSlot.gameObject.SetActive(canRegisterQuickSlot);
+
+        if (ButtonDrop != null)
+            ButtonDrop.gameObject.SetActive(true);
+    }
+
+    private void ShowDragSlot (ItemStack stack, Vector2 screenPosition)
+    {
+        if (stack == null || stack.Item == null)
+            return;
+
+        if (DragIconObject == null || DragIconRect == null || DragIconImage == null)
+            return;
+
+        DragIconObject.SetActive(true);
+
+        Sprite icon = ItemIconLoader.LoadIcon(stack.Item);
+
+        DragIconImage.sprite = icon;
+        DragIconImage.gameObject.SetActive(icon != null);
+
+        if (TextDragIconCount != null)
+        {
+            TextDragIconCount.text = stack.StackCount > 1
+                ? stack.StackCount.ToString()
+                : string.Empty;
+        }
+
+        SetPanelPositionClamped(DragIconRect, screenPosition);
+    }
+
+    private void MoveDragSlot(Vector2 screenPosition)
+    {
+        if (DragIconObject == null || !DragIconObject.activeSelf)
+            return;
+
+        SetPanelPositionClamped(DragIconRect, screenPosition);
+    }
+
+    private void HideDragSlot()
+    {
+        if (DragIconObject != null)
+            DragIconObject.SetActive(false);
+
+        if (DragIconImage != null)
+            DragIconImage.sprite = null;
+
+        if (TextDragIconCount != null)
+            TextDragIconCount.text = string.Empty;
     }
 }
