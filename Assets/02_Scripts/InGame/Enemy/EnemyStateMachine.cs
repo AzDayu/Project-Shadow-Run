@@ -22,43 +22,45 @@ public class EnemyStateMachine : MonoBehaviour
     // 전술한 5가지 상태 리스트를 여기서 관리
     public IState CurrentState { get; private set; }
 
-    [SerializeField] private string currentStatusName;
-    public LayerMask playerLayerMask;
+    [SerializeField] private string _currentStatusName;
+    public LayerMask _playerLayerMask;
     // 다른 상태 클래스들이 공통으로 쓸 유니티 컴포넌트들을 미리 캐싱
-    [HideInInspector] public NavMeshAgent agent;
-    [HideInInspector] public Transform targetPlayer;
-    [HideInInspector] public Vector3 lastKnownPosition; // 플레이어를 마지막으로 목격한 위치
-    public Animator animator;
+    [HideInInspector] public NavMeshAgent _agent;
+    [HideInInspector] public Transform _targetPlayer;
+    [HideInInspector] public Vector3 _lastDetectPosition; // 플레이어를 마지막으로 목격한 위치
+    public Animator _animator;
+    public EnemyBase _enemyBase;
     // 예시용 상태 객체들
-    public EnemyIdleState idleState; 
-    public EnemyPatrolState patrolState;
-    public EnemyInvestigateState investigateState;
-    public EnemyChaseState chaseState;
-    public EnemyAttackState attackState;   
-    public EnemyRetreatState retreatState;
-    public EnemyDeadState deadState;
+    public EnemyIdleState _idleState; 
+    public EnemyPatrolState _patrolState;
+    public EnemyInvestigateState _investigateState;
+    public EnemyChaseState _chaseState;
+    public EnemyAttackState _attackState;   
+    public EnemyRetreatState _retreatState;
+    public EnemyDeadState _deadState;
     
     
     // ... 다른 상태들도 추가 가능
 
     private void Awake()
     {
-        agent = GetComponent<NavMeshAgent>();
-        animator = GetComponent<Animator>();
+        _enemyBase= GetComponent<EnemyBase>();
+        _agent = GetComponent<NavMeshAgent>();
+        _animator = GetComponent<Animator>();
         // 상태 인스턴스 생성 (생성자를 통해 이 스크립트의 참조를 넘김)
-        idleState = new EnemyIdleState(this);
-        patrolState = new EnemyPatrolState(this);
-        investigateState = new EnemyInvestigateState(this);
-        chaseState = new EnemyChaseState(this);
-        attackState = new EnemyAttackState(this);
-        retreatState = new EnemyRetreatState(this);
-        deadState = new EnemyDeadState(this);
+        _idleState = new EnemyIdleState(this);
+        _patrolState = new EnemyPatrolState(this);
+        _investigateState = new EnemyInvestigateState(this);
+        _chaseState = new EnemyChaseState(this);
+        _attackState = new EnemyAttackState(this);
+        _retreatState = new EnemyRetreatState(this);
+        _deadState = new EnemyDeadState(this);
     }
 
     private void Start()
     {
         // 시작 상태 지정 
-        ChangeState(idleState);
+        ChangeState(_idleState);
     }
 
     private void Update()
@@ -75,7 +77,7 @@ public class EnemyStateMachine : MonoBehaviour
         CurrentState?.ExitState();  // 1. 기존 상태 나가기
         CurrentState = newState; // 2. 상태 교체
        
-        currentStatusName = newState.GetType().Name;
+        _currentStatusName = newState.GetType().Name;
         CurrentState?.EnterState(); // 3. 새 상태 들어가기
     }
 }

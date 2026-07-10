@@ -1,25 +1,25 @@
 ﻿using UnityEngine;
 using UnityEngine.AI; 
 
-public class EnemyBase : MonoBehaviour
+public class EnemyBase : MonoBehaviour,IDamageable,IWeaponOwner
 {
-    // 플레이어의 위치를 드래그 앤 드롭할 변수
-    public Transform playerTransform;
-
-    private NavMeshAgent agent;
-
-    void Start()
+    public TestWeaponBase CurrentWeapon { get; private set; }
+    [SerializeField] Transform _weaponSpawnPo;
+    [SerializeField] TestWeaponBase _testWeapon;
+    public float HP { get; private set; }
+    //public EnemyData Data { get; private set; }
+    public void Awake()
     {
-        // 내 오브젝트에 붙어있는 NavMeshAgent를 가져옵니다.
-        agent = GetComponent<NavMeshAgent>();
+        SetWeapon(_testWeapon);
+    }
+    public void SetWeapon(TestWeaponBase weapon)
+    {
+        CurrentWeapon = weapon;
+
+        weapon.transform.SetParent(_weaponSpawnPo, false);
     }
 
-    void Update()
-    {
-        if (playerTransform != null)
-        {
-            // 실시간으로 플레이어의 위치를 향해 경로를 계산하고 이동합니다.
-           // agent.SetDestination(playerTransform.position);
-        }
-    }
+    public void TakeDamage(float damage) { }
+    public void UseWeapon() { }
+    
 }

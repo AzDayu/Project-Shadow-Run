@@ -50,6 +50,33 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "QuickSlot1",
+                    "type": "Button",
+                    "id": "fefc4860-b1ff-4c90-b2c3-92223eaef199",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "QuickSlot2",
+                    "type": "Button",
+                    "id": "b6d0505a-610e-4ccf-be66-8038f72de74b",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "QuickSlot3",
+                    "type": "Button",
+                    "id": "4537b393-e552-4ed2-b90e-768a6b8a6dd6",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -149,6 +176,39 @@
                     "processors": "",
                     "groups": "",
                     "action": "Fire",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2d615e4a-54b5-4b87-a09d-daba108a708e",
+                    "path": "<Keyboard>/1",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "QuickSlot1",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9ed8c31b-8747-4786-8948-819bed6eef50",
+                    "path": "<Keyboard>/2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "QuickSlot2",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2a670200-067e-4daf-8a6e-1a8bcc23ee57",
+                    "path": "<Keyboard>/3",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "QuickSlot3",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

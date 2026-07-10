@@ -32,3 +32,21 @@ public class ItemStack
     public ItemData Item;
     public int StackCount;
 }
+[System.Serializable]
+public class WeaponData : ItemData
+{
+    public float Damage;
+    public float AttackInterval;
+    public int MagazineSize;
+    public float Accuracy;
+    public float Range;
+    public float ReloadTime;
+}
+[System.Serializable]
+public class WeaponPartsData : ItemData
+{
+    public WeaponPartsType PartsType;
+    public WeaponStatType StatType;
+    public WeaponStatModifierType ModifierType;
+    public float Value;
+}

@@ -23,7 +23,10 @@ public class PlayerInventorySlotUI : MonoBehaviour,
     public int SlotIndex => _slotIndex;
     public ItemStack ItemStack => _itemStack;
 
-    public bool HasItem => _itemStack != null && _itemStack.Item != null && _itemStack.StackCount > 0;
+    public bool HasItem =>
+        _itemStack != null &&
+        _itemStack.Item != null &&
+        _itemStack.StackCount > 0;
 
     public void Init(int slotIndex, PlayerInventoryPopUpUI owner)
     {
@@ -33,59 +36,57 @@ public class PlayerInventorySlotUI : MonoBehaviour,
         Clear();
     }
 
-    public void SetItem(ItemStack itemStack)
+    public void SetItem(ItemStack stack)
     {
-        _itemStack = itemStack;
-        Refresh();
-    }
+        _itemStack = stack;
 
-    public void Clear()
-    {
-        _itemStack = null;
-        Refresh();
-        SetSelected(false);
-    }
-
-    private void Refresh()
-    {
         if (!HasItem)
         {
-            if (ImageItemIcon != null)
-            {
-                ImageItemIcon.sprite = null;
-                ImageItemIcon.enabled = false;
-            }
-
-            if (TextItemCount != null)
-            {
-                TextItemCount.text = string.Empty;
-                TextItemCount.enabled = false;
-            }
-
+            Clear();
             return;
         }
 
         if (ImageItemIcon != null)
         {
-            Sprite iconSprite = Resources.Load<Sprite>(_itemStack.Item.IconPath);
-
-            ImageItemIcon.sprite = iconSprite;
-            ImageItemIcon.enabled = iconSprite != null;
+            ImageItemIcon.sprite = ItemIconLoader.LoadIcon(_itemStack.Item);
+            ImageItemIcon.enabled = ImageItemIcon.sprite != null;
         }
 
         if (TextItemCount != null)
         {
             bool showCount = _itemStack.StackCount > 1;
 
-            TextItemCount.text = showCount ? _itemStack.StackCount.ToString() : string.Empty;
+            TextItemCount.text = showCount
+                ? _itemStack.StackCount.ToString()
+                : string.Empty;
+
             TextItemCount.enabled = showCount;
         }
     }
 
-    public void SetSelected(bool isSelected)
+    public void Clear()
+    {
+        _itemStack = null;
+
+        if (ImageItemIcon != null)
+        {
+            ImageItemIcon.sprite = null;
+            ImageItemIcon.enabled = false;
+        }
+
+        if (TextItemCount != null)
+        {
+            TextItemCount.text = string.Empty;
+            TextItemCount.enabled = false;
+        }
+
+        SetSelected(false);
+    }
+
+    public void SetSelected(bool selected)
     {
         if (SelectedFrame != null)
-            SelectedFrame.SetActive(isSelected);
+            SelectedFrame.SetActive(selected);
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -109,13 +110,9 @@ public class PlayerInventorySlotUI : MonoBehaviour,
         if (eventData.button == PointerEventData.InputButton.Left)
         {
             if (eventData.clickCount >= 2)
-            {
                 _owner.TryUseItem(this);
-            }
             else
-            {
                 _owner.SelectSlot(this);
-            }
         }
         else if (eventData.button == PointerEventData.InputButton.Right)
         {
@@ -142,7 +139,7 @@ public class PlayerInventorySlotUI : MonoBehaviour,
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        if (!HasItem)
+        if (_owner == null)
             return;
 
         _owner.EndDragSlot(this, eventData);
