@@ -7,6 +7,7 @@ public class EnemyBase : MonoBehaviour,IDamageable,IWeaponOwner
     [SerializeField] Transform _weaponSpawnPo;
     [SerializeField] TestWeaponBase _testWeapon;
     public float HP { get; private set; }
+    public bool IsDead { get; private set; } = false;
     //public EnemyData Data { get; private set; }
     public void Awake()
     {

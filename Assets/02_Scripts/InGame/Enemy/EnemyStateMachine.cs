@@ -1,4 +1,5 @@
-﻿using Unity.IO.LowLevel.Unsafe;
+﻿using System.Xml;
+using Unity.IO.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -35,7 +36,8 @@ public class EnemyStateMachine : MonoBehaviour
     public EnemyPatrolState _patrolState;
     public EnemyInvestigateState _investigateState;
     public EnemyChaseState _chaseState;
-    public EnemyAttackState _attackState;   
+    public EnemyAttackState _attackState;
+    public EnemyReloadState _reloadState;
     public EnemyRetreatState _retreatState;
     public EnemyDeadState _deadState;
     
@@ -53,6 +55,7 @@ public class EnemyStateMachine : MonoBehaviour
         _investigateState = new EnemyInvestigateState(this);
         _chaseState = new EnemyChaseState(this);
         _attackState = new EnemyAttackState(this);
+        _reloadState = new EnemyReloadState(this);
         _retreatState = new EnemyRetreatState(this);
         _deadState = new EnemyDeadState(this);
     }
@@ -65,6 +68,13 @@ public class EnemyStateMachine : MonoBehaviour
 
     private void Update()
     {
+        if (_enemyBase.IsDead)
+        {
+            if (CurrentState != _deadState)
+                ChangeState(_deadState);
+
+            return;
+        }
         // 현재 활성화된 상태의 Update를 매 프레임 실행
         CurrentState?.UpdateState();
     }
