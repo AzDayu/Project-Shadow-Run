@@ -45,9 +45,10 @@ public class PlayerQuickSlotUI : MonoBehaviour
     private void OnEnable()
     {
         if (InventoryManager.Instance != null)
+        {
             InventoryManager.Instance.OnQuickSlotChanged += Refresh;
-
-        InventoryManager.Instance.OnSelectedQuickSlotChanged += RefreshSelected;
+            InventoryManager.Instance.OnSelectedQuickSlotChanged += RefreshSelected;
+        }
 
         Refresh();
     }
@@ -55,9 +56,10 @@ public class PlayerQuickSlotUI : MonoBehaviour
     private void OnDisable()
     {
         if (InventoryManager.Instance != null)
+        {
             InventoryManager.Instance.OnQuickSlotChanged -= Refresh;
-
-        InventoryManager.Instance.OnSelectedQuickSlotChanged -= RefreshSelected;
+            InventoryManager.Instance.OnSelectedQuickSlotChanged -= RefreshSelected;
+        }
     }
 
     private void Refresh()
@@ -95,14 +97,16 @@ public class PlayerQuickSlotUI : MonoBehaviour
             Sprite icon = ItemIconLoader.LoadIcon(stack.Item);
 
             IconImage.sprite = icon;
-            IconImage.gameObject.SetActive(icon != null);
+            IconImage.enabled = icon != null;
         }
 
         if (TextCount != null)
         {
-            TextCount.text = stack.StackCount > 1
-                ? stack.StackCount.ToString()
-                : string.Empty;
+            bool showCount = stack.StackCount > 1;
+
+            TextCount.text = showCount ? stack.StackCount.ToString() : string.Empty;
+
+            TextCount.enabled = showCount;
         }
     }
 
@@ -111,17 +115,27 @@ public class PlayerQuickSlotUI : MonoBehaviour
         if (IconImage != null)
         {
             IconImage.sprite = null;
-            IconImage.gameObject.SetActive(false);
+            IconImage.enabled = false;
         }
 
         if (TextCount != null)
+        {
             TextCount.text = string.Empty;
+            TextCount.enabled = false;
+        }
+
+        RefreshSelected();
     }
 
     private void RefreshSelected()
     {
         if (InventoryManager.Instance == null)
+        {
+            if (SelectedFrame != null)
+                SelectedFrame.SetActive(false);
+
             return;
+        }
 
         bool selected = InventoryManager.Instance.SelectedQuickSlotIndex == QuickSlotIndex;
 

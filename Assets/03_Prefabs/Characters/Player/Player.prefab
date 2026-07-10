@@ -284,6 +284,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fba68244af6a6f74fa01602bfce05518, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerQuickSlotInputController
+  _playerInputHandler: {fileID: 2594667027422455901}
 --- !u!1 &8761221876698149512
 GameObject:
   m_ObjectHideFlags: 0
