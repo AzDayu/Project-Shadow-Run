@@ -6,6 +6,8 @@ public abstract class BaseEnemyState : IState
 
     // 기본 감지 반경 세팅 (필요시 자식에서 따로 정의 가능)
     protected float detectionRadius = 15f;
+    protected const float PatrolReloadRatio = 0.3f;
+    protected const float CombatReloadRatio = 0f;
     float currentSpeed;
     // 생성자
     public BaseEnemyState(EnemyStateMachine stateMachine)
@@ -20,7 +22,7 @@ public abstract class BaseEnemyState : IState
     /// <summary>
     /// 모든 자식 상태(Idle, Patrol, Investigate 등)가 쓸 수 있는 플레이어 감지 함수
     /// </summary>
-    protected bool DetectPlayer()
+    protected bool DetectPlayer()//플레이어를 탐지하고 레이캐스트로 적중했을시,
     {
         Collider[] hitColliders = Physics.OverlapSphere(stateMachine.transform.position, detectionRadius, stateMachine._playerLayerMask);
 
@@ -72,6 +74,28 @@ public abstract class BaseEnemyState : IState
         }
         stateMachine._animator.SetFloat("MoveSpeed", currentSpeed);
     }
+    protected bool NeedReload(float ratio)
+    {
+        int remainBullets = stateMachine._enemyBase.CurrentWeapon.RemainBullets;
+        int magazineSize = stateMachine._enemyBase.CurrentWeapon.MagazineSize;
+
+        return remainBullets <= magazineSize * ratio;
+    }
+    protected void EvaluateCombatState() //독립적인 행동이 끝나고 다음 행동을 이어나가기 위함(장전 등)
+    {
+        if (stateMachine._targetPlayer == null)
+        {
+            stateMachine.ChangeState(stateMachine._patrolState);
+        }
+        else if (DetectPlayer())
+        {
+            stateMachine.ChangeState(stateMachine._attackState);
+        }
+        else
+        {
+            stateMachine.ChangeState(stateMachine._chaseState);
+        }
+    }
 }
 public class EnemyIdleState : BaseEnemyState
 {
@@ -85,6 +109,11 @@ public class EnemyIdleState : BaseEnemyState
     public override void UpdateState()
     {
         stateMachine.ChangeState(stateMachine._patrolState);
+        if (NeedReload(PatrolReloadRatio))
+        {
+            stateMachine.ChangeState(stateMachine._reloadState);
+            return;
+        }
     }
 
     public override void ExitState() { }
@@ -108,6 +137,11 @@ public class EnemyPatrolState : BaseEnemyState
         if (DetectPlayer())
         {
             stateMachine.ChangeState(stateMachine._chaseState);
+            return;
+        }
+        if (NeedReload(PatrolReloadRatio))
+        {
+            stateMachine.ChangeState(stateMachine._reloadState);
             return;
         }
     }
@@ -162,11 +196,11 @@ public class EnemyChaseState : BaseEnemyState
             lostTimer = 0f;
             
             stateMachine._lastDetectPosition = stateMachine._targetPlayer.position;
-            //사격중에 마지막 위치를 업데이트 하지 않는 문제 있음
+           
             stateMachine._agent.SetDestination(stateMachine._lastDetectPosition);
 
 
-            if (Vector3.Distance(stateMachine.transform.position, stateMachine._targetPlayer.position) <= 10f)
+            if (Vector3.Distance(stateMachine.transform.position, stateMachine._targetPlayer.position) <= 10f)//적의 고유 공격사거리 설정 필요
             {
                 Debug.Log("[Chase] 플레이어를 포착했습니다. 공격(Attack) 상태로 전환합니다.");
                 stateMachine.ChangeState(stateMachine._attackState);
@@ -187,6 +221,11 @@ public class EnemyChaseState : BaseEnemyState
                 return;
             }
         }
+        if (NeedReload(CombatReloadRatio))
+        {
+            stateMachine.ChangeState(stateMachine._reloadState);
+            return;
+        }
     }
 
     public override void ExitState()
@@ -205,8 +244,8 @@ public class EnemyAttackState : BaseEnemyState
     private float aimTimer; //조준 후에 발사까지 걸리는 시간 
     private float aimDuration = 0.5f; //추후에 무기 등에서 값을 받아올수도 있음 *EnemyData에 필요
 
-    private float cooldownTimer;//다음 공격까지 걸리는 시간 *EnemyData에 필요
-    private float attackInterval = 1.0f;
+    private float attackIntervalTimer;//다음 공격까지 걸리는 시간 *EnemyData에 필요
+    private float attackInterval;
 
     private Vector3 aimPosition;
 
@@ -227,7 +266,7 @@ public class EnemyAttackState : BaseEnemyState
         stateMachine._agent.ResetPath();
 
         targetLostTimer = 0f;
-
+        attackInterval = stateMachine._enemyBase.CurrentWeapon.AttackInterval;
         StartAim();
     }
 
@@ -266,7 +305,7 @@ public class EnemyAttackState : BaseEnemyState
                     EnemyAttack();
 
                     currentPhase = AttackPhase.Cooldown;
-                    cooldownTimer = 0f;
+                    attackIntervalTimer = 0f;
 
                    // stateMachine.animator.SetBool("IsAiming", false);
                 }
@@ -275,14 +314,19 @@ public class EnemyAttackState : BaseEnemyState
 
             case AttackPhase.Cooldown:
 
-                cooldownTimer += Time.deltaTime;
+                attackIntervalTimer += Time.deltaTime;
 
-                if (cooldownTimer >= attackInterval)
+                if (attackIntervalTimer >= attackInterval)
                 {
                     StartAim();
                 }
 
                 break;
+        }
+        if (NeedReload(CombatReloadRatio))
+        {
+            stateMachine.ChangeState(stateMachine._reloadState);
+            return;
         }
     }
 
@@ -329,6 +373,39 @@ public class EnemyAttackState : BaseEnemyState
         // 조준 애니메이션
        // stateMachine.animator.SetBool("IsAiming", true);
     }
+}
+public class EnemyReloadState : BaseEnemyState 
+{
+    private float _reloadTimer = 0f;
+    private float _maxReloadTime;
+    private int _reloadBulletAmount;
+    public EnemyReloadState(EnemyStateMachine stateMachine) : base(stateMachine) { }
+    public override void EnterState() 
+    {
+        _maxReloadTime = stateMachine._enemyBase.CurrentWeapon.ReloadTime;
+        _reloadBulletAmount = stateMachine._enemyBase.CurrentWeapon.MagazineSize;
+        _reloadTimer = 0f;
+        Debug.Log("[Reload] 재장전 시작."); 
+    }  // 이 상태로 처음 들어왔을 때 
+    public override void UpdateState() 
+    {
+        _reloadTimer += Time.deltaTime;
+        if (_reloadTimer >= _maxReloadTime) 
+        {
+            stateMachine._enemyBase.CurrentWeapon.Reload(_reloadBulletAmount);
+            Debug.Log($"[Reload] 재장전 끝 현재탄창{stateMachine._enemyBase.CurrentWeapon.RemainBullets}발.");
+            EvaluateCombatState();
+        }
+
+
+    } // 매 프레임 실행될 로직 
+    public override void ExitState() 
+    { 
+        Debug.Log("[Reload] 재장전 종료.");
+
+       
+
+    }   // 이 상태에서 빠져나갈 때
 }
 public class EnemyRetreatState : BaseEnemyState
 {

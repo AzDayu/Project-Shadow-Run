@@ -8,6 +8,10 @@ public class TestWeaponBase : MonoBehaviour
     protected WeaponStat _baseWeaponStat = new WeaponStat();
     protected WeaponStat _currentWeaponStat = new WeaponStat();
     protected int _remainBullets = 0;
+    public float ReloadTime => _currentWeaponStat.ReloadTime;
+    public int MagazineSize => _currentWeaponStat.MagazineSize;
+    public int RemainBullets => _remainBullets;
+    public float AttackInterval => _currentWeaponStat.AttackInterval;
 
     protected Dictionary<WeaponPartsType, WeaponPartsData> _weaponPartsDic = new Dictionary<WeaponPartsType, WeaponPartsData>();
     public void Awake()
@@ -23,7 +27,7 @@ public class TestWeaponBase : MonoBehaviour
         _baseWeaponStat.Range = 10f;
         _baseWeaponStat.ReloadTime = 5f;
         _currentWeaponStat = _baseWeaponStat;
-        _remainBullets = 100;
+        _remainBullets = 10;
     }
 
     //public abstract bool CanFire { get; }
