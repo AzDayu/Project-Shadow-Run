@@ -26,5 +26,8 @@ public class PlayerInventoryInputController : MonoBehaviour
         bool isInventoryOpened = UIManager.Instance.IsInventoryOpened();
 
         InputHandler.SetGameplayInputBlocked(isInventoryOpened);
+
+        Cursor.visible = isInventoryOpened;
+        Cursor.lockState = isInventoryOpened ? CursorLockMode.None : CursorLockMode.Locked;
     }
 }

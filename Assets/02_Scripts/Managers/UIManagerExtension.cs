@@ -48,14 +48,17 @@ public static class UIManagerExtension
         // 게임 로비 UI를 여기서 오픈해주자 -> uiManager.
     }
 
-    public static void OpenInventoryPopup(this UIManager uiManger)
+    public static void OpenInventoryPopup(this UIManager uiManager)
     {
-        var uiBase = uiManger.OpenContentUI(UIType.Inventory);
+        UIBase uiBase = uiManager.OpenPopupUI(UIType.Inventory);
+
         if (uiBase == null)
         {
-            Debug.LogWarning($"UI가 생성되지 않았습니다");
+            Debug.LogWarning("Inventory UI가 생성되지 않았습니다.");
             return;
         }
+
+        SetInventoryCursorState(true);
     }
 
     public static void OpenLoadingUI(this UIManager uiManager)
@@ -88,13 +91,13 @@ public static class UIManagerExtension
 
     public static void CloseInventoryPopup(this UIManager uiManager)
     {
-        uiManager.CloseContentUI(UIType.Inventory);
+        uiManager.ClosePopupUI(UIType.Inventory);
         SetInventoryCursorState(false);
     }
 
     public static void ToggleInventoryPopup(this UIManager uiManager)
     {
-        bool isOpened = uiManager.IsUIOpened(UIRootType.ContentUI, UIType.Inventory);
+        bool isOpened = uiManager.IsUIOpened(UIType.Inventory);
 
         if (isOpened)
             uiManager.CloseInventoryPopup();
@@ -104,7 +107,7 @@ public static class UIManagerExtension
 
     public static bool IsInventoryOpened(this UIManager uiManager)
     {
-        return uiManager.IsUIOpened(UIRootType.ContentUI, UIType.Inventory);
+        return uiManager.IsUIOpened(UIType.Inventory);
     }
 
     private static void SetInventoryCursorState(bool isInventoryOpen)
