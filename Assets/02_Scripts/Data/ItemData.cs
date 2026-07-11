@@ -17,6 +17,8 @@ public class ItemData
 
     public string UseItemType;
     public string[] UseItemParameterList;
+    // damage, fireRate, range, maxAmmo, currentAmmo, reloadTime
+
 }
 
 [System.Serializable]
