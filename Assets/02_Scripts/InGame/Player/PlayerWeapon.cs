@@ -1,171 +1,50 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
+using UnityEngine.InputSystem; 
 
 public class PlayerWeapon : MonoBehaviour
 {
-    [Header("Input")]
-    [SerializeField] private PlayerInputHandler InputHandler;
+    // 무기 기본 스탯 변수
+    public string weaponName;
+    public WeaponStat stat;
+    public int currentMag;
 
-    [Header("Weapon")]
-    [SerializeField] private Transform WeaponSocket;
-    [SerializeField] private Camera PlayerCamera;
+    public Transform cameraTarget;
+    public PlayerMagazine reloadSystem;
+    public PlayerShoot shootSystem;
+    public WeaponModification modificationSystem;
+    public PlayerBuff buffSystem;
 
-    private WeaponBase _equippedWeapon;
-    private WeaponData _equippedWeaponData;
-
-    public WeaponBase EquippedWeapon => _equippedWeapon;
-
-    private void OnEnable()
+    void Awake( )
     {
-        if (InputHandler != null)
-            InputHandler.FirePerformed += Fire;
-
-        if (InventoryManager.Instance != null)
-        {
-            InventoryManager.Instance
-                .OnSelectedQuickSlotChanged +=
-                EquipSelectedQuickSlot;
-        }
+        // 동적 생성 시 자동으로 자기 자신에게 붙은 컴포넌트들을 찾아 연결
+        reloadSystem = GetComponent<PlayerMagazine>();
+        shootSystem = GetComponent<PlayerShoot>();
+        buffSystem = GetComponent<PlayerBuff>();
+        modificationSystem = GetComponent<WeaponModification>();
     }
 
-    private void Start()
+    public void Init( ItemData weaponData )
     {
-        EquipSelectedQuickSlot();
+        weaponName = weaponData.ItemName;
+
+        stat.Damage = 0f;
+        stat.AttackInterval = 0f;
+        stat.Range = 0f;
+        stat.MagazineSize = 0;
+        stat.ReloadTime = 0f;
+
+        // UseItemParameterList의 문자열 데이터를 숫자로 변환하여 할당
+        if (weaponData.UseItemParameterList != null && weaponData.UseItemParameterList.Length >= 5)
+        {
+            int.Parse(weaponData.UseItemParameterList[0]);
+            float.Parse(weaponData.UseItemParameterList[1]);
+            float.Parse(weaponData.UseItemParameterList[2]);
+            int.Parse(weaponData.UseItemParameterList[3]);
+            float.Parse(weaponData.UseItemParameterList[4]);
+        }
+
+        currentMag = stat.MagazineSize;
     }
 
-    private void OnDisable()
-    {
-        if (InputHandler != null)
-            InputHandler.FirePerformed -= Fire;
-
-        if (InventoryManager.Instance != null)
-        {
-            InventoryManager.Instance
-                .OnSelectedQuickSlotChanged -=
-                EquipSelectedQuickSlot;
-        }
-    }
-
-    private void EquipSelectedQuickSlot()
-    {
-        if (InventoryManager.Instance == null)
-            return;
-
-        ItemStack stack =
-            InventoryManager.Instance
-                .GetSelectedQuickSlotStack();
-
-        if (stack?.Item is not WeaponData weaponData)
-        {
-            UnequipWeapon();
-            return;
-        }
-
-        EquipWeapon(weaponData);
-    }
-
-    private void EquipWeapon(WeaponData weaponData)
-    {
-        if (weaponData == null)
-            return;
-
-        if (_equippedWeaponData == weaponData &&
-            _equippedWeapon != null)
-        {
-            return;
-        }
-
-        UnequipWeapon();
-
-        if (string.IsNullOrEmpty(weaponData.PrefabPath))
-        {
-            Debug.LogWarning(
-                $"무기 PrefabPath가 비어 있습니다. " +
-                $"Item: {weaponData.ItemName}"
-            );
-
-            return;
-        }
-
-        GameObject weaponPrefab =
-            Resources.Load<GameObject>(
-                weaponData.PrefabPath
-            );
-
-        if (weaponPrefab == null)
-        {
-            Debug.LogWarning(
-                $"무기 프리팹 로드 실패: " +
-                $"{weaponData.PrefabPath}"
-            );
-
-            return;
-        }
-
-        GameObject weaponObject =
-            Instantiate(
-                weaponPrefab,
-                WeaponSocket
-            );
-
-        weaponObject.transform
-            .SetLocalPositionAndRotation(
-                Vector3.zero,
-                Quaternion.identity
-            );
-
-        if (!weaponObject.TryGetComponent(
-            out WeaponBase weapon))
-        {
-            Debug.LogWarning(
-                $"무기 프리팹에 " +
-                $"{nameof(TestWeaponBase)}가 없습니다."
-            );
-
-            Destroy(weaponObject);
-            return;
-        }
-
-        weapon.Initialize(weaponData);
-
-        _equippedWeapon = weapon;
-        _equippedWeaponData = weaponData;
-
-        Debug.Log(
-            $"무기 장착: {weaponData.ItemName}"
-        );
-    }
-
-    private void UnequipWeapon()
-    {
-        if (_equippedWeapon != null)
-            Destroy(_equippedWeapon.gameObject);
-
-        _equippedWeapon = null;
-        _equippedWeaponData = null;
-    }
-
-    private void Fire()
-    {
-        if (_equippedWeapon == null)
-            return;
-
-        if (PlayerCamera == null)
-            return;
-
-        Transform firePoint = _equippedWeapon.FirePoint;
-
-        if (firePoint == null)
-        {
-            Debug.LogWarning(
-                "무기에 FirePoint가 할당되지 않았습니다."
-            );
-
-            return;
-        }
-
-        _equippedWeapon.Fire(
-            firePoint.position,
-            PlayerCamera.transform.forward
-        );
-    }
 }
