@@ -36,4 +36,9 @@ public class PlayerSight : MonoBehaviour
 
         CameraTarget.localRotation = Quaternion.Euler(_pitch, 0f, 0f);
     }
+
+    public Transform GetPlayerSightTransform()
+    {
+        return CameraTarget;
+    }
 }
