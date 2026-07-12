@@ -9,64 +9,76 @@ public class ShopItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler
     [SerializeField] private Image Image_ItemIcon;
     [SerializeField] private TMP_Text Text_ItemPrice;
 
-    public Action<ItemData> OnHoverEnter;
-    public Action OnHoverExit;
-
-    public ItemData ItemData { get; set; }
+    private ShopItemSlotViewModel _slotVm;
+    public Action<ItemData> _onHoverEnter;
+    public Action _onHoverExit;
 
     public ShopItemSlotType _curSlotType { get; set; }
     public int _slotIdx { get; set; }
     public int _itemDataId { get; set; }
 
-    public void Bind(ItemData itemData, Action<ItemData> onHoverEnter, Action onHoverExit)
+    public void Bind(ShopItemSlotViewModel slotVm, Action<ItemData> onHoverEnter, Action onHoverExit)
     {
-        ItemData = itemData;
-        OnHoverEnter = onHoverEnter;
-        OnHoverExit = onHoverExit;
-
-        if (ItemData != null)
+        if (_slotVm != null)
         {
-            Text_ItemPrice.text = $"{ItemData.SellingPrice} Gold";
-            // Image_ItemIcon.sprite = Resources.Load<Sprite>(ItemData.IconPath); 등 아이콘 로드
+            _slotVm.PropertyChanged -= OnSlotPropertyChanged;
         }
+
+        _slotVm = slotVm;
+
+        _onHoverEnter = onHoverEnter;
+        _onHoverExit = onHoverExit;
+
+        _slotVm.PropertyChanged += OnSlotPropertyChanged;
+        UpdateSlotUI();
     }
 
-    public void InitSlot(ShopItemSlotType slotType, int slotIdx, int itemDataId)
+    private void OnSlotPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        _curSlotType = slotType;
-        _slotIdx = slotIdx;
-        _itemDataId = itemDataId;
-        // 이미지와 가격 텍스트는 아이템 아이디로 가져온 정보로 초기화해준다.
+        // 슬롯 데이터가 바뀌면 UI 새로고침
+        UpdateSlotUI();
+    }
+
+    private void UpdateSlotUI()
+    {
+        if (Text_ItemPrice == null || Image_ItemIcon == null) return;
+
+        // 1. 빈 슬롯이거나 데이터가 없으면 투명하게 만들거나 숨기기
+        if (_slotVm == null || _slotVm.IsSlotEmpty || _slotVm.ItemData == null)
+        {
+            Image_ItemIcon.enabled = false;  // 아이콘 숨기기
+            Text_ItemPrice.text = string.Empty; // 가격 글자 지우기
+            return;
+        }
+
+        // 2. 아이템이 존재할 때 데이터 채우고 켜기
+        Image_ItemIcon.enabled = true;
+
+        if (_slotVm.SlotType == ShopItemSlotType.Shop)
+            Text_ItemPrice.text = $"{_slotVm.ItemData.SellingPrice} Credit";
+        else
+            Text_ItemPrice.text = $"{_slotVm.ItemData.SellingPrice} Credit";
+
+        // Image_ItemIcon.sprite = Resources.Load<Sprite>(_slotVm.ItemData.IconPath);
     }
 
 
-
-    // ======================== 슬롯 팝업 관련 메서드 ========================
-    //현재 테스트 코드 적용중. 추후 수정 필요.
     public void OnPointerEnter(PointerEventData eventData)
     {
-        ItemData testData;
-
-        if (ItemData != null)
+        if (_slotVm != null && !_slotVm.IsSlotEmpty)
         {
-            testData = ItemData;
+            _onHoverEnter?.Invoke(_slotVm.ItemData);
         }
-        else
-        {
-            testData = new ItemData
-            {
-                ItemName = "테스트 아이템",
-                ItemDescription = "아이템 데이터가 없을 때 표시되는 테스트 팝업입니다.",
-                SellingPrice = 100
-            };
-        }
-
-        OnHoverEnter?.Invoke(testData);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        OnHoverExit?.Invoke();
+        _onHoverExit?.Invoke();
+    }
+
+    private void OnDestroy()
+    {
+        if (_slotVm != null) _slotVm.PropertyChanged -= OnSlotPropertyChanged;
     }
 
 }
