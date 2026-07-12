@@ -168,6 +168,7 @@ GameObject:
   - component: {fileID: 2594667027422455901}
   - component: {fileID: 7304968640189071439}
   - component: {fileID: 4907903416859211107}
+  - component: {fileID: 7588999015336974005}
   - component: {fileID: 6622171463591126358}
   - component: {fileID: 4183498448615601335}
   m_Layer: 3
@@ -207,13 +208,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
   InputHandler: {fileID: 2594667027422455901}
+  WalkSpeed: 2
   MoveSpeed: 5
+  SprintSpeed: 8
   JumpPower: 5
   GroundCheck: {fileID: 3330816053871665217}
   GroundRadius: 0.2
   GroundMask:
     serializedVersion: 2
     m_Bits: 1
+  StandingCollider: {fileID: 4907903416859211107}
+  ProneCollider: {fileID: 7588999015336974005}
+  Head: {fileID: 6414859238678251675}
+  CrouchHeightRatio: 0.5
+  CrouchHeadHeightRatio: 0.6
+  ProneHeadHeightRatio: 0.25
+  PostureChangeSpeed: 8
+  CrouchSpeed: 3
+  ProneSpeed: 1.5
 --- !u!114 &5242166127282976409
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -279,6 +291,29 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0.5000626, z: 0}
+--- !u!136 &7588999015336974005
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7834500494340706646}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 0
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 2
+  m_Direction: 2
+  m_Center: {x: 0, y: 0, z: 0.5}
 --- !u!54 &6622171463591126358
 Rigidbody:
   m_ObjectHideFlags: 0
