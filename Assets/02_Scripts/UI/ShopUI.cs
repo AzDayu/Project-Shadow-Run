@@ -46,7 +46,6 @@ public class ShopUI : UIBase
         }
         else
         {
-            // [개선] 이미 UI가 있다면 데이터만 새로 매핑하여 UI를 갱신합니다.
             RebindSlotsZone(_vm.ShopItemSlotList, Transform_ShopContent);
             RebindSlotsZone(_vm.InventoryItemSlotList, Transform_InventoryContent);
             RebindSlotsZone(_vm.StashItemSlotList, Transform_StashContent);
@@ -67,7 +66,7 @@ public class ShopUI : UIBase
 
     private void RebindSlotsZone(List<ShopItemSlotViewModel> slotVms, Transform parentContent)
     {
-        // parentContent 자식으로 붙어있는 ShopItemSlotUI들을 순색하며 새로 바인딩
+        // parentContent 자식으로 붙어있는 ShopItemSlotUI들을 탐색하며 새로 바인딩
         int index = 0;
         foreach (Transform child in parentContent)
         {
@@ -120,7 +119,6 @@ public class ShopUI : UIBase
                 }
                 break;
             case nameof(ShopViewModel.HoveredItem):
-                //테스트용으로 임시 작성한 코드. 아이템 데이터 만들어지면 즉시 수정 필요.
                 if (_vm.HoveredItem != null)
                 {
                     ShopItemPopup.SetItemData(_vm.HoveredItem);

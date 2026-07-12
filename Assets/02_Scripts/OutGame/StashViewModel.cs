@@ -6,38 +6,80 @@ public class StashViewModel : ViewModelBase, IContainerPropertyChanged<long>
 {
     public event Action<string, ContainerEventType, long> ContainerPropertyChanged;
 
-    private Dictionary<long, StashItemSlotViewModel> _itemList = new Dictionary<long, StashItemSlotViewModel>();
-    public Dictionary<long, StashItemSlotViewModel> ItemList
+    public List<ShopItemSlotViewModel> InventoryItemSlotList { get; } = new List<ShopItemSlotViewModel>();
+    public List<ShopItemSlotViewModel> StashItemSlotList { get; } = new List<ShopItemSlotViewModel>();
+
+    public void InvokeOnceOnInit()
     {
-        get => _itemList;
+        OnPropertyChanged(nameof(StashItemList));
+        OnPropertyChanged(nameof(HoveredItem));
+    }
+
+    private Dictionary<long, StashItemSlotViewModel> _stashItemList = new Dictionary<long, StashItemSlotViewModel>();
+    public Dictionary<long, StashItemSlotViewModel> StashItemList
+    {
+        get => _stashItemList;
         set
         {
-            if (_itemList != value)
+            if (_stashItemList != value)
             {
-                _itemList = value;
-                OnPropertyChanged(nameof(ItemList));
+                _stashItemList = value;
+                OnPropertyChanged(nameof(StashItemList));
             }
         }
     }
 
-    public void InvokeOnceOnInit()
+    private int _curPlayerCredit;
+    public int CurPlayerCredit
     {
-        OnPropertyChanged(nameof(ItemList));
+        get => _curPlayerCredit;
+        set
+        {
+            if (_curPlayerCredit != value)
+            {
+                _curPlayerCredit = value;
+                OnPropertyChanged(nameof(CurPlayerCredit));
+            }
+        }
+    }
+
+    private ItemData _hoveredItem;
+    public ItemData HoveredItem
+    {
+        get => _hoveredItem;
+        set
+        {
+            if (_hoveredItem != value)
+            {
+                _hoveredItem = value;
+                OnPropertyChanged(nameof(HoveredItem));
+            }
+        }
     }
 
     public void AddItemSlotViewModel(StashItemSlotViewModel slotVm)
     {
-        _itemList.Add(slotVm.ItemUniqueId, slotVm);
-        ContainerPropertyChanged?.Invoke(nameof(ItemList), ContainerEventType.Add, slotVm.ItemUniqueId);
+        _stashItemList.Add(slotVm.ItemUniqueId, slotVm);
+        ContainerPropertyChanged?.Invoke(nameof(StashItemList), ContainerEventType.Add, slotVm.ItemUniqueId);
     }
 
     public void RemoveItemSlotViewModel(long uniqueId)
     {
-        if (_itemList.ContainsKey(uniqueId) == true)
+        if (_stashItemList.ContainsKey(uniqueId) == true)
         {
-            _itemList.Remove(uniqueId);
+            _stashItemList.Remove(uniqueId);
         }
 
-        ContainerPropertyChanged?.Invoke(nameof(ItemList), ContainerEventType.Remove, uniqueId);
+        ContainerPropertyChanged?.Invoke(nameof(StashItemList), ContainerEventType.Remove, uniqueId);
+    }
+
+    public void OnSlotPointerEnter(ItemData itemData)
+    {
+        HoveredItem = itemData;
+    }
+
+    public void OnSlotPointerExit()
+    {
+        HoveredItem = null;
     }
 }

@@ -5,7 +5,7 @@ public class NetworkManager : MonoBehaviour
     public static NetworkManager Inst { get; set; }
 
     public NetworkShopService ShopService { get; private set; }
-    //public NetworkStashService StashService { get; private set; }
+    public NetworkStashService StashService { get; private set; }
 
 
     private void Awake()
@@ -17,6 +17,6 @@ public class NetworkManager : MonoBehaviour
     private void InitNetworkService()
     {
         ShopService = new NetworkShopService();
-        //StashService = new NetworkStashService();
+        StashService = new NetworkStashService();
     }
 }

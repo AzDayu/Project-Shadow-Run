@@ -335,7 +335,7 @@ MonoBehaviour:
   m_ChildAlignment: 0
   m_StartCorner: 0
   m_StartAxis: 0
-  m_CellSize: {x: 150, y: 200}
+  m_CellSize: {x: 150, y: 150}
   m_Spacing: {x: 10, y: 10}
   m_Constraint: 0
   m_ConstraintCount: 2
@@ -466,6 +466,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6bd5ac83c1147db4a9a6d2d2b43c7da3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StashUI
+  Text_CurPlayerCredit: {fileID: 0}
+  Image_DragIcon: {fileID: 0}
+  Button_CloseSelf: {fileID: 0}
+  ShopItemPopup: {fileID: 0}
+  Prefab_ShopItemSlotUI: {fileID: 0}
+  Transform_InventoryContent: {fileID: 0}
+  Transform_StashContent: {fileID: 0}
 --- !u!1 &2707883869400216498
 GameObject:
   m_ObjectHideFlags: 0
@@ -968,7 +975,7 @@ MonoBehaviour:
   m_ChildAlignment: 0
   m_StartCorner: 0
   m_StartAxis: 0
-  m_CellSize: {x: 150, y: 200}
+  m_CellSize: {x: 150, y: 150}
   m_Spacing: {x: 10, y: 10}
   m_Constraint: 0
   m_ConstraintCount: 2

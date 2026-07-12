@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
 
-public class ShopItemPopupUI : UIBase
+public class ShopItemPopupUI : UIBase //생각해보니까 이거 그냥 인벤토리나 창고에서 돌려써도 괜찮을것 같음.
 {
     [SerializeField] private GameObject Gobj_ShopItemPopupUI;
     [SerializeField] private Image Image_ItemIcon;
