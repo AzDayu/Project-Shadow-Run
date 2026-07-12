@@ -931,7 +931,7 @@ MonoBehaviour:
   m_OverrideVoxelSize: 0
   m_VoxelSize: 0.06666667
   m_MinRegionArea: 2
-  m_NavMeshData: {fileID: 23800000, guid: 2c91a9cff31c18b45b5f6235ffb16849, type: 2}
+  m_NavMeshData: {fileID: 23800000, guid: 8ed396810dd98134cabda8bbe1cb1aac, type: 2}
   m_BuildHeightMesh: 0
 --- !u!1 &9108399466996107509
 GameObject:
@@ -2777,6 +2777,22 @@ PrefabInstance:
       propertyPath: m_Name
       value: (0, 0, 18)
       objectReference: {fileID: 0}
+    - target: {fileID: 2553481404179836808, guid: eb2cfde91ad31bf4bad84b2c70e9816e, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2553481404179836812, guid: eb2cfde91ad31bf4bad84b2c70e9816e, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3430650765161827291, guid: eb2cfde91ad31bf4bad84b2c70e9816e, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8304824688809799349, guid: eb2cfde91ad31bf4bad84b2c70e9816e, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -3043,6 +3059,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 536311822145014665}
     m_Modifications:
+    - target: {fileID: 100000, guid: 498a831095708df4bbdb548211124aef, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 100004, guid: 498a831095708df4bbdb548211124aef, type: 3}
       propertyPath: m_Name
       value: (0, 0, 18)
