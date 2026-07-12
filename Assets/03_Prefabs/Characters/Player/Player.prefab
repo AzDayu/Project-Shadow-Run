@@ -165,7 +165,6 @@ GameObject:
   - component: {fileID: 4945378990719200201}
   - component: {fileID: 5159432160104867375}
   - component: {fileID: 5242166127282976409}
-  - component: {fileID: 1191557259494469862}
   - component: {fileID: 2594667027422455901}
   - component: {fileID: 7304968640189071439}
   - component: {fileID: 4907903416859211107}
@@ -232,21 +231,6 @@ MonoBehaviour:
   MouseSensitivity: 0.1
   MinPitch: -80
   MaxPitch: 80
---- !u!114 &1191557259494469862
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7834500494340706646}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8ff66c50d78dc3d48b183d76e4df6ab2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerWeapon
-  InputHandler: {fileID: 0}
-  WeaponSocket: {fileID: 0}
-  PlayerCamera: {fileID: 0}
 --- !u!114 &2594667027422455901
 MonoBehaviour:
   m_ObjectHideFlags: 0

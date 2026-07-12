@@ -163,6 +163,51 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Sprint"",
+                    ""type"": ""Button"",
+                    ""id"": ""ceb1c696-906d-4004-b487-91bfad7811d2"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Walk"",
+                    ""type"": ""Button"",
+                    ""id"": ""7a663562-2589-4c8c-b8ce-f5fd0f8aaa37"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Crouch"",
+                    ""type"": ""Button"",
+                    ""id"": ""6e72a6eb-db73-442f-9547-6ef10ffbb7a2"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Prone"",
+                    ""type"": ""Button"",
+                    ""id"": ""73083998-5725-416f-90ef-183bd16db4eb"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Lean"",
+                    ""type"": ""Value"",
+                    ""id"": ""36b021d1-2f71-4392-b7f6-e3a11b7c898d"",
+                    ""expectedControlType"": ""Axis"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -297,6 +342,83 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""action"": ""QuickSlot3"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""341179db-9e7f-4989-9386-8be593608384"",
+                    ""path"": ""<Keyboard>/leftShift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Sprint"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""204f7e6e-3d79-4496-9944-a2483db36456"",
+                    ""path"": ""<Keyboard>/leftCtrl"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Walk"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""051fbc01-28fd-4d83-b7ba-dcf68f9937bb"",
+                    ""path"": ""<Keyboard>/c"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Crouch"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""9fde8fc7-b6b4-455f-9724-e55e19792fd7"",
+                    ""path"": ""<Keyboard>/z"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Prone"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""1D Axis"",
+                    ""id"": ""5f26dfbd-0ae0-4081-9380-f813cce78d25"",
+                    ""path"": ""1DAxis"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Lean"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""negative"",
+                    ""id"": ""9cf6365f-afb0-44f5-bdbe-99ed41826e36"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Lean"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""positive"",
+                    ""id"": ""5c5859e2-51c3-4123-baeb-266573e3f4e9"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Lean"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
                 }
             ]
         }
@@ -313,6 +435,11 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         m_InGame_QuickSlot1 = m_InGame.FindAction("QuickSlot1", throwIfNotFound: true);
         m_InGame_QuickSlot2 = m_InGame.FindAction("QuickSlot2", throwIfNotFound: true);
         m_InGame_QuickSlot3 = m_InGame.FindAction("QuickSlot3", throwIfNotFound: true);
+        m_InGame_Sprint = m_InGame.FindAction("Sprint", throwIfNotFound: true);
+        m_InGame_Walk = m_InGame.FindAction("Walk", throwIfNotFound: true);
+        m_InGame_Crouch = m_InGame.FindAction("Crouch", throwIfNotFound: true);
+        m_InGame_Prone = m_InGame.FindAction("Prone", throwIfNotFound: true);
+        m_InGame_Lean = m_InGame.FindAction("Lean", throwIfNotFound: true);
     }
 
     ~@PlayerInput()
@@ -401,6 +528,11 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
     private readonly InputAction m_InGame_QuickSlot1;
     private readonly InputAction m_InGame_QuickSlot2;
     private readonly InputAction m_InGame_QuickSlot3;
+    private readonly InputAction m_InGame_Sprint;
+    private readonly InputAction m_InGame_Walk;
+    private readonly InputAction m_InGame_Crouch;
+    private readonly InputAction m_InGame_Prone;
+    private readonly InputAction m_InGame_Lean;
     /// <summary>
     /// Provides access to input actions defined in input action map "InGame".
     /// </summary>
@@ -444,6 +576,26 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "InGame/QuickSlot3".
         /// </summary>
         public InputAction @QuickSlot3 => m_Wrapper.m_InGame_QuickSlot3;
+        /// <summary>
+        /// Provides access to the underlying input action "InGame/Sprint".
+        /// </summary>
+        public InputAction @Sprint => m_Wrapper.m_InGame_Sprint;
+        /// <summary>
+        /// Provides access to the underlying input action "InGame/Walk".
+        /// </summary>
+        public InputAction @Walk => m_Wrapper.m_InGame_Walk;
+        /// <summary>
+        /// Provides access to the underlying input action "InGame/Crouch".
+        /// </summary>
+        public InputAction @Crouch => m_Wrapper.m_InGame_Crouch;
+        /// <summary>
+        /// Provides access to the underlying input action "InGame/Prone".
+        /// </summary>
+        public InputAction @Prone => m_Wrapper.m_InGame_Prone;
+        /// <summary>
+        /// Provides access to the underlying input action "InGame/Lean".
+        /// </summary>
+        public InputAction @Lean => m_Wrapper.m_InGame_Lean;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -494,6 +646,21 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
             @QuickSlot3.started += instance.OnQuickSlot3;
             @QuickSlot3.performed += instance.OnQuickSlot3;
             @QuickSlot3.canceled += instance.OnQuickSlot3;
+            @Sprint.started += instance.OnSprint;
+            @Sprint.performed += instance.OnSprint;
+            @Sprint.canceled += instance.OnSprint;
+            @Walk.started += instance.OnWalk;
+            @Walk.performed += instance.OnWalk;
+            @Walk.canceled += instance.OnWalk;
+            @Crouch.started += instance.OnCrouch;
+            @Crouch.performed += instance.OnCrouch;
+            @Crouch.canceled += instance.OnCrouch;
+            @Prone.started += instance.OnProne;
+            @Prone.performed += instance.OnProne;
+            @Prone.canceled += instance.OnProne;
+            @Lean.started += instance.OnLean;
+            @Lean.performed += instance.OnLean;
+            @Lean.canceled += instance.OnLean;
         }
 
         /// <summary>
@@ -529,6 +696,21 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
             @QuickSlot3.started -= instance.OnQuickSlot3;
             @QuickSlot3.performed -= instance.OnQuickSlot3;
             @QuickSlot3.canceled -= instance.OnQuickSlot3;
+            @Sprint.started -= instance.OnSprint;
+            @Sprint.performed -= instance.OnSprint;
+            @Sprint.canceled -= instance.OnSprint;
+            @Walk.started -= instance.OnWalk;
+            @Walk.performed -= instance.OnWalk;
+            @Walk.canceled -= instance.OnWalk;
+            @Crouch.started -= instance.OnCrouch;
+            @Crouch.performed -= instance.OnCrouch;
+            @Crouch.canceled -= instance.OnCrouch;
+            @Prone.started -= instance.OnProne;
+            @Prone.performed -= instance.OnProne;
+            @Prone.canceled -= instance.OnProne;
+            @Lean.started -= instance.OnLean;
+            @Lean.performed -= instance.OnLean;
+            @Lean.canceled -= instance.OnLean;
         }
 
         /// <summary>
@@ -625,5 +807,40 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnQuickSlot3(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Sprint" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSprint(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Walk" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnWalk(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Crouch" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnCrouch(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Prone" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnProne(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Lean" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnLean(InputAction.CallbackContext context);
     }
 }
