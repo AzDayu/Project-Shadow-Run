@@ -54,16 +54,16 @@ public abstract class WeaponBase : MonoBehaviour
 
         _weaponData.RemainBullets--;
 
-        if (Physics.Raycast(firePosition, direction.normalized, out RaycastHit hit, _weaponData.Range))
+        if (Physics.Raycast(firePosition, direction.normalized, out RaycastHit hit, _weaponData.FinalStats.Range))
         {
             if (hit.transform.TryGetComponent(
                 out IDamageable damageable))
             {
-                damageable.TakeDamage(_weaponData.Damage);
+                damageable.TakeDamage(_weaponData.FinalStats.Damage);
 
                 Debug.Log(
                     $"{hit.transform.name}이 " +
-                    $"{_weaponData.Damage}만큼 피해를 입음"
+                    $"{_weaponData.FinalStats.Damage}만큼 피해를 입음"
                 );
             }
         }
@@ -99,7 +99,7 @@ public abstract class WeaponBase : MonoBehaviour
             return bulletAmount;
         }
 
-        int loadableCount = _weaponData.MagazineSize - _weaponData.RemainBullets;
+        int loadableCount = _weaponData.FinalStats.MagazineSize - _weaponData.RemainBullets;
 
         if (loadableCount <= 0)
             return bulletAmount;
