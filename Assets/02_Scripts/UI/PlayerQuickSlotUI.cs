@@ -70,7 +70,7 @@ public class PlayerQuickSlotUI : MonoBehaviour
             return;
         }
 
-        IReadOnlyList<ItemStack> quickSlots = InventoryManager.Instance.QuickSlotList;
+        IReadOnlyList<ItemModel> quickSlots = InventoryManager.Instance.QuickSlotList;
 
         if (QuickSlotIndex < 0 || QuickSlotIndex >= quickSlots.Count)
         {
@@ -78,9 +78,9 @@ public class PlayerQuickSlotUI : MonoBehaviour
             return;
         }
 
-        ItemStack stack = quickSlots[QuickSlotIndex];
+        ItemModel stack = quickSlots[QuickSlotIndex];
 
-        if (stack == null || stack.Item == null || stack.StackCount <= 0)
+        if (stack == null ||  stack.CurrentStackCount <= 0)
         {
             Clear();
             return;
@@ -90,7 +90,7 @@ public class PlayerQuickSlotUI : MonoBehaviour
         RefreshSelected();
     }
 
-    private void SetItem(ItemStack stack)
+    private void SetItem(ItemModel stack)
     {
         if (IconImage != null)
         {
@@ -102,9 +102,9 @@ public class PlayerQuickSlotUI : MonoBehaviour
 
         if (TextCount != null)
         {
-            bool showCount = stack.StackCount > 1;
+            bool showCount = stack.CurrentStackCount > 1;
 
-            TextCount.text = showCount ? stack.StackCount.ToString() : string.Empty;
+            TextCount.text = showCount ? stack.CurrentStackCount.ToString() : string.Empty;
 
             TextCount.enabled = showCount;
         }
