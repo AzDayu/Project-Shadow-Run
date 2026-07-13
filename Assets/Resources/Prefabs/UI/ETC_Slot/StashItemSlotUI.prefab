@@ -46,7 +46,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2769521300288873528}
-  - component: {fileID: 6478109290326230929}
+  - component: {fileID: -1966634775213575629}
   m_Layer: 5
   m_Name: StashItemSlotUI
   m_TagString: Untagged
@@ -74,7 +74,7 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
---- !u!114 &6478109290326230929
+--- !u!114 &-1966634775213575629
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -83,11 +83,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 3782939664262273885}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 488e39faf352e2142b4eefa733b413d6, type: 3}
+  m_Script: {fileID: 11500000, guid: 8119595f7fe6899409981d54bd473652, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ItemSlotUI
+  m_EditorClassIdentifier: Assembly-CSharp::StashItemSlotUI
   Image_ItemIcon: {fileID: 7950669226891445778}
-  Text_ItemPrice: {fileID: 0}
 --- !u!1 &4202936657251165039
 GameObject:
   m_ObjectHideFlags: 0

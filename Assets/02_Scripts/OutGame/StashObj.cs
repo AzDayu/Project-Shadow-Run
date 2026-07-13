@@ -9,7 +9,7 @@ public class StashObj : MonoBehaviour
 
     private void Update()
     {
-        if (/*_isPlayerInside &&*/ Input.GetKeyDown(_interactKey))
+        if (_isPlayerInside && Input.GetKeyDown(_interactKey))
         {
             if (UIManager.Instance.IsUIOpened(UIType.StashUI))
             {

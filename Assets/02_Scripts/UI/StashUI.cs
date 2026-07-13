@@ -9,9 +9,9 @@ public class StashUI : UIBase
     [SerializeField] private TMP_Text Text_CurPlayerCredit;
     [SerializeField] private Image Image_DragIcon;
     [SerializeField] private Button Button_CloseSelf;
-    [SerializeField] private ShopItemPopupUI ShopItemPopup; //창고 전용 팝업을 따로 만들지 생각중
+    [SerializeField] private ShopItemPopupUI ShopItemPopup; 
 
-    [SerializeField] private ShopItemSlotUI Prefab_ShopItemSlotUI; //이건 확실하게 상정 슬롯과 분리해야할 듯(가격이 없는 버전으로)
+    [SerializeField] private ShopItemSlotUI Prefab_ShopItemSlotUI; //이건 확실하게 상점 슬롯과 분리해야할 듯(가격이 없는 버전으로) -> 상점뷰모델 같이 쓰고 UI만 분리할까 고민중.
     [SerializeField] private Transform Transform_InventoryContent;
     [SerializeField] private Transform Transform_StashContent;
 

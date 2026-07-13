@@ -44,7 +44,7 @@ public class ShopItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler
         if (Text_ItemPrice == null || Image_ItemIcon == null) return;
 
         // 1. 빈 슬롯이거나 데이터가 없으면 투명하게 만들거나 숨기기
-        if (_slotVm == null || _slotVm.IsSlotEmpty || _slotVm.ItemData == null)
+        if (_slotVm == null || _slotVm.IsSlotEmpty || _slotVm.ItemDataWithStack.Item == null)
         {
             Image_ItemIcon.enabled = false;  // 아이콘 숨기기
             Text_ItemPrice.text = string.Empty; // 가격 글자 지우기
@@ -55,19 +55,18 @@ public class ShopItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler
         Image_ItemIcon.enabled = true;
 
         if (_slotVm.SlotType == ShopItemSlotType.Shop)
-            Text_ItemPrice.text = $"{_slotVm.ItemData.SellingPrice} Credit";
+            Text_ItemPrice.text = $"{_slotVm.ItemDataWithStack.Item.SellingPrice} Credit";
         else
-            Text_ItemPrice.text = $"{_slotVm.ItemData.SellingPrice} Credit";
+            Text_ItemPrice.text = $"{_slotVm.ItemDataWithStack.Item.SellingPrice} Credit";
 
         // Image_ItemIcon.sprite = Resources.Load<Sprite>(_slotVm.ItemData.IconPath);
     }
-
 
     public void OnPointerEnter(PointerEventData eventData)
     {
         if (_slotVm != null && !_slotVm.IsSlotEmpty)
         {
-            _onHoverEnter?.Invoke(_slotVm.ItemData);
+            _onHoverEnter?.Invoke(_slotVm.ItemDataWithStack.Item);
         }
     }
 

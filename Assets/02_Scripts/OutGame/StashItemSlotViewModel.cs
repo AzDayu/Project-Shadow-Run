@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class StashItemSlotViewModel : ViewModelBase //상점 아이템 슬롯에서 가격 없는 버전.
+public class StashItemSlotViewModel : ViewModelBase 
 {
     public int SlotIndex { get; set; }
     public ShopItemSlotType SlotType { get; set; }
@@ -9,9 +9,7 @@ public class StashItemSlotViewModel : ViewModelBase //상점 아이템 슬롯에
     {
         OnPropertyChanged(nameof(ItemUniqueId));
         OnPropertyChanged(nameof(ItemDataId));
-        OnPropertyChanged(nameof(ItemStackCount));
         OnPropertyChanged(nameof(ItemDataWithStack));
-        OnPropertyChanged(nameof(ItemData));
         OnPropertyChanged(nameof(IsSlotEmpty));
     }
 
@@ -43,20 +41,6 @@ public class StashItemSlotViewModel : ViewModelBase //상점 아이템 슬롯에
         }
     }
 
-    private int _itemStackCount;
-    public int ItemStackCount
-    {
-        get => _itemStackCount;
-        set
-        {
-            if (_itemStackCount != value)
-            {
-                _itemStackCount = value;
-                OnPropertyChanged(nameof(ItemStackCount));
-            }
-        }
-    }
-
     private ItemStack _itemDataWithStack;
     public ItemStack ItemDataWithStack
     {
@@ -67,20 +51,6 @@ public class StashItemSlotViewModel : ViewModelBase //상점 아이템 슬롯에
             {
                 _itemDataWithStack = value;
                 OnPropertyChanged(nameof(ItemDataWithStack));
-            }
-        }
-    }
-
-    private ItemData _itemData;
-    public ItemData ItemData
-    {
-        get => _itemData;
-        set
-        {
-            if (_itemData != value)
-            {
-                _itemData = value;
-                OnPropertyChanged(nameof(ItemData));
             }
         }
     }
@@ -103,26 +73,16 @@ public class StashItemSlotViewModel : ViewModelBase //상점 아이템 슬롯에
     {
         ItemUniqueId = 0;
         ItemDataId = string.Empty;
-        ItemStackCount = 0;
-        ItemData = null;
+        ItemDataWithStack = null;
         IsSlotEmpty = true;
     }
 
-    //개수 제한 있을 때
-    public void SetItem(ItemData data, int count)
+    public void SetItem(long uniqueId, ItemStack itemData) //일단은 유니크 아이디를 사용해서 개별적인 아이템의 구분을 하도록 로직을 작성했으나 이게 어떻게 될런지.
     {
-        ItemDataId = data.ItemId;
-        ItemData = data;
-        ItemStackCount = count;
-        IsSlotEmpty = false;
-    }
-
-    //판매 아이템 개수 제한 없을 때. 유니크 아이디는 인벤토리에 들어갈 때 추가하거나 할 것.
-    public void SetItem(ItemData data)
-    {
-        ItemDataId = data.ItemId;
-        ItemData = data;
-        ItemStackCount = 9999; //UI에서는 ItemStackCount가 9999면 숫자가 안보이게, 서비스에서는 줄어들지 않게 변경하면 될듯. 더 좋은 방법 연구중.
+        ItemUniqueId = uniqueId;
+        ItemDataId = itemData.Item.ItemId;
+        ItemDataWithStack.Item = itemData.Item;
+        ItemDataWithStack.StackCount = itemData.StackCount;
         IsSlotEmpty = false;
     }
 }
