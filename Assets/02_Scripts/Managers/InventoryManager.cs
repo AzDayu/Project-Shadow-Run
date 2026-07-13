@@ -274,9 +274,7 @@ public class InventoryManager : MonoBehaviour
 
     private bool IsValidStack(ItemStack stack)
     {
-        return stack != null &&
-               stack.Item != null &&
-               stack.StackCount > 0;
+        return stack != null && stack.Item != null && stack.StackCount > 0;
     }
 
     public bool TrySelectQuickSlot(int quickSlotIndex)
@@ -329,5 +327,77 @@ public class InventoryManager : MonoBehaviour
                 Debug.LogWarning($"퀵슬롯에서 사용할 수 없는 아이템 타입입니다. Type: {stack.Item.ItemType}");
                 return false;
         }
+    }
+
+    public bool TryAddWeapon(WeaponData weaponData)
+    {
+        if (weaponData == null)
+            return false;
+
+        if (weaponData.ItemType != "Weapon")
+            return false;
+
+        if (_itemList.Count >= MaxSlotCount)
+            return false;
+
+        ItemStack weaponStack = new ItemStack
+        {
+            Item = weaponData,
+            StackCount = 1
+        };
+
+        _itemList.Add(weaponStack);
+
+        TryRegisterWeaponToEmptyQuickSlot(weaponStack);
+
+        OnInventoryChanged?.Invoke();
+
+        return true;
+    }
+
+    private bool TryRegisterWeaponToEmptyQuickSlot(ItemStack weaponStack)
+    {
+        if (!IsValidStack(weaponStack))
+            return false;
+
+        if (weaponStack.Item.ItemType != "Weapon")
+            return false;
+
+        for (int i = 0; i < _quickSlotList.Length; i++)
+        {
+            if (IsValidStack(_quickSlotList[i]))
+                continue;
+
+            _quickSlotList[i] = weaponStack;
+
+            OnQuickSlotChanged?.Invoke();
+
+            if (_selectedQuickSlotIndex < 0)
+            {
+                _selectedQuickSlotIndex = i;
+                OnSelectedQuickSlotChanged?.Invoke();
+            }
+
+            Debug.Log($"무기 자동 퀵슬롯 등록: QuickSlot {i}, Item: {weaponStack.Item.ItemName}");
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public ItemStack GetSelectedQuickSlotStack()
+    {
+        if (_selectedQuickSlotIndex < 0 || _selectedQuickSlotIndex >= _quickSlotList.Length)
+        {
+            return null;
+        }
+
+        ItemStack stack = _quickSlotList[_selectedQuickSlotIndex];
+
+        if (!IsValidStack(stack))
+            return null;
+
+        return stack;
     }
 }
