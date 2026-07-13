@@ -36,12 +36,7 @@ public class ItemStack
 [System.Serializable]
 public class WeaponData : ItemData
 {
-    public float Damage;
-    public float AttackInterval;
-    public int MagazineSize;
-    public float Accuracy;
-    public float Range;
-    public float ReloadTime;
+    public WeaponStat FinalStats;
 
     public int RemainBullets;
 
