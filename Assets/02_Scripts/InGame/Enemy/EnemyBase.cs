@@ -24,5 +24,5 @@ public class EnemyBase : MonoBehaviour,IDamageable,IWeaponOwner
 
     public void TakeDamage(float damage) { }
     public void UseWeapon() { }
-    
+    public void Initialize(EnemyData enemyData) { }
 }
