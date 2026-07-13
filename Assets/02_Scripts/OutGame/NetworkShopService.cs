@@ -23,7 +23,7 @@ public class NetworkShopService
     }
 
     // 상점의 판매 상품 리스트를 불러오고 해당 아이템들을 슬롯에 넣어주는 함수. 개수 무한버전.
-    public void SetShopItem(int slotIndex, ItemData itemData)
+    public void SetShopItem(int slotIndex, ItemStack itemData)
     {
         var shopVm = GetShopViewModel();
         if ((slotIndex >= 0) && slotIndex < shopVm.ShopItemSlotList.Count)
@@ -40,7 +40,7 @@ public class NetworkShopService
 
         if (targetSlot.IsSlotEmpty) return;
 
-        int price = targetSlot.ItemData.SellingPrice;
+        int price = targetSlot.ItemDataWithStack.Item.SellingPrice;
 
         if (vm.CurPlayerCredit < price)
         {
@@ -67,7 +67,7 @@ public class NetworkShopService
 
         //emptySlot.SetItem(generatedUniqueId, targetSlot.ItemData, 1);
 
-        Debug.Log($"{targetSlot.ItemData.ItemName} 구매 성공!");
+        Debug.Log($"{targetSlot.ItemDataWithStack.Item.ItemName} 구매 성공!");
 
     }
 
