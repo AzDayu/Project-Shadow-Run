@@ -5,10 +5,13 @@ public class PlayerModel
 {
     public string PlayerName { get; set; }
     public int CurrentCredit { get; set; }
-    public List<int> InventoryItemIds { get; set; }
+
+    public List<ItemModel> InventoryItems { get; set; }
+    public List<ItemModel> StashItems { get; set; }
 
     public PlayerModel()
     {
-        InventoryItemIds = new List<int>();
+        InventoryItems = new List<ItemModel>();
+        StashItems = new List<ItemModel>();
     }
 }

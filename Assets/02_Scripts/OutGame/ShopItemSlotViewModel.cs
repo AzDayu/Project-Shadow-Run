@@ -3,11 +3,16 @@ using UnityEngine;
 
 public class ShopItemSlotViewModel : ViewModelBase
 {
+    public int SlotIndex { get; set; }
+    public ShopItemSlotType SlotType { get; set; }
+
     public void InvokeOnceOnInit()
     {
         OnPropertyChanged(nameof(ItemUniqueId));
         OnPropertyChanged(nameof(ItemDataId));
-        OnPropertyChanged(nameof(ItemStackCount));
+        OnPropertyChanged(nameof(ItemDataWithStack));
+        OnPropertyChanged(nameof(ItemData));
+        OnPropertyChanged(nameof(IsSlotEmpty));
     }
 
     private long _itemUniqueId;
@@ -38,17 +43,47 @@ public class ShopItemSlotViewModel : ViewModelBase
         }
     }
 
-    private int _itemStackCount;
-    public int ItemStackCount
+    private ItemStack _itemDataWithStack;
+    public ItemStack ItemDataWithStack
     {
-        get => _itemStackCount;
+        get => _itemDataWithStack;
         set
         {
-            if (_itemStackCount != value)
+            if (_itemDataWithStack != value)
             {
-                _itemStackCount = value;
-                OnPropertyChanged(nameof(ItemStackCount));
+                _itemDataWithStack = value;
+                OnPropertyChanged(nameof(ItemDataWithStack));
             }
         }
+    }
+
+    private bool _isSlotEmpty = true;
+    public bool IsSlotEmpty
+    {
+        get => _isSlotEmpty;
+        set
+        {
+            if(_isSlotEmpty != value)
+            {
+                _isSlotEmpty = value;
+                OnPropertyChanged(nameof(IsSlotEmpty));
+            }
+        }
+    }
+
+    public void Clear()
+    {
+        ItemUniqueId = 0;
+        ItemDataId = string.Empty;
+        ItemDataWithStack = null;
+        IsSlotEmpty = true;
+    }
+
+    public void SetItem(ItemStack itemData)
+    {
+        ItemDataId = itemData.Item.ItemId;
+        ItemDataWithStack.Item = itemData.Item;
+        ItemDataWithStack.StackCount = itemData.StackCount;
+        IsSlotEmpty = false;
     }
 }

@@ -18,9 +18,11 @@ public class EnemyBase : MonoBehaviour,IDamageable,IWeaponOwner
         CurrentWeapon = weapon;
 
         weapon.transform.SetParent(_weaponSpawnPo, false);
+        weapon.transform.localPosition = Vector3.zero;
+        weapon.transform.localRotation = Quaternion.identity;
     }
 
     public void TakeDamage(float damage) { }
     public void UseWeapon() { }
-    
+    public void Initialize(EnemyData enemyData) { }
 }

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class WeaponRifle : WeaponBase
+public class WeaponRifle : TestWeaponBase
 {
     //public override void Initialize() { }
 

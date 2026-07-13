@@ -1,6 +1,20 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+public enum WeaponPartsType
+{
+
+}
+public struct WeaponStat
+{
+    public float Damage;
+    public float AttackInterval;
+    public int MagazineSize;
+    public float Accuracy;
+    public float Range;
+    public float ReloadTime;
+}
+
 [System.Serializable]
 public class ItemData
 {
@@ -17,8 +31,6 @@ public class ItemData
 
     public string UseItemType;
     public string[] UseItemParameterList;
-    // damage, fireRate, range, maxAmmo, currentAmmo, reloadTime
-
 }
 
 [System.Serializable]
@@ -36,17 +48,13 @@ public class ItemStack
 [System.Serializable]
 public class WeaponData : ItemData
 {
-    public WeaponStat FinalStats;
-
-    public int RemainBullets;
-
-    public string CompatibleCaliber;
-
-    public string LoadedAmmoItemId;
-
-    public List<WeaponPartsData> EquippedParts = new();
+    public float Damage;
+    public int MagazineSize;
+    public float AttackInterval;
+    public float Accuracy;
+    public float Range;
+    public float ReloadTime;
 }
-
 [System.Serializable]
 public class WeaponPartsData : ItemData
 {
@@ -57,8 +65,17 @@ public class WeaponPartsData : ItemData
 }
 
 [System.Serializable]
-public class AmmoData : ItemData
+public class ItemModel
 {
-    public string Caliber;
-    public float Damage;
+    public string InstanceId;      // 생성될 때마다 발급받는 고유 ID (예: Guid)
+    public string ItemId;          // DataManager에서 원본 ItemData를 찾기 위한 Key
+    public int CurrentStackCount;  // 현재 겹쳐진 개수 (ItemStack 대체)
+}
+
+[System.Serializable]
+public class WeaponModel : ItemModel
+{
+    public int CurrentAmmo;        // 현재 장전된 총알 수
+    public float CurrentDurability;// 현재 내구도
+    public List<ItemModel> AttachedParts; // 장착된 파츠들
 }
