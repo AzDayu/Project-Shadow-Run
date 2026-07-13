@@ -94,7 +94,7 @@ public class PlayerQuickSlotUI : MonoBehaviour
     {
         if (IconImage != null)
         {
-            Sprite icon = ItemIconLoader.LoadIcon(stack.Item);
+            Sprite icon = ItemIconLoader.LoadIcon(GameDataManager.Instance.GetItemDataById(stack.ItemId));
 
             IconImage.sprite = icon;
             IconImage.enabled = icon != null;
