@@ -9,14 +9,14 @@ public class InventoryManager : MonoBehaviour
     [SerializeField] private int MaxSlotCount = 30;
     [SerializeField] private int QuickSlotCount = 3;
 
-    private readonly ItemStack[] _quickSlotList = new ItemStack[4];
-    public IReadOnlyList<ItemStack> QuickSlotList => _quickSlotList;
+    private readonly ItemModel[] _quickSlotList = new ItemModel[3];
+    public IReadOnlyList<ItemModel> QuickSlotList => _quickSlotList;
 
     public event Action OnQuickSlotChanged;
 
-    private readonly List<ItemStack> _itemList = new();
+    private readonly List<ItemModel> _itemList = new();
 
-    public IReadOnlyList<ItemStack> ItemList => _itemList;
+    public IReadOnlyList<ItemModel> ItemList => _itemList;
     public event Action OnInventoryChanged;
 
     private int _selectedQuickSlotIndex = -1;
@@ -49,18 +49,18 @@ public class InventoryManager : MonoBehaviour
 
         for (int i = 0; i < _itemList.Count; i++)
         {
-            ItemStack stack = _itemList[i];
+            ItemModel stack = _itemList[i];
 
-            if (stack.Item.ItemId != item.ItemId)
+            if (stack.ItemId != item.ItemId)
                 continue;
 
-            if (stack.StackCount >= item.MaxStackSize)
+            if (stack.CurrentStackCount >= item.MaxStackSize)
                 continue;
 
-            int addableCount = item.MaxStackSize - stack.StackCount;
+            int addableCount = item.MaxStackSize - stack.CurrentStackCount;
             int addCount = Mathf.Min(addableCount, remainCount);
 
-            stack.StackCount += addCount;
+            stack.CurrentStackCount += addCount;
             remainCount -= addCount;
 
             if (remainCount <= 0)
@@ -80,11 +80,7 @@ public class InventoryManager : MonoBehaviour
 
             int addCount = Mathf.Min(item.MaxStackSize, remainCount);
 
-            _itemList.Add(new ItemStack
-            {
-                Item = item,
-                StackCount = addCount
-            });
+            _itemList.Add(new ItemModel{ItemId = item.ItemId,CurrentStackCount = addCount});
 
             remainCount -= addCount;
         }
@@ -108,17 +104,17 @@ public class InventoryManager : MonoBehaviour
 
         for (int i = _itemList.Count - 1; i >= 0; i--)
         {
-            ItemStack stack = _itemList[i];
+            ItemModel stack = _itemList[i];
 
-            if (stack.Item.ItemId != itemId)
+            if (stack.ItemId != itemId)
                 continue;
 
-            int removeCount = Mathf.Min(stack.StackCount, remainCount);
+            int removeCount = Mathf.Min(stack.CurrentStackCount, remainCount);
 
-            stack.StackCount -= removeCount;
+            stack.CurrentStackCount -= removeCount;
             remainCount -= removeCount;
 
-            if (stack.StackCount <= 0)
+            if (stack.CurrentStackCount <= 0)
                 _itemList.RemoveAt(i);
 
             if (remainCount <= 0)
@@ -142,12 +138,12 @@ public class InventoryManager : MonoBehaviour
 
         int totalCount = 0;
 
-        foreach (ItemStack stack in _itemList)
+        foreach (ItemModel stack in _itemList)
         {
-            if (stack.Item.ItemId != itemId)
+            if (stack.ItemId != itemId)
                 continue;
 
-            totalCount += stack.StackCount;
+            totalCount += stack.CurrentStackCount;
 
             if (totalCount >= count)
                 return true;
@@ -156,7 +152,7 @@ public class InventoryManager : MonoBehaviour
         return false;
     }
 
-    public ItemStack GetItemStack(int index)
+    public ItemModel GetItemModel(int index)
     {
         if (index < 0 || index >= _itemList.Count)
             return null;
@@ -166,7 +162,7 @@ public class InventoryManager : MonoBehaviour
 
     public bool TryUseItem(int slotIndex)
     {
-        ItemStack stack = GetItemStack(slotIndex);
+        ItemModel stack = GetItemModel(slotIndex);
 
         if (!IsValidStack(stack))
         {
@@ -174,7 +170,7 @@ public class InventoryManager : MonoBehaviour
             return false;
         }
 
-        string itemType = stack.Item.ItemType;
+        string itemType = GameDataManager.Instance.GetItemDataById(stack.ItemId).ItemType;
 
         switch (itemType)
         {
@@ -182,14 +178,14 @@ public class InventoryManager : MonoBehaviour
                 return TryUseConsumable(stack);
 
             default:
-                Debug.LogWarning($"사용할 수 없는 아이템 타입입니다. Item: {stack.Item.ItemName}, Type: {itemType}");
+                Debug.LogWarning($"사용할 수 없는 아이템 타입입니다. Item: {GameDataManager.Instance.GetItemDataById(stack.ItemId).ItemName}, Type: {itemType}");
                 return false;
         }
     }
 
     public bool TryDropItem(int slotIndex, int count = 1)
     {
-        ItemStack stack = GetItemStack(slotIndex);
+        ItemModel stack = GetItemModel(slotIndex);
 
         if (!IsValidStack(stack))
         {
@@ -200,16 +196,16 @@ public class InventoryManager : MonoBehaviour
         if (count <= 0)
             return false;
 
-        if (stack.StackCount < count)
+        if (stack.CurrentStackCount < count)
         {
-            Debug.LogWarning($"버릴 개수가 부족합니다. Item: {stack.Item.ItemName}, 보유: {stack.StackCount}, 요청: {count}");
+            Debug.LogWarning($"버릴 개수가 부족합니다. Item: {GameDataManager.Instance.GetItemDataById(stack.ItemId).ItemName}, 보유: {stack.CurrentStackCount}, 요청: {count}");
             return false;
         }
 
-        Debug.Log($"아이템 드랍 요청: {stack.Item.ItemName} / Count: {count}");
+        Debug.Log($"아이템 드랍 요청: {GameDataManager.Instance.GetItemDataById(stack.ItemId).ItemName} / Count: {count}");
 
         // TODO: 월드 드랍 오브젝트 생성
-        return TryRemoveItem(stack.Item.ItemId, count);
+        return TryRemoveItem(stack.ItemId, count);
     }
 
     public bool TryRegisterQuickSlot(int inventorySlotIndex, int quickSlotIndex)
@@ -220,7 +216,7 @@ public class InventoryManager : MonoBehaviour
             return false;
         }
 
-        ItemStack stack = GetItemStack(inventorySlotIndex);
+        ItemModel stack = GetItemModel(inventorySlotIndex);
 
         if (!IsValidStack(stack))
         {
@@ -228,15 +224,15 @@ public class InventoryManager : MonoBehaviour
             return false;
         }
 
-        if (!CanRegisterQuickSlot(stack.Item))
+        if (!CanRegisterQuickSlot(stack))
         {
-            Debug.LogWarning($"퀵슬롯 등록 불가 아이템입니다. Item: {stack.Item.ItemName}, Type: {stack.Item.ItemType}");
+            Debug.LogWarning($"퀵슬롯 등록 불가 아이템입니다. Item: {GameDataManager.Instance.GetItemDataById(stack.ItemId).ItemName}, Type: {GameDataManager.Instance.GetItemDataById(stack.ItemId).ItemType}");
             return false;
         }
 
         _quickSlotList[quickSlotIndex] = stack;
 
-        Debug.Log($"퀵슬롯 등록 완료: QuickSlot {quickSlotIndex}, Item: {stack.Item.ItemName}");
+        Debug.Log($"퀵슬롯 등록 완료: QuickSlot {quickSlotIndex}, Item: {GameDataManager.Instance.GetItemDataById(stack.ItemId).ItemName}");
 
         OnQuickSlotChanged?.Invoke();
 
@@ -248,13 +244,12 @@ public class InventoryManager : MonoBehaviour
         return TryRegisterQuickSlot(inventorySlotIndex, 0);
     }
 
-    private bool TryUseConsumable(ItemStack stack)
+    private bool TryUseConsumable(ItemModel stack)
     {
-        Debug.Log($"소모품 사용 요청: {stack.Item.ItemName}");
+        Debug.Log($"소모품 사용 요청: {GameDataManager.Instance.GetItemDataById(stack.ItemId).ItemName}");
 
         // TODO: UseItemType / UseItemParameterList 기준으로 효과 적용
-
-        bool removed = TryRemoveItem(stack.Item.ItemId, 1);
+        bool removed = TryRemoveItem(stack.ItemId, 1);
 
         if (removed)
             OnQuickSlotChanged?.Invoke();
@@ -263,18 +258,18 @@ public class InventoryManager : MonoBehaviour
     }
 
 
-    private bool CanRegisterQuickSlot(ItemData item)
+    private bool CanRegisterQuickSlot(ItemModel item)
     {
         if (item == null)
             return false;
 
-        return item.ItemType == "Weapon" ||
-               item.ItemType == "Consumable";
+        return GameDataManager.Instance.GetItemDataById(item.ItemId).ItemType == "Weapon" || 
+            GameDataManager.Instance.GetItemDataById(item.ItemId).ItemType == "Consumable";
     }
 
-    private bool IsValidStack(ItemStack stack)
+    private bool IsValidStack(ItemModel stack)
     {
-        return stack != null && stack.Item != null && stack.StackCount > 0;
+        return stack != null && stack.CurrentStackCount > 0;
     }
 
     public bool TrySelectQuickSlot(int quickSlotIndex)
@@ -285,7 +280,7 @@ public class InventoryManager : MonoBehaviour
             return false;
         }
 
-        ItemStack stack = _quickSlotList[quickSlotIndex];
+        ItemModel stack = _quickSlotList[quickSlotIndex];
 
         if (!IsValidStack(stack))
         {
@@ -295,7 +290,7 @@ public class InventoryManager : MonoBehaviour
 
         _selectedQuickSlotIndex = quickSlotIndex;
 
-        Debug.Log($"퀵슬롯 선택: {quickSlotIndex}, Item: {stack.Item.ItemName}");
+        Debug.Log($"퀵슬롯 선택: {quickSlotIndex}, Item: {GameDataManager.Instance.GetItemDataById(stack.ItemId).ItemName}");
 
         OnSelectedQuickSlotChanged?.Invoke();
 
@@ -307,24 +302,24 @@ public class InventoryManager : MonoBehaviour
         if (_selectedQuickSlotIndex < 0 || _selectedQuickSlotIndex >= _quickSlotList.Length)
             return false;
 
-        ItemStack stack = _quickSlotList[_selectedQuickSlotIndex];
+        ItemModel stack = _quickSlotList[_selectedQuickSlotIndex];
 
         if (!IsValidStack(stack))
             return false;
 
-        switch (stack.Item.ItemType)
+        switch (GameDataManager.Instance.GetItemDataById(stack.ItemId).ItemType)
         {
             case "Weapon":
-                Debug.Log($"선택 무기 사용 요청: {stack.Item.ItemName}");
+                Debug.Log($"선택 무기 사용 요청: {GameDataManager.Instance.GetItemDataById(stack.ItemId).ItemName}");
                 // TODO: WeaponManager 없이 갈 거면 나중에 여기서 장착/발사 요청 연결
                 return true;
 
             case "Consumable":
-                Debug.Log($"선택 소모품 사용 요청: {stack.Item.ItemName}");
+                Debug.Log($"선택 소모품 사용 요청: {GameDataManager.Instance.GetItemDataById(stack.ItemId).ItemName}");
                 return TryUseConsumable(stack);
 
             default:
-                Debug.LogWarning($"퀵슬롯에서 사용할 수 없는 아이템 타입입니다. Type: {stack.Item.ItemType}");
+                Debug.LogWarning($"퀵슬롯에서 사용할 수 없는 아이템 타입입니다. Type: {GameDataManager.Instance.GetItemDataById(stack.ItemId).ItemType}");
                 return false;
         }
     }
@@ -340,10 +335,9 @@ public class InventoryManager : MonoBehaviour
         if (_itemList.Count >= MaxSlotCount)
             return false;
 
-        ItemStack weaponStack = new ItemStack
+        ItemModel weaponStack = new ItemModel
         {
-            Item = weaponData,
-            StackCount = 1
+            CurrentStackCount = 1
         };
 
         _itemList.Add(weaponStack);
@@ -355,12 +349,12 @@ public class InventoryManager : MonoBehaviour
         return true;
     }
 
-    private bool TryRegisterWeaponToEmptyQuickSlot(ItemStack weaponStack)
+    private bool TryRegisterWeaponToEmptyQuickSlot(ItemModel weaponStack)
     {
         if (!IsValidStack(weaponStack))
             return false;
 
-        if (weaponStack.Item.ItemType != "Weapon")
+        if (GameDataManager.Instance.GetItemDataById(weaponStack.ItemId).ItemType != "Weapon")
             return false;
 
         for (int i = 0; i < _quickSlotList.Length; i++)
@@ -378,7 +372,7 @@ public class InventoryManager : MonoBehaviour
                 OnSelectedQuickSlotChanged?.Invoke();
             }
 
-            Debug.Log($"무기 자동 퀵슬롯 등록: QuickSlot {i}, Item: {weaponStack.Item.ItemName}");
+            Debug.Log($"무기 자동 퀵슬롯 등록: QuickSlot {i}, Item: {GameDataManager.Instance.GetItemDataById(weaponStack.ItemId).ItemName}");
 
             return true;
         }
@@ -386,14 +380,14 @@ public class InventoryManager : MonoBehaviour
         return false;
     }
 
-    public ItemStack GetSelectedQuickSlotStack()
+    public ItemModel GetSelectedQuickSlotStack()
     {
         if (_selectedQuickSlotIndex < 0 || _selectedQuickSlotIndex >= _quickSlotList.Length)
         {
             return null;
         }
 
-        ItemStack stack = _quickSlotList[_selectedQuickSlotIndex];
+        ItemModel stack = _quickSlotList[_selectedQuickSlotIndex];
 
         if (!IsValidStack(stack))
             return null;
