@@ -21,8 +21,10 @@ public class DataManager : MonoBehaviour
         public List<T> items; // JSON 파일의 루트 키 이름이 "items"여야 함
     }
     
-    public Dictionary<string, ItemData> _itemDataDic { get; private set; } = new Dictionary<string, ItemData>();
+    
     public Dictionary<string, PreloadData> _preloadDataDic { get; private set; } = new Dictionary<string, PreloadData>();
+    public Dictionary<string, ObjectPoolData> _objectPoolDataDic { get; private set; } = new Dictionary<string, ObjectPoolData>();
+    public Dictionary<string, EnemyData> _enemyDataDic { get; private set; } = new Dictionary<string, EnemyData>();
 
 
     private Dictionary<string, T> LoadData<T>(string tableName) where T : BaseData
@@ -64,22 +66,20 @@ public class DataManager : MonoBehaviour
         return new Dictionary<string, T>();
     }
     
-    public void LoadItemData(string jsonPath)
-    {
-        _itemDataDic = LoadData<ItemData>(jsonPath);
-    }
+    
     public void LoadPreloadData(string jsonPath)
     {
         _preloadDataDic = LoadData<PreloadData>(jsonPath);
     }
-
-    public ItemData GetItemData(string id)
+    public void LoadObjectPoolData(string jsonPath)
     {
-
-        if (_itemDataDic == null || string.IsNullOrEmpty(id)) return null;
-        return _itemDataDic.TryGetValue(id, out var data) ? data : null;
-
+        _objectPoolDataDic = LoadData<ObjectPoolData>(jsonPath);
     }
+    public void LoadEnemyData(string jsonPath)
+    {
+        _enemyDataDic = LoadData<EnemyData>(jsonPath);
+    }
+
     public PreloadData GetPreloadData(string id)
     {
 
@@ -87,9 +87,24 @@ public class DataManager : MonoBehaviour
         return _preloadDataDic.TryGetValue(id, out var data) ? data : null;
 
     }
+    public ObjectPoolData GetObjectPoolData(string id)
+    {
+
+        if (_preloadDataDic == null || string.IsNullOrEmpty(id)) return null;
+        return _objectPoolDataDic.TryGetValue(id, out var data) ? data : null;
+
+    }
+    public EnemyData GetEnemyData(string id)
+    {
+
+        if (_preloadDataDic == null || string.IsNullOrEmpty(id)) return null;
+        return _enemyDataDic.TryGetValue(id, out var data) ? data : null;
+
+    }
     public void LoadFullData()
     {
-        LoadItemData("ItemData");
         LoadPreloadData("PreloadData");
+        LoadObjectPoolData("ObjectPoolData");
+        LoadEnemyData("EnemyData");
     }
 }
