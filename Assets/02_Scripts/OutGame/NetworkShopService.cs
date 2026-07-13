@@ -22,25 +22,15 @@ public class NetworkShopService
         return shopVm;
     }
 
-    // 상점의 판매 상품 리스트를 불러오고 해당 아이템들을 슬롯에 넣어주는 함수. 개수 무한버전.
-    public void SetShopItem(int slotIndex, ItemStack itemData)
-    {
-        var shopVm = GetShopViewModel();
-        if ((slotIndex >= 0) && slotIndex < shopVm.ShopItemSlotList.Count)
-        {
-            shopVm.ShopItemSlotList[slotIndex].SetItem(itemData);
-        }
-    }
-
     //플레이어가 상점에서 아이템을 구매할 때 사용되는 함수
-    public void BuyShopItem(int shopSlotIndex)
+    public void RequestBuyItem(int shopSlotIndex)
     {
         var vm = GetShopViewModel();
         var targetSlot = vm.ShopItemSlotList[shopSlotIndex];
 
         if (targetSlot.IsSlotEmpty) return;
 
-        int price = targetSlot.ItemDataWithStack.Item.SellingPrice;
+        int price = targetSlot.ItemSellingPrice;
 
         if (vm.CurPlayerCredit < price)
         {
@@ -67,12 +57,12 @@ public class NetworkShopService
 
         //emptySlot.SetItem(generatedUniqueId, targetSlot.ItemData, 1);
 
-        Debug.Log($"{targetSlot.ItemDataWithStack.Item.ItemName} 구매 성공!");
+        Debug.Log($"구매 성공!");
 
     }
 
     //플레이어가 상점에 아이템을 판매할 때 사용되는 함수
-    public void SellItemToShop(ShopItemSlotType fromZone, int slotIndex)
+    public void RequestSellItem(ShopItemSlotType fromZone, int slotIndex)
     {
         //var vm = GetShopViewModel();
         //List<ShopItemSlotViewModel> targetZone = (fromZone == ShopItemSlotType.Inventory) ? vm.InventorySlots : vm.StashSlots;

@@ -6,13 +6,13 @@ public class StashViewModel : ViewModelBase, IContainerPropertyChanged<long>
 {
     public event Action<string, ContainerEventType, long> ContainerPropertyChanged;
 
-    public List<ShopItemSlotViewModel> InventoryItemSlotList { get; } = new List<ShopItemSlotViewModel>();
-    public List<ShopItemSlotViewModel> StashItemSlotList { get; } = new List<ShopItemSlotViewModel>();
+    public List<StashItemSlotViewModel> InventoryItemSlotList { get; } = new List<StashItemSlotViewModel>();
+    public List<StashItemSlotViewModel> StashItemSlotList { get; } = new List<StashItemSlotViewModel>();
 
     public void InvokeOnceOnInit()
     {
         OnPropertyChanged(nameof(StashItemList));
-        OnPropertyChanged(nameof(HoveredItem));
+        OnPropertyChanged(nameof(HoveredItemId));
     }
 
     private Dictionary<long, StashItemSlotViewModel> _stashItemList = new Dictionary<long, StashItemSlotViewModel>();
@@ -43,16 +43,16 @@ public class StashViewModel : ViewModelBase, IContainerPropertyChanged<long>
         }
     }
 
-    private ItemData _hoveredItem;
-    public ItemData HoveredItem
+    private string _hoveredItemId;
+    public string HoveredItemId
     {
-        get => _hoveredItem;
+        get => _hoveredItemId;
         set
         {
-            if (_hoveredItem != value)
+            if (_hoveredItemId != value)
             {
-                _hoveredItem = value;
-                OnPropertyChanged(nameof(HoveredItem));
+                _hoveredItemId = value;
+                OnPropertyChanged(nameof(HoveredItemId));
             }
         }
     }
@@ -73,13 +73,13 @@ public class StashViewModel : ViewModelBase, IContainerPropertyChanged<long>
         ContainerPropertyChanged?.Invoke(nameof(StashItemList), ContainerEventType.Remove, uniqueId);
     }
 
-    public void OnSlotPointerEnter(ItemData itemData)
+    public void OnSlotPointerEnter(string itemDataId)
     {
-        HoveredItem = itemData;
+        HoveredItemId = itemDataId;
     }
 
     public void OnSlotPointerExit()
     {
-        HoveredItem = null;
+        HoveredItemId = null;
     }
 }

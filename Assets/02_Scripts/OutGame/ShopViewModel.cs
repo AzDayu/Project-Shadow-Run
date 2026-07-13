@@ -10,7 +10,7 @@ public class ShopViewModel : ViewModelBase
     public void InvokeOnceOnInit()
     {
         OnPropertyChanged(nameof(CurPlayerCredit));
-        OnPropertyChanged(nameof(HoveredItem));
+        OnPropertyChanged(nameof(HoveredItemId));
     }
 
     private int _curPlayerCredit;
@@ -27,16 +27,16 @@ public class ShopViewModel : ViewModelBase
         }
     }
 
-    private ItemData _hoveredItem;
-    public ItemData HoveredItem
+    private string _hoveredItemId;
+    public string HoveredItemId
     {
-        get => _hoveredItem;
+        get => _hoveredItemId;
         set
         {
-            if (_hoveredItem != value)
+            if (_hoveredItemId != value)
             {
-                _hoveredItem = value;
-                OnPropertyChanged(nameof(HoveredItem));
+                _hoveredItemId = value;
+                OnPropertyChanged(nameof(HoveredItemId));
             }
         }
     }
@@ -52,13 +52,13 @@ public class ShopViewModel : ViewModelBase
         }
     }
 
-    public void OnSlotPointerEnter(ItemData itemData)
+    public void OnSlotPointerEnter(string itemDataId)
     {
-        HoveredItem = itemData;
+        HoveredItemId = itemDataId;
     }
 
     public void OnSlotPointerExit()
     {
-        HoveredItem = null;
+        HoveredItemId = null;
     }
 }
