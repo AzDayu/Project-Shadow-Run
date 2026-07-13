@@ -4,12 +4,11 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class ShopItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler
+public class StashItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler
 {
     [SerializeField] private Image Image_ItemIcon;
-    [SerializeField] private TMP_Text Text_ItemPrice;
 
-    private ShopItemSlotViewModel _slotVm;
+    private StashItemSlotViewModel _slotVm;
     public Action<ItemData> _onHoverEnter;
     public Action _onHoverExit;
 
@@ -17,7 +16,7 @@ public class ShopItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler
     public int _slotIdx { get; set; }
     public int _itemDataId { get; set; }
 
-    public void Bind(ShopItemSlotViewModel slotVm, Action<ItemData> onHoverEnter, Action onHoverExit)
+    public void Bind(StashItemSlotViewModel slotVm, Action<ItemData> onHoverEnter, Action onHoverExit)
     {
         if (_slotVm != null)
         {
@@ -41,23 +40,17 @@ public class ShopItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler
 
     private void UpdateSlotUI()
     {
-        if (Text_ItemPrice == null || Image_ItemIcon == null) return;
+        if (Image_ItemIcon == null) return;
 
         // 1. 빈 슬롯이거나 데이터가 없으면 투명하게 만들거나 숨기기
         if (_slotVm == null || _slotVm.IsSlotEmpty || _slotVm.ItemDataWithStack.Item == null)
         {
             Image_ItemIcon.enabled = false;  // 아이콘 숨기기
-            Text_ItemPrice.text = string.Empty; // 가격 글자 지우기
             return;
         }
 
         // 2. 아이템이 존재할 때 데이터 채우고 켜기
         Image_ItemIcon.enabled = true;
-
-        if (_slotVm.SlotType == ShopItemSlotType.Shop)
-            Text_ItemPrice.text = $"{_slotVm.ItemDataWithStack.Item.SellingPrice} Credit";
-        else
-            Text_ItemPrice.text = $"{_slotVm.ItemDataWithStack.Item.SellingPrice} Credit";
 
         // Image_ItemIcon.sprite = Resources.Load<Sprite>(_slotVm.ItemData.IconPath);
     }
@@ -79,5 +72,4 @@ public class ShopItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler
     {
         if (_slotVm != null) _slotVm.PropertyChanged -= OnSlotPropertyChanged;
     }
-
 }

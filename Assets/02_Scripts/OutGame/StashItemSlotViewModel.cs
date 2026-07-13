@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class ShopItemSlotViewModel : ViewModelBase
+public class StashItemSlotViewModel : ViewModelBase 
 {
     public int SlotIndex { get; set; }
     public ShopItemSlotType SlotType { get; set; }
@@ -11,7 +10,6 @@ public class ShopItemSlotViewModel : ViewModelBase
         OnPropertyChanged(nameof(ItemUniqueId));
         OnPropertyChanged(nameof(ItemDataId));
         OnPropertyChanged(nameof(ItemDataWithStack));
-        OnPropertyChanged(nameof(ItemData));
         OnPropertyChanged(nameof(IsSlotEmpty));
     }
 
@@ -63,7 +61,7 @@ public class ShopItemSlotViewModel : ViewModelBase
         get => _isSlotEmpty;
         set
         {
-            if(_isSlotEmpty != value)
+            if (_isSlotEmpty != value)
             {
                 _isSlotEmpty = value;
                 OnPropertyChanged(nameof(IsSlotEmpty));
@@ -79,8 +77,9 @@ public class ShopItemSlotViewModel : ViewModelBase
         IsSlotEmpty = true;
     }
 
-    public void SetItem(ItemStack itemData)
+    public void SetItem(long uniqueId, ItemStack itemData) //일단은 유니크 아이디를 사용해서 개별적인 아이템의 구분을 하도록 로직을 작성했으나 이게 어떻게 될런지.
     {
+        ItemUniqueId = uniqueId;
         ItemDataId = itemData.Item.ItemId;
         ItemDataWithStack.Item = itemData.Item;
         ItemDataWithStack.StackCount = itemData.StackCount;
