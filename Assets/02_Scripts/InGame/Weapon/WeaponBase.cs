@@ -25,83 +25,99 @@ public abstract class WeaponBase : MonoBehaviour
 {
     protected WeaponData _weaponData;
 
-    protected WeaponStat _baseWeaponStat = new WeaponStat();
-    protected WeaponStat _currentWeaponStat=new WeaponStat();
-    protected int _remainBullets=0;
-    public float ReloadTime => _currentWeaponStat.ReloadTime;
-    public int MagazineSize=> _currentWeaponStat.MagazineSize;
-    public int RemainBullets => _remainBullets;
-    public float AttackInterval => _currentWeaponStat.AttackInterval;
+    public WeaponData WeaponData => _weaponData;
+    public int RemainBullets => _weaponData?.RemainBullets ?? 0;
 
-    protected Dictionary<WeaponPartsType,WeaponPartsData> _weaponPartsDic = new Dictionary<WeaponPartsType, WeaponPartsData>();
-    public virtual void Initialize(WeaponData data) 
+    [SerializeField] private Transform Muzzle;
+    public Transform FirePoint => Muzzle;
+
+    // TODO[안우재, 07/11]:
+    // 테스트용 Awake메서드
+    public void Awake()
     {
-        _weaponData=data;
-
-        _baseWeaponStat.Damage = data.Damage;
-        _baseWeaponStat.AttackInterval = data.AttackInterval;
-        _baseWeaponStat.MagazineSize = data.MagazineSize;
-        _baseWeaponStat.Accuracy = data.Accuracy;
-        _baseWeaponStat.Range = data.Range;
-        _baseWeaponStat.ReloadTime = data.ReloadTime;
-        _currentWeaponStat= _baseWeaponStat;
+        // Initialize();
+    }
+    public virtual void Initialize(WeaponData weaponData)
+    {
+        _weaponData = weaponData;
     }
 
     //public abstract bool CanFire { get; }
 
-    public virtual void Fire(Vector3 firePosition, Vector3 direction)//현재는 사용자의 위치에서 총이 발사됨, 추후에 총의 위치에서 발사되도록 수정될수있음
+    public virtual void Fire(Vector3 firePosition, Vector3 direction)
     {
-        if (_remainBullets <= 0) 
-        {
+        if (_weaponData == null)
             return;
-        }
-        _remainBullets--;
 
-        //Vector3 direction = (targetPosition - firePosition).normalized;
-        if (Physics.Raycast(firePosition, direction.normalized, out RaycastHit hit, _currentWeaponStat.Range))
+        if (_weaponData.RemainBullets <= 0)
+            return;
+
+        _weaponData.RemainBullets--;
+
+        if (Physics.Raycast(firePosition, direction.normalized, out RaycastHit hit, _weaponData.Range))
         {
-            Debug.DrawRay(firePosition, direction * hit.distance, Color.red, _currentWeaponStat.Range);
-
-            if (hit.transform.TryGetComponent<IDamageable>(out var damageable))
+            if (hit.transform.TryGetComponent(
+                out IDamageable damageable))
             {
-                damageable.TakeDamage(_currentWeaponStat.Damage);
-            }
+                damageable.TakeDamage(_weaponData.Damage);
 
-            else
-            {
-                Debug.Log("빗나감");
+                Debug.Log(
+                    $"{hit.transform.name}이 " +
+                    $"{_weaponData.Damage}만큼 피해를 입음"
+                );
             }
         }
-        
+        else
+        {
+            Debug.Log("빗나감");
+        }
+
     }
 
-    public virtual int Reload(int bulletAmount)
+    public bool CanLoadAmmo(AmmoData ammoData)
     {
-        int newBulletAmonut = _remainBullets + bulletAmount;
+        if (ammoData == null)
+            return false;
 
-        if (bulletAmount <= 0)
-        {
-            return bulletAmount;
-        }
-
-        if (_remainBullets >= _currentWeaponStat.MagazineSize)
-        {
-            return bulletAmount;
-        }
-
-        if (newBulletAmonut >= _currentWeaponStat.MagazineSize)
-        {
-            _remainBullets = _currentWeaponStat.MagazineSize;
-            return newBulletAmonut - _currentWeaponStat.MagazineSize;
-        }
-        else 
-        {
-            _remainBullets = newBulletAmonut;
-            return 0;
-        }
-
+        return _weaponData.CompatibleCaliber ==
+               ammoData.Caliber;
     }
-    public virtual void CalculateCurrentWeaponStat() 
+
+    public virtual int Reload(AmmoData ammoData, int bulletAmount)
+    {
+        if (_weaponData == null || ammoData == null || bulletAmount <= 0)
+        {
+            return bulletAmount;
+        }
+
+        if (_weaponData.CompatibleCaliber != ammoData.Caliber)
+            return bulletAmount;
+
+        if (_weaponData.RemainBullets > 0 && !string.IsNullOrEmpty(_weaponData.LoadedAmmoItemId) &&
+            _weaponData.LoadedAmmoItemId != ammoData.ItemId)
+        {
+            return bulletAmount;
+        }
+
+        int loadableCount = _weaponData.MagazineSize - _weaponData.RemainBullets;
+
+        if (loadableCount <= 0)
+            return bulletAmount;
+
+        int loadedCount = Mathf.Min(loadableCount, bulletAmount);
+
+        _weaponData.LoadedAmmoItemId = ammoData.ItemId;
+
+        _weaponData.RemainBullets += loadedCount;
+
+        return bulletAmount - loadedCount;
+    }
+
+    // TODO[안우재, 07/11]:
+    // 파츠 아이템들 구현 완료 후 아래 메서드 확인 및 구축 필요
+    // 아마 WeaponStat을 정하는 부분이라서 ItemData.cs의 WeaponData클래스에 들어갈 가능성 존재
+    /*
+    public virtual void CalculateCurrentWeaponStat()
     {
         _currentWeaponStat = WeaponStatCalculator.CalculateWeaponStat(_baseWeaponStat, _weaponPartsDic);
     }
@@ -122,4 +138,5 @@ public abstract class WeaponBase : MonoBehaviour
 
         return oldPart;
     }
+    */
 }

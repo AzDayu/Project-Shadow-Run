@@ -8,11 +8,20 @@ public class PlayerInputHandler : MonoBehaviour
 
     public Vector2 MoveInput { get; private set; }
     public Vector2 LookInput { get; private set; }
+
     public event Action JumpPerformed;
     public event Action FirePerformed;
 
     public event Action InventoryPerformed;
+
+    public event Action CrouchPerformed;
+    public event Action PronePerformed;
+
     public bool IsGameplayInputBlocked { get; private set; }
+
+    public bool IsSprintPressed { get; private set; }
+    public bool IsWalkPressed { get; private set; }
+    public float LeanInput { get; private set; }
 
     public event Action<int> QuickSlotPerformed;
 
@@ -35,6 +44,18 @@ public class PlayerInputHandler : MonoBehaviour
 
         _controls.InGame.Fire.performed += OnFire;
 
+        _controls.InGame.Crouch.performed += OnCrouch;
+        _controls.InGame.Prone.performed += OnProne;
+
+        _controls.InGame.Sprint.performed += OnSprint;
+        _controls.InGame.Sprint.canceled += OnSprintCanceled;
+
+        _controls.InGame.Walk.performed += OnWalk;
+        _controls.InGame.Walk.canceled += OnWalkCanceled;
+
+        _controls.InGame.Lean.performed += OnLean;
+        _controls.InGame.Lean.canceled += OnLeanCanceled;
+
         _controls.InGame.Inventory.performed += OnInventory;
 
         _controls.InGame.QuickSlot1.performed += OnQuickSlot1;
@@ -54,6 +75,18 @@ public class PlayerInputHandler : MonoBehaviour
 
         _controls.InGame.Fire.performed -= OnFire;
 
+        _controls.InGame.Sprint.performed -= OnSprint;
+        _controls.InGame.Sprint.canceled -= OnSprintCanceled;
+
+        _controls.InGame.Walk.performed -= OnWalk;
+        _controls.InGame.Walk.canceled -= OnWalkCanceled;
+
+        _controls.InGame.Crouch.performed -= OnCrouch;
+        _controls.InGame.Prone.performed -= OnProne;
+
+        _controls.InGame.Lean.performed -= OnLean;
+        _controls.InGame.Lean.canceled -= OnLeanCanceled;
+
         _controls.InGame.Inventory.performed -= OnInventory;
 
         _controls.InGame.QuickSlot1.performed -= OnQuickSlot1;
@@ -67,11 +100,15 @@ public class PlayerInputHandler : MonoBehaviour
     {
         IsGameplayInputBlocked = isBlocked;
 
-        if (isBlocked)
-        {
-            MoveInput = Vector2.zero;
-            LookInput = Vector2.zero;
-        }
+        if (!isBlocked)
+            return;
+
+        MoveInput = Vector2.zero;
+        LookInput = Vector2.zero;
+
+        IsSprintPressed = false;
+        IsWalkPressed = false;
+        LeanInput = 0f;
     }
 
     private void OnMove(InputAction.CallbackContext context)
@@ -114,6 +151,64 @@ public class PlayerInputHandler : MonoBehaviour
         JumpPerformed?.Invoke();
     }
 
+    private void OnSprint(InputAction.CallbackContext context)
+    {
+        if (IsGameplayInputBlocked)
+            return;
+
+        IsSprintPressed = true;
+    }
+
+    private void OnSprintCanceled(InputAction.CallbackContext context)
+    {
+        IsSprintPressed = false;
+    }
+
+    private void OnWalk(InputAction.CallbackContext context)
+    {
+        if (IsGameplayInputBlocked)
+            return;
+
+        IsWalkPressed = true;
+    }
+
+    private void OnWalkCanceled(InputAction.CallbackContext context)
+    {
+        IsWalkPressed = false;
+    }
+
+    private void OnCrouch(InputAction.CallbackContext context)
+    {
+        if (IsGameplayInputBlocked)
+            return;
+
+        CrouchPerformed?.Invoke();
+    }
+
+    private void OnProne(InputAction.CallbackContext context)
+    {
+        if (IsGameplayInputBlocked)
+            return;
+
+        PronePerformed?.Invoke();
+    }
+
+    private void OnLean(InputAction.CallbackContext context)
+    {
+        if (IsGameplayInputBlocked)
+        {
+            LeanInput = 0f;
+            return;
+        }
+
+        LeanInput = context.ReadValue<float>();
+    }
+
+    private void OnLeanCanceled(InputAction.CallbackContext context)
+    {
+        LeanInput = 0f;
+    }
+
     private void OnInventory(InputAction.CallbackContext context)
     {
         InventoryPerformed?.Invoke();
@@ -129,34 +224,24 @@ public class PlayerInputHandler : MonoBehaviour
 
     private void OnQuickSlot1(InputAction.CallbackContext context)
     {
-        if (!context.performed)
-            return;
-
-        if (IsGameplayInputBlocked)
-            return;
-
-        QuickSlotPerformed?.Invoke(0);
+        TryPerformQuickSlot(0);
     }
 
     private void OnQuickSlot2(InputAction.CallbackContext context)
     {
-        if (!context.performed)
-            return;
-
-        if (IsGameplayInputBlocked)
-            return;
-
-        QuickSlotPerformed?.Invoke(1);
+        TryPerformQuickSlot(1);
     }
 
     private void OnQuickSlot3(InputAction.CallbackContext context)
     {
-        if (!context.performed)
-            return;
+        TryPerformQuickSlot(2);
+    }
 
+    private void TryPerformQuickSlot(int slotIndex)
+    {
         if (IsGameplayInputBlocked)
             return;
 
-        QuickSlotPerformed?.Invoke(2);
+        QuickSlotPerformed?.Invoke(slotIndex);
     }
 }

@@ -17,6 +17,8 @@ public class ItemData
 
     public string UseItemType;
     public string[] UseItemParameterList;
+    // damage, fireRate, range, maxAmmo, currentAmmo, reloadTime
+
 }
 
 [System.Serializable]
@@ -40,7 +42,16 @@ public class WeaponData : ItemData
     public float Accuracy;
     public float Range;
     public float ReloadTime;
+
+    public int RemainBullets;
+
+    public string CompatibleCaliber;
+
+    public string LoadedAmmoItemId;
+
+    public List<WeaponPartsData> EquippedParts = new();
 }
+
 [System.Serializable]
 public class WeaponPartsData : ItemData
 {
@@ -48,4 +59,11 @@ public class WeaponPartsData : ItemData
     public WeaponStatType StatType;
     public WeaponStatModifierType ModifierType;
     public float Value;
+}
+
+[System.Serializable]
+public class AmmoData : ItemData
+{
+    public string Caliber;
+    public float Damage;
 }
