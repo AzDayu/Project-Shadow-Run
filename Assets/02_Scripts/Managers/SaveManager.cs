@@ -1,5 +1,7 @@
 ﻿using System.IO;
 using UnityEngine;
+using Newtonsoft.Json;
+using System;
 
 public class SaveManager
 {
@@ -15,6 +17,11 @@ public class SaveManager
     }
 
     private string _savePath;
+
+    private JsonSerializerSettings _settings = new JsonSerializerSettings
+    {
+        TypeNameHandling = TypeNameHandling.Auto
+    };
 
     private SaveManager()
     {
@@ -33,7 +40,9 @@ public class SaveManager
         try
         {
             string json = File.ReadAllText(_savePath);
-            PlayerModel data = JsonUtility.FromJson<PlayerModel>(json);
+
+            PlayerModel data = JsonConvert.DeserializeObject<PlayerModel>(json, _settings);
+
             Debug.Log("SaveManager: 유저 데이터 로드 성공!");
             return data;
         }
@@ -48,7 +57,8 @@ public class SaveManager
     {
         try
         {
-            string json = JsonUtility.ToJson(data, true);
+            string json = JsonConvert.SerializeObject(data, Formatting.Indented, _settings);
+
             File.WriteAllText(_savePath, json);
             Debug.Log("SaveManager: 유저 데이터 저장 완료!");
         }
@@ -60,15 +70,54 @@ public class SaveManager
 
     private PlayerModel CreateNewPlayerData()
     {
-        PlayerModel newPlayer = new PlayerModel
+        PlayerModel newPlayer = new PlayerModel();
+        newPlayer.PlayerName = "Shadow_Agent";
+        newPlayer.CurrentCredit = 50000;
+
+        WeaponModel mainWeapon = new WeaponModel
         {
-            PlayerName = "Survivor",
-            CurrentCredit = 15000
+            InstanceId = Guid.NewGuid().ToString(),
+            ItemId = "Item_Weapon_AR_01",
+            CurrentStackCount = 1,
+            CurrentAmmo = 30,
+            CurrentDurability = 100f
         };
+        newPlayer.InventoryItems.Add(mainWeapon);
 
-        newPlayer.InventoryItemIds.Add(101);
+        ItemModel emergencyMedkit = new ItemModel
+        {
+            InstanceId = Guid.NewGuid().ToString(),
+            ItemId = "Item_Medical_Kit_01",
+            CurrentStackCount = 2
+        };
+        newPlayer.InventoryItems.Add(emergencyMedkit);
 
-        SavePlayerData(newPlayer);
+
+        ItemModel reserveAmmo = new ItemModel
+        {
+            InstanceId = Guid.NewGuid().ToString(),
+            ItemId = "Item_Ammo_556",
+            CurrentStackCount = 60
+        };
+        newPlayer.StashItems.Add(reserveAmmo);
+
+        ItemModel repairTool = new ItemModel
+        {
+            InstanceId = Guid.NewGuid().ToString(),
+            ItemId = "Item_Loot_Tool",
+            CurrentStackCount = 1
+        };
+        newPlayer.StashItems.Add(repairTool);
+
+        ItemModel assetGold = new ItemModel
+        {
+            InstanceId = Guid.NewGuid().ToString(),
+            ItemId = "Item_Loot_Gold",
+            CurrentStackCount = 1
+        };
+        newPlayer.StashItems.Add(assetGold);
+
+        UnityEngine.Debug.Log("SaveManager: [프로젝트 섀도우 런] 실제 테이블 기준 초기 보급품이 지급된 신규 세이브를 생성했습니다.");
         return newPlayer;
     }
 }

@@ -90,14 +90,14 @@ public class DataManager : MonoBehaviour
     public ObjectPoolData GetObjectPoolData(string id)
     {
 
-        if (_preloadDataDic == null || string.IsNullOrEmpty(id)) return null;
+        if (_objectPoolDataDic == null || string.IsNullOrEmpty(id)) return null;
         return _objectPoolDataDic.TryGetValue(id, out var data) ? data : null;
 
     }
     public EnemyData GetEnemyData(string id)
     {
 
-        if (_preloadDataDic == null || string.IsNullOrEmpty(id)) return null;
+        if (_enemyDataDic == null || string.IsNullOrEmpty(id)) return null;
         return _enemyDataDic.TryGetValue(id, out var data) ? data : null;
 
     }
