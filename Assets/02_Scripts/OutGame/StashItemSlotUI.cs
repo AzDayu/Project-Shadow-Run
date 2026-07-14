@@ -34,18 +34,14 @@ public class StashItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler
 
     private void OnSlotPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        // 슬롯 데이터가 바뀌면 UI 새로고침
         UpdateSlotUI();
     }
 
     private void UpdateSlotUI()
     {
-        if (Image_ItemIcon == null) return;
-
-        // 1. 빈 슬롯이거나 데이터가 없으면 투명하게 만들거나 숨기기
         if (_slotVm.IsSlotEmpty == true)
         {
-            Image_ItemIcon.enabled = false;  // 아이콘 숨기기
+            Image_ItemIcon.enabled = false; 
             return;
         }
 

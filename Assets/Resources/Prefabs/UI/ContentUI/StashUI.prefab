@@ -466,13 +466,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6bd5ac83c1147db4a9a6d2d2b43c7da3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StashUI
-  Text_CurPlayerCredit: {fileID: 0}
+  Text_CurPlayerCredit: {fileID: 6422579625486411652}
   Image_DragIcon: {fileID: 0}
-  Button_CloseSelf: {fileID: 0}
-  ShopItemPopup: {fileID: 0}
-  Prefab_ShopItemSlotUI: {fileID: 0}
-  Transform_InventoryContent: {fileID: 0}
-  Transform_StashContent: {fileID: 0}
+  Button_CloseSelf: {fileID: 2490196437642875948}
+  ShopItemPopup: {fileID: 1118460587990136849, guid: 51f800e3c72d7584ca91c452b92843bc, type: 3}
+  Prefab_StashItemSlotUI: {fileID: -1966634775213575629, guid: ceb1c4f968803f342ad607e10a421867, type: 3}
+  Transform_InventoryContent: {fileID: 24818927660406214}
+  Transform_StashContent: {fileID: 9118785978853796994}
 --- !u!1 &2707883869400216498
 GameObject:
   m_ObjectHideFlags: 0

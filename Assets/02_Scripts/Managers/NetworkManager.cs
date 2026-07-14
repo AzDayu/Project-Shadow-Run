@@ -14,9 +14,25 @@ public class NetworkManager : MonoBehaviour
         InitNetworkService();
     }
 
+    private void Start()
+    {
+        LoadGameData();
+    }
+
     private void InitNetworkService()
     {
         ShopService = new NetworkShopService();
         StashService = new NetworkStashService();
+    }
+
+    private void LoadGameData()
+    {
+        PlayerModel playerData = SaveManager.Instance.LoadPlayerData();
+
+        var stashVm = StashService.GetStashViewModel();
+
+        stashVm.CurPlayerCredit = playerData.CurrentCredit;
+
+        // StashService.LoadStashData(playerData.StashItems);
     }
 }

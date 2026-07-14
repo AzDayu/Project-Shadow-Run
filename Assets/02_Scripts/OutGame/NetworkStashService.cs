@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Xml;
 using UnityEngine;
 
 public class NetworkStashService
@@ -22,35 +23,72 @@ public class NetworkStashService
         return stashVm;
     }
 
+    public void LoadStashData(List<ItemModel> savedStashItems)
+    {
+        var stashVm = GetStashViewModel();
+
+        foreach (var slotVm in stashVm.StashSlots)
+        {
+            slotVm.ItemUniqueId = string.Empty;
+            slotVm.ItemDataId = string.Empty;
+            slotVm.ItemStackCount = 0;
+            slotVm.IsSlotEmpty = true;
+        }
+
+        for (int i = 0; i < savedStashItems.Count; i++)
+        {
+            if (i >= stashVm._maxStashSlot)
+            {
+                Debug.LogWarning("NetworkStashService: 보관함 최대 슬롯을 초과하는 데이터가 있습니다!");
+                break;
+            }
+
+            var savedItem = savedStashItems[i];
+            var targetSlot = stashVm.StashSlots[i];
+
+            targetSlot.ItemUniqueId = savedItem.InstanceId;
+            targetSlot.ItemDataId = savedItem.ItemId;
+            targetSlot.ItemStackCount = savedItem.CurrentStackCount;
+            targetSlot.IsSlotEmpty = false;
+        }
+    }
+
     public void AddItem(string itemDataId, int addItemCount)
     {
-        // 저장할때 고유값 ID를 부여하기 위해 사용
-        long uniqueId = GameUtil.GenerateUniqueId();
-
-        // TODO : 우선 쉽게 사용할 수 있도록 중복 처리는 빼두었다. 습득할때마다 아이템이 하나씩 추가되도록 해두고
-        // 추후에 중복값은 StackCount가 다 찰때까지 누적해줄 수 있도록 로직을 추가하자
-        var newItemVm = new StashItemSlotViewModel();
-        newItemVm.ItemUniqueId = uniqueId;
-        newItemVm.ItemDataId = itemDataId;
-        newItemVm.ItemStackCount = addItemCount;
-
         var stashVm = GetStashViewModel();
-        stashVm.AddItemSlotViewModel(newItemVm);
+        string uniqueId = System.Guid.NewGuid().ToString();
 
+        foreach(var slotVm in stashVm.StashSlots)
+        {
+            if (slotVm.IsSlotEmpty)
+            {
+                slotVm.ItemUniqueId = uniqueId;
+                slotVm.ItemDataId = itemDataId;
+                slotVm.ItemStackCount = addItemCount;
+                slotVm.IsSlotEmpty = false;
+
+                return;
+            }
+        }
+    }
+
+    private void RequestRemoveItem(string removeTargetUniqueId)
+    {
+        var stashVm = GetStashViewModel();
+
+        foreach(var slotVm in stashVm.StashSlots)
+        {
+            if((slotVm.IsSlotEmpty == false) && (slotVm.ItemUniqueId == removeTargetUniqueId))
+            {
+                slotVm.ItemUniqueId = string.Empty;
+                slotVm.ItemDataId = string.Empty;
+                slotVm.ItemStackCount = 0;
+                slotVm.IsSlotEmpty = true;
+
+                return;
+            }
+        }
         //NetworkManager.Inst.SaveLoadService.RequstSaveData();
     }
 
-    private void RequestRemoveItem(long removeTargetUniqueId)
-    {
-        var stashVm = GetStashViewModel();
-        stashVm.RemoveItemSlotViewModel(removeTargetUniqueId);
-
-        //NetworkManager.Inst.SaveLoadService.RequstSaveData();
-    }
-
-    public Dictionary<long, StashItemSlotViewModel> GetStashItemList()
-    {
-        var stashVm = GetStashViewModel();
-        return stashVm.StashItemList;
-    }
 }

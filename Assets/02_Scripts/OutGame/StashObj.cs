@@ -2,7 +2,7 @@
 
 public class StashObj : MonoBehaviour
 {
-    [SerializeField] private KeyCode _interactKey = KeyCode.T;
+    private KeyCode _interactKey = KeyCode.E;
 
     private bool _isPlayerInside = false;
     //private PlayerController _playerController; 나중에 플레이어 컨트롤러가 추가되면 주석해제. 플레이어가 상점UI를 열고있을 때 플레이어의 움직임을 막기 위함.
@@ -13,14 +13,12 @@ public class StashObj : MonoBehaviour
         {
             if (UIManager.Instance.IsUIOpened(UIType.StashUI))
             {
-                Debug.Log("StashObj: 창고 UI가 이미 열려 있습니다.");
-
+                CloseStash();
                 return;
             }
-            {
-                OpenStash();
-                Debug.Log("StashObj: 창고 UI를 열었습니다.");
-            }
+            
+            OpenStash();
+            Debug.Log("StashObj: 창고 UI를 열었습니다.");
         }
 
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -37,7 +35,6 @@ public class StashObj : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             _isPlayerInside = true;
-            //_playerController = other.GetComponent<PlayerController>(); 
             Debug.Log("StashObj: 플레이어가 창고 범위에 진입했습니다.");
         }
     }
@@ -56,12 +53,12 @@ public class StashObj : MonoBehaviour
 
     private void OpenStash()
     {
-        UIManager.Instance.OpenContentUI(UIType.ShopUI);
-
+        UIManager.Instance.OpenContentUI(UIType.StashUI);
         var stashUI = UIManager.Instance.GetOpenedUI(UIRootType.ContentUI, UIType.StashUI) as StashUI;
+
         if (stashUI != null)
         {
-            //stashUI.BindViewModel(new StashViewModel());
+            var stashVm = NetworkManager.Inst.StashService.GetStashViewModel();
             Debug.Log("ViewModel 바인딩 성공!");
         }
         else

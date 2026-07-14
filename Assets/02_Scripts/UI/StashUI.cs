@@ -11,108 +11,69 @@ public class StashUI : UIBase
     [SerializeField] private Button Button_CloseSelf;
     [SerializeField] private ShopItemPopupUI ShopItemPopup; 
 
-    [SerializeField] private StashItemSlotUI Prefab_ShopItemSlotUI; 
+    [SerializeField] private StashItemSlotUI Prefab_StashItemSlotUI; 
     [SerializeField] private Transform Transform_InventoryContent;
     [SerializeField] private Transform Transform_StashContent;
 
-    private StashViewModel _vm;
-    private List<StashItemSlotUI> _instantiatedSlots = new List<StashItemSlotUI>();
-    private bool _isInitialized = false;
+    private List<StashItemSlotUI> _slotUIList = new List<StashItemSlotUI>();
 
-    public void BindViewModel(StashViewModel vm)
-    {
-        if (_vm != null)
-        {
-            _vm.PropertyChanged -= OnPropertyChanged_View;
-        }
-
-        _vm = vm;
-        _vm.PropertyChanged += OnPropertyChanged_View;
-
-        if (!_isInitialized)
-        {
-            SpawnSlotsZone(_vm.InventoryItemSlotList, Transform_InventoryContent);
-            SpawnSlotsZone(_vm.StashItemSlotList, Transform_StashContent);
-            _isInitialized = true;
-        }
-        else
-        {
-            // [개선] 이미 UI가 있다면 데이터만 새로 매핑하여 UI를 갱신합니다.
-            RebindSlotsZone(_vm.InventoryItemSlotList, Transform_InventoryContent);
-            RebindSlotsZone(_vm.StashItemSlotList, Transform_StashContent);
-        }
-
-        _vm.InvokeOnceOnInit();
-    }
-
-    private void SpawnSlotsZone(List<StashItemSlotViewModel> slotVms, Transform parentContent)
-    {
-        foreach (var slotVm in slotVms)
-        {
-            StashItemSlotUI slotUi = Instantiate(Prefab_ShopItemSlotUI, parentContent);
-            slotUi.Bind(slotVm, _vm.OnSlotPointerEnter, _vm.OnSlotPointerExit);
-            _instantiatedSlots.Add(slotUi);
-        }
-    }
-
-    private void RebindSlotsZone(List<StashItemSlotViewModel> slotVms, Transform parentContent)
-    {
-        // parentContent 자식으로 붙어있는 ShopItemSlotUI들을 탐색하며 새로 바인딩
-        int index = 0;
-        foreach (Transform child in parentContent)
-        {
-            if (index >= slotVms.Count) break;
-
-            if (child.TryGetComponent<StashItemSlotUI>(out var slotUi))
-            {
-                slotUi.Bind(slotVms[index], _vm.OnSlotPointerEnter, _vm.OnSlotPointerExit);
-                index++;
-            }
-        }
-    }
-
-    private void ClearSpawnedSlots()
-    {
-        foreach (var slot in _instantiatedSlots)
-        {
-            if (slot != null) Destroy(slot.gameObject);
-        }
-        _instantiatedSlots.Clear();
-    }
+    private StashViewModel _stashVm;
 
     private void OnEnable()
     {
         Button_CloseSelf.onClick.RemoveAllListeners();
-        Debug.Log("버튼 이벤트 초기화");
-
-        if (Button_CloseSelf != null)
-        {
-            Button_CloseSelf.onClick.AddListener(OnClick_CloseButton);
-            Debug.Log("버튼이벤트 등록");
-        }
+        Button_CloseSelf.onClick.AddListener(OnClick_CloseButton);
+        SetStashItemSlotOnEnable();
     }
 
-    private void OnDestroy()
+    private void OnDisable()
     {
-        if (_vm != null)
+        if (_stashVm != null)
         {
-            _vm.PropertyChanged -= OnPropertyChanged_View;
+            _stashVm.PropertyChanged -= OnPropChanged_View;
         }
     }
 
-    private void OnPropertyChanged_View(object sender, PropertyChangedEventArgs e)
+    private void SetStashItemSlotOnEnable()
+    {
+        var stashVm = NetworkManager.Inst.StashService.GetStashViewModel();
+        _stashVm = stashVm;
+        _stashVm.PropertyChanged += OnPropChanged_View;
+        _stashVm.InvokeOnceOnInit();
+        InitStashSlotUIs();
+    }
+
+    private void InitStashSlotUIs()
+    {
+        // 이미 슬롯 UI를 생성했다면 바인딩만 다시 해주거나 스킵합니다.
+        if (_slotUIList.Count == 0)
+        {
+            // ViewModel에 미리 정의된 60개의 빈 슬롯 데이터를 기반으로 UI를 생성합니다.
+            foreach (var slotVm in _stashVm.StashSlots)
+            {
+                var slotUI = Instantiate(Prefab_StashItemSlotUI, Transform_StashContent);
+
+                // 생성한 UI에 ViewModel을 묶어줍니다 (이 순간 UI가 비어있는 상태로 세팅됨)
+                slotUI.Bind(slotVm, OnSlotHoverEnter, OnSlotHoverExit);
+
+                _slotUIList.Add(slotUI);
+            }
+        }
+    }
+
+    private void OnPropChanged_View(object sender, PropertyChangedEventArgs e)
     {
         switch (e.PropertyName)
         {
             case nameof(StashViewModel.CurPlayerCredit):
                 {
-                    Text_CurPlayerCredit.text = $"Player Credit : {_vm.CurPlayerCredit}";
+                    Text_CurPlayerCredit.text = $"Player Credit : {_stashVm.CurPlayerCredit}";
                 }
                 break;
             case nameof(StashViewModel.HoveredItemId):
-                if (_vm.HoveredItemId != null)
+                if (_stashVm.HoveredItemId != null)
                 {
-                    ShopItemPopup.SetItemData(_vm.HoveredItemId);
+                    ShopItemPopup.SetItemData(_stashVm.HoveredItemId);
                 }
                 else
                 {
@@ -135,5 +96,15 @@ public class StashUI : UIBase
         {
             ShopItemPopup.HidePopup();
         }
+    }
+
+    private void OnSlotHoverEnter(string dataId)
+    {
+        _stashVm.HoveredItemId = dataId;
+    }
+
+    private void OnSlotHoverExit()
+    {
+        _stashVm.HoveredItemId = null;
     }
 }
