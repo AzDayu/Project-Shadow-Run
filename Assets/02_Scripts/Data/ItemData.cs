@@ -3,8 +3,31 @@ using UnityEngine;
 
 public enum WeaponPartsType
 {
-
+    None,       // 없음
+    Muzzle,     // 총구
+    Scope,      // 조준경
+    Magazine,   // 탄창
+    Grip,       // 손잡이
+    Stock       // 개머리판
 }
+
+public enum WeaponStatType
+{
+    Damage,
+    AttackInterval,
+    MagazineSize,
+    Accuracy,
+    Range,
+    ReloadTime
+}
+
+public enum WeaponStatModifierType
+{
+    Add,        // 합연산
+    Multiply,   // 곱연산
+    Override    // 덮어쓰기
+}
+
 public struct WeaponStat
 {
     public float Damage;
@@ -18,7 +41,7 @@ public struct WeaponStat
 [System.Serializable]
 public class ItemData
 {
-    public string ItemId;
+    public string Id;
     public string ItemName;
     public string ItemDescription;
     public string ItemType;
@@ -33,18 +56,7 @@ public class ItemData
     public string[] UseItemParameterList;
 }
 
-[System.Serializable]
-public class ItemDataList
-{
-    public ItemData[] Items;
-}
 
-[System.Serializable]
-public class ItemStack
-{
-    public ItemData Item;
-    public int StackCount;
-}
 [System.Serializable]
 public class WeaponData : ItemData
 {
@@ -54,7 +66,9 @@ public class WeaponData : ItemData
     public float Accuracy;
     public float Range;
     public float ReloadTime;
+    public float MaxDurability;
 }
+
 [System.Serializable]
 public class WeaponPartsData : ItemData
 {
@@ -67,15 +81,15 @@ public class WeaponPartsData : ItemData
 [System.Serializable]
 public class ItemModel
 {
-    public string InstanceId;      // 생성될 때마다 발급받는 고유 ID (예: Guid)
+    public string InstanceId;      // 생성될 때마다 발급받는 고유 ID
     public string ItemId;          // DataManager에서 원본 ItemData를 찾기 위한 Key
-    public int CurrentStackCount;  // 현재 겹쳐진 개수 (ItemStack 대체)
+    public int CurrentStackCount;  // 현재 겹쳐진 개수
 }
 
 [System.Serializable]
 public class WeaponModel : ItemModel
 {
-    public int CurrentAmmo;        // 현재 장전된 총알 수
-    public float CurrentDurability;// 현재 내구도
-    public List<ItemModel> AttachedParts; // 장착된 파츠들
+    public int CurrentAmmo;                 // 현재 장전된 총알 수
+    public float CurrentDurability;         // 현재 내구도
+    public List<ItemModel> AttachedParts;   // 장착된 파츠들
 }

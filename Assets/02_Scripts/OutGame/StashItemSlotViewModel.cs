@@ -9,7 +9,7 @@ public class StashItemSlotViewModel : ViewModelBase
     {
         OnPropertyChanged(nameof(ItemUniqueId));
         OnPropertyChanged(nameof(ItemDataId));
-        OnPropertyChanged(nameof(ItemDataWithStack));
+        OnPropertyChanged(nameof(ItemStackCount));
         OnPropertyChanged(nameof(IsSlotEmpty));
     }
 
@@ -41,16 +41,16 @@ public class StashItemSlotViewModel : ViewModelBase
         }
     }
 
-    private ItemStack _itemDataWithStack;
-    public ItemStack ItemDataWithStack
+    private int _itemStackCount;
+    public int ItemStackCount
     {
-        get => _itemDataWithStack;
+        get => _itemStackCount;
         set
         {
-            if (_itemDataWithStack != value)
+            if (_itemStackCount != value)
             {
-                _itemDataWithStack = value;
-                OnPropertyChanged(nameof(ItemDataWithStack));
+                _itemStackCount = value;
+                OnPropertyChanged(nameof(ItemStackCount));
             }
         }
     }
@@ -67,22 +67,5 @@ public class StashItemSlotViewModel : ViewModelBase
                 OnPropertyChanged(nameof(IsSlotEmpty));
             }
         }
-    }
-
-    public void Clear()
-    {
-        ItemUniqueId = 0;
-        ItemDataId = string.Empty;
-        ItemDataWithStack = null;
-        IsSlotEmpty = true;
-    }
-
-    public void SetItem(long uniqueId, ItemStack itemData) //일단은 유니크 아이디를 사용해서 개별적인 아이템의 구분을 하도록 로직을 작성했으나 이게 어떻게 될런지.
-    {
-        ItemUniqueId = uniqueId;
-        ItemDataId = itemData.Item.ItemId;
-        ItemDataWithStack.Item = itemData.Item;
-        ItemDataWithStack.StackCount = itemData.StackCount;
-        IsSlotEmpty = false;
     }
 }

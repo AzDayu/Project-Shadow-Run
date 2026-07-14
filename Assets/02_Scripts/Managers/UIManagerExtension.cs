@@ -24,7 +24,8 @@ public enum UIType
     MVVMTestUI,
     ShopUI,
     ShopItemPopupUI,
-    StashUI
+    StashUI,
+    StartUI
 }
 
 public static class UIManagerExtension
@@ -117,4 +118,22 @@ public static class UIManagerExtension
             ? CursorLockMode.None
             : CursorLockMode.Locked;
     }
+
+    public static void OpenStartUI(this UIManager uiManager)
+    {
+        var uiBase = uiManager.OpenUI(UIRootType.PopupUI, UIType.StartUI);
+        if (uiBase == null)
+        {
+            Debug.LogWarning($"UI가 생성되지 않았습니다");
+            return;
+        }
+        SetInventoryCursorState(true);
+    }
+
+    public static void CloseStartUI(this UIManager uiManager)
+    {
+        uiManager.CloseUI(UIRootType.PopupUI, UIType.StartUI);
+        SetInventoryCursorState(false);
+    }
+
 }

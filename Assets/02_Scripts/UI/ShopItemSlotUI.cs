@@ -10,14 +10,14 @@ public class ShopItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler
     [SerializeField] private TMP_Text Text_ItemPrice;
 
     private ShopItemSlotViewModel _slotVm;
-    public Action<ItemData> _onHoverEnter;
+    public Action<string> _onHoverEnter;
     public Action _onHoverExit;
 
     public ShopItemSlotType _curSlotType { get; set; }
     public int _slotIdx { get; set; }
     public int _itemDataId { get; set; }
 
-    public void Bind(ShopItemSlotViewModel slotVm, Action<ItemData> onHoverEnter, Action onHoverExit)
+    public void Bind(ShopItemSlotViewModel slotVm, Action<string> onHoverEnter, Action onHoverExit)
     {
         if (_slotVm != null)
         {
@@ -44,7 +44,7 @@ public class ShopItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler
         if (Text_ItemPrice == null || Image_ItemIcon == null) return;
 
         // 1. 빈 슬롯이거나 데이터가 없으면 투명하게 만들거나 숨기기
-        if (_slotVm == null || _slotVm.IsSlotEmpty || _slotVm.ItemDataWithStack.Item == null)
+        if (_slotVm.IsSlotEmpty == true)
         {
             Image_ItemIcon.enabled = false;  // 아이콘 숨기기
             Text_ItemPrice.text = string.Empty; // 가격 글자 지우기
@@ -55,9 +55,9 @@ public class ShopItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler
         Image_ItemIcon.enabled = true;
 
         if (_slotVm.SlotType == ShopItemSlotType.Shop)
-            Text_ItemPrice.text = $"{_slotVm.ItemDataWithStack.Item.SellingPrice} Credit";
+            Text_ItemPrice.text = $"{_slotVm.ItemStackCount} Credit";
         else
-            Text_ItemPrice.text = $"{_slotVm.ItemDataWithStack.Item.SellingPrice} Credit";
+            Text_ItemPrice.text = $"{_slotVm.ItemSellingPrice} Credit";
 
         // Image_ItemIcon.sprite = Resources.Load<Sprite>(_slotVm.ItemData.IconPath);
     }
@@ -66,7 +66,7 @@ public class ShopItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler
     {
         if (_slotVm != null && !_slotVm.IsSlotEmpty)
         {
-            _onHoverEnter?.Invoke(_slotVm.ItemDataWithStack.Item);
+            _onHoverEnter?.Invoke(_slotVm.ItemDataId);
         }
     }
 

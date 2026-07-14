@@ -18,15 +18,14 @@ public class PlayerInventorySlotUI : MonoBehaviour,
 
     private PlayerInventoryPopUpUI _owner;
     private int _slotIndex;
-    private ItemStack _itemStack;
+    private ItemModel _ItemModel;
 
     public int SlotIndex => _slotIndex;
-    public ItemStack ItemStack => _itemStack;
+    public ItemModel ItemModel => _ItemModel;
 
     public bool HasItem =>
-        _itemStack != null &&
-        _itemStack.Item != null &&
-        _itemStack.StackCount > 0;
+        _ItemModel != null &&
+        _ItemModel.CurrentStackCount > 0;
 
     public void Init(int slotIndex, PlayerInventoryPopUpUI owner)
     {
@@ -36,9 +35,9 @@ public class PlayerInventorySlotUI : MonoBehaviour,
         Clear();
     }
 
-    public void SetItem(ItemStack stack)
+    public void SetItem(ItemModel stack)
     {
-        _itemStack = stack;
+        _ItemModel = stack;
 
         if (!HasItem)
         {
@@ -48,16 +47,16 @@ public class PlayerInventorySlotUI : MonoBehaviour,
 
         if (ImageItemIcon != null)
         {
-            ImageItemIcon.sprite = ItemIconLoader.LoadIcon(_itemStack.Item);
+            ImageItemIcon.sprite = ItemIconLoader.LoadIcon(GameDataManager.Instance.GetItemDataById(stack.ItemId));
             ImageItemIcon.enabled = ImageItemIcon.sprite != null;
         }
 
         if (TextItemCount != null)
         {
-            bool showCount = _itemStack.StackCount > 1;
+            bool showCount = _ItemModel.CurrentStackCount > 1;
 
             TextItemCount.text = showCount
-                ? _itemStack.StackCount.ToString()
+                ? _ItemModel.CurrentStackCount.ToString()
                 : string.Empty;
 
             TextItemCount.enabled = showCount;
@@ -66,7 +65,7 @@ public class PlayerInventorySlotUI : MonoBehaviour,
 
     public void Clear()
     {
-        _itemStack = null;
+        _ItemModel = null;
 
         if (ImageItemIcon != null)
         {

@@ -3,7 +3,7 @@ using UnityEngine;
 using Newtonsoft.Json;
 using System;
 
-public class SaveManager
+public class SaveManager : MonoBehaviour
 {
     private static SaveManager _instance;
     public static SaveManager Instance
@@ -11,7 +11,11 @@ public class SaveManager
         get
         {
             if (_instance == null)
-                _instance = new SaveManager();
+            {
+                GameObject go = new GameObject("@SaveManager");
+                _instance = go.AddComponent<SaveManager>();
+                DontDestroyOnLoad(go);
+            }
             return _instance;
         }
     }
@@ -23,7 +27,7 @@ public class SaveManager
         TypeNameHandling = TypeNameHandling.Auto
     };
 
-    private SaveManager()
+    private void Awake()
     {
         _savePath = Path.Combine(Application.persistentDataPath, "PlayerData.json");
         Debug.Log($"SaveManager: 세이브 파일 경로 - {_savePath}");
@@ -68,7 +72,7 @@ public class SaveManager
         }
     }
 
-    private PlayerModel CreateNewPlayerData()
+    public PlayerModel CreateNewPlayerData()
     {
         PlayerModel newPlayer = new PlayerModel();
         newPlayer.PlayerName = "Shadow_Agent";

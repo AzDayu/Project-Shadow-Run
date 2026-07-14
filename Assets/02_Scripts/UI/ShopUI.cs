@@ -118,10 +118,10 @@ public class ShopUI : UIBase
                     Text_CurPlayerCredit.text = $"Player Credit : {_vm.CurPlayerCredit}";
                 }
                 break;
-            case nameof(ShopViewModel.HoveredItem):
-                if (_vm.HoveredItem != null)
+            case nameof(ShopViewModel.HoveredItemId):
+                if (_vm.HoveredItemId != null)
                 {
-                    ShopItemPopup.SetItemData(_vm.HoveredItem);
+                    ShopItemPopup.SetItemData(_vm.HoveredItemId);
                 }
                 else
                 {
