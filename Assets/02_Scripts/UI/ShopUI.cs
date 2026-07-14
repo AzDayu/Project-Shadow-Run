@@ -66,7 +66,6 @@ public class ShopUI : UIBase
 
     private void RebindSlotsZone(List<ShopItemSlotViewModel> slotVms, Transform parentContent)
     {
-        // parentContent 자식으로 붙어있는 ShopItemSlotUI들을 탐색하며 새로 바인딩
         int index = 0;
         foreach (Transform child in parentContent)
         {

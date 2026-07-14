@@ -4,9 +4,10 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class StashItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler
+public class StashItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     [SerializeField] private Image Image_ItemIcon;
+    [SerializeField] private TMP_Text Text_StackCount;
 
     private StashItemSlotViewModel _slotVm;
     public Action<string> _onHoverEnter;
@@ -16,7 +17,9 @@ public class StashItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler
     public int _slotIdx { get; set; }
     public int _itemDataId { get; set; }
 
-    public void Bind(StashItemSlotViewModel slotVm, Action<string> onHoverEnter, Action onHoverExit)
+    public Action<StashItemSlotViewModel, PointerEventData.InputButton> _onClickSlot;
+
+    public void Bind(StashItemSlotViewModel slotVm, Action<string> onHoverEnter, Action onHoverExit, Action<StashItemSlotViewModel, PointerEventData.InputButton> onClickSlot)
     {
         if (_slotVm != null)
         {
@@ -24,9 +27,9 @@ public class StashItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler
         }
 
         _slotVm = slotVm;
-
         _onHoverEnter = onHoverEnter;
         _onHoverExit = onHoverExit;
+        _onClickSlot = onClickSlot;
 
         _slotVm.PropertyChanged += OnSlotPropertyChanged;
         UpdateSlotUI();
@@ -41,14 +44,28 @@ public class StashItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler
     {
         if (_slotVm.IsSlotEmpty == true)
         {
-            Image_ItemIcon.enabled = false; 
+            Image_ItemIcon.enabled = false;
+            Text_StackCount.text = "";
             return;
         }
 
-        // 2. 아이템이 존재할 때 데이터 채우고 켜기
         Image_ItemIcon.enabled = true;
 
         // Image_ItemIcon.sprite = Resources.Load<Sprite>(_slotVm.ItemData.IconPath);
+
+        if (_slotVm.ItemStackCount <= 1)
+        {
+            Text_StackCount.text = ""; 
+        }
+        else
+        {
+            Text_StackCount.text = _slotVm.ItemStackCount.ToString(); 
+        }
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        _onClickSlot?.Invoke(_slotVm, eventData.button);
     }
 
     public void OnPointerEnter(PointerEventData eventData)
