@@ -25,7 +25,6 @@ public class StashUI : UIBase
     private List<StashItemSlotUI> _stashSlotUIList = new List<StashItemSlotUI>();
     private List<StashItemSlotUI> _invenSlotUIList = new List<StashItemSlotUI>();
 
-
     private StashViewModel _stashVm;
     //private InventoryViewModel _inventoryVm;
 

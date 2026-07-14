@@ -33,6 +33,6 @@ public class NetworkManager : MonoBehaviour
 
         stashVm.CurPlayerCredit = playerData.CurrentCredit;
 
-        // StashService.LoadStashData(playerData.StashItems);
+        StashService.LoadStashData(playerData.StashItems);
     }
 }

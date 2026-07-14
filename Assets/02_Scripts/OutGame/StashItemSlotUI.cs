@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Cysharp.Threading.Tasks;
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -51,7 +52,11 @@ public class StashItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler
 
         Image_ItemIcon.enabled = true;
 
-        // Image_ItemIcon.sprite = Resources.Load<Sprite>(_slotVm.ItemData.IconPath);
+        var itemData = GameDataManager.Instance.GetItemDataById(_slotVm.ItemDataId);
+        if (itemData != null)
+        {
+            GameUtil.LoadAndSetSpriteImage(Image_ItemIcon, itemData.IconPath).Forget();
+        }
 
         if (_slotVm.ItemStackCount <= 1)
         {
