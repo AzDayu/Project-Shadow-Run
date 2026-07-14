@@ -10,15 +10,3 @@ public static class WeaponStatCalculator
         return finalStat;
     }
 }
-
-public enum WeaponStatType 
-{
-
-
-
-
-}
-public enum WeaponStatModifierType 
-{
-
-}
