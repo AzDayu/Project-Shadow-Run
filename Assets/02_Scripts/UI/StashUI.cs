@@ -122,136 +122,6 @@ public class StashUI : UIBase
         }
     }
 
-    private void OnSlotClicked(StashItemSlotViewModel clickedSlotVm, PointerEventData.InputButton button)
-    {
-        if (button == PointerEventData.InputButton.Left)
-        {
-            HandleLeftClick(clickedSlotVm);
-        }
-        else if (button == PointerEventData.InputButton.Right)
-        {
-            HandleRightClick(clickedSlotVm);
-        }
-    }
-
-    private void HandleLeftClick(StashItemSlotViewModel clickedSlot)
-    {
-        // 1. 아무것도 안 들고 있는데 아이템이 있는 슬롯을 클릭 -> 1개 줍기
-        if (_heldStackCount == 0 && !clickedSlot.IsSlotEmpty)
-        {
-            PickupItem(clickedSlot);
-        }
-        // 2. 이미 들고 있는데 원래 꺼냈던 슬롯을 또 클릭 -> 1개 더 줍기
-        else if (_heldStackCount > 0 && clickedSlot == _originSlotVm)
-        {
-            // 원래 슬롯에 남은 갯수가 있어야만 더 주울 수 있음
-            if (_originSlotVm.ItemStackCount > 0)
-            {
-                PickupItem(clickedSlot);
-            }
-        }
-        // 3. 들고 있는데 '다른 슬롯(또는 빈 공간)'을 클릭 -> 해당 구역으로 내려놓기
-        else if (_heldStackCount > 0 && clickedSlot != _originSlotVm)
-        {
-            DropItemToArea(clickedSlot.SlotType);
-        }
-    }
-
-    private void HandleRightClick(StashItemSlotViewModel clickedSlot)
-    {
-        // 들고 있는 상태에서 우클릭 -> 1개씩 취소(원래 자리로 되돌려놓기)
-        if (_heldStackCount > 0)
-        {
-            ReturnOneItemToOrigin();
-        }
-    }
-
-    private void PickupItem(StashItemSlotViewModel slotVm)
-    {
-        if (_heldStackCount == 0)
-        {
-            _originSlotVm = slotVm;
-            DragSlotUI.gameObject.SetActive(true);
-
-            _dragSlotVm.ItemDataId = slotVm.ItemDataId;
-            _dragSlotVm.ItemUniqueId = slotVm.ItemUniqueId;
-        }
-
-        // 마우스 스택 증가, 슬롯 스택 감소
-        _heldStackCount++;
-        _originSlotVm.ItemStackCount--;
-
-        // 슬롯의 아이템을 다 집었다면 빈 슬롯 처리
-        if (_originSlotVm.ItemStackCount == 0)
-        {
-            _originSlotVm.IsSlotEmpty = true;
-        }
-
-        _dragSlotVm.ItemStackCount = _heldStackCount;
-        _dragSlotVm.IsSlotEmpty = false;
-    }
-
-    private void ReturnOneItemToOrigin()
-    {
-        _heldStackCount--;
-
-        // 원래 자리가 비어있었다면 다시 채워줌
-        if (_originSlotVm.IsSlotEmpty)
-        {
-            _originSlotVm.IsSlotEmpty = false;
-        }
-
-        _originSlotVm.ItemStackCount++;
-
-        // 다 돌려놨으면 마우스 아이콘 숨김
-        if (_heldStackCount == 0)
-        {
-            ClearCursorItem();
-        }
-        else
-        {
-            _dragSlotVm.ItemStackCount = _heldStackCount;
-        }
-    }
-
-    private void DropItemToArea(ShopItemSlotType targetAreaType)
-    {
-        // 확장을 위해 클릭한 구역이 인벤토리인지, 보관함인지 판단.
-        var targetSlots = _stashVm.StashSlots; //(targetAreaType == ShopItemSlotType.Inventory) ? _inventoryVm.InventorySlots : _stashVm.StashSlots;
-
-        // 해당 구역에서 빈 슬롯 찾기
-        foreach (var slot in targetSlots)
-        {
-            if (slot.IsSlotEmpty)
-            {
-                slot.ItemUniqueId = _originSlotVm.ItemUniqueId; 
-                slot.ItemDataId = _originSlotVm.ItemDataId;
-                slot.ItemStackCount = _heldStackCount;
-                slot.IsSlotEmpty = false;
-
-                // 원래 슬롯과의 연관성을 완전히 끊고 마우스 초기화
-                ClearCursorItem();
-                return;
-            }
-        }
-
-        // 대상 구역에 빈 슬롯이 없다면 취소(원래 자리로 복귀).
-        Debug.LogWarning("해당 구역에 빈 슬롯이 없습니다!");
-        while (_heldStackCount > 0)
-        {
-            ReturnOneItemToOrigin();
-        }
-    }
-
-    private void ClearCursorItem()
-    {
-        _originSlotVm = null;
-        _heldStackCount = 0;
-
-        _dragSlotVm.IsSlotEmpty = true;
-        DragSlotUI.gameObject.SetActive(false);
-    }
-
     private void OnClick_CloseButton()
     {
         CloseStashUI();
@@ -275,5 +145,189 @@ public class StashUI : UIBase
     private void OnSlotHoverExit()
     {
         _stashVm.HoveredItemId = null;
+    }
+
+    private void OnSlotClicked(StashItemSlotViewModel clickedSlotVm, PointerEventData.InputButton button)
+    {
+        if (button == PointerEventData.InputButton.Left)
+        {
+            HandleLeftClick(clickedSlotVm);
+        }
+        else if (button == PointerEventData.InputButton.Right)
+        {
+            HandleRightClick(clickedSlotVm);
+        }
+    }
+
+    private void HandleLeftClick(StashItemSlotViewModel clickedSlot)
+    {
+        if (_heldStackCount == 0)
+        {
+            // 1. 맨손일 때: 클릭한 슬롯의 아이템 '전부' 집어들기
+            if (!clickedSlot.IsSlotEmpty)
+            {
+                PickupAll(clickedSlot);
+            }
+        }
+        else
+        {
+            // 2. 아이템을 들고 있을 때
+            if (clickedSlot.IsSlotEmpty)
+            {
+                // 2-1. 빈 슬롯: 전부 내려놓기
+                PlaceAll(clickedSlot);
+            }
+            else if (clickedSlot.ItemDataId == _dragSlotVm.ItemDataId)
+            {
+                // 2-2. 같은 아이템: 전부 합치기 (이것이 유저님이 원하시던 기능!)
+                MergeAll(clickedSlot);
+            }
+            else
+            {
+                // 2-3. 다른 아이템: 서로 스왑(교체)하기
+                SwapItems(clickedSlot);
+            }
+        }
+    }
+
+    private void HandleRightClick(StashItemSlotViewModel clickedSlot)
+    {
+        if (_heldStackCount == 0)
+        {
+            // 1. 맨손일 때: 클릭한 슬롯에서 '1개만' 집기
+            if (!clickedSlot.IsSlotEmpty)
+            {
+                PickupOne(clickedSlot);
+            }
+        }
+        else
+        {
+            if (clickedSlot.IsSlotEmpty)
+            {
+                PlaceOne(clickedSlot);
+            }
+            else if (clickedSlot.ItemDataId == _dragSlotVm.ItemDataId)
+            {
+                PickupOne(clickedSlot);
+            }
+        }
+    }
+
+    // ==========================================
+    // 아래는 위 조작을 수행하는 헬퍼 메서드들입니다.
+    // ==========================================
+
+    private void PickupAll(StashItemSlotViewModel slotVm)
+    {
+        _heldStackCount = slotVm.ItemStackCount;
+
+        // 커서에 데이터 복사
+        _dragSlotVm.ItemDataId = slotVm.ItemDataId;
+        _dragSlotVm.ItemUniqueId = slotVm.ItemUniqueId;
+        _dragSlotVm.ItemStackCount = _heldStackCount;
+        _dragSlotVm.IsSlotEmpty = false;
+        DragSlotUI.gameObject.SetActive(true);
+
+        // 원래 슬롯 완전 초기화
+        ClearSlotData(slotVm);
+    }
+
+    private void PlaceAll(StashItemSlotViewModel targetSlot)
+    {
+        targetSlot.ItemDataId = _dragSlotVm.ItemDataId;
+        targetSlot.ItemUniqueId = _dragSlotVm.ItemUniqueId;
+        targetSlot.ItemStackCount = _heldStackCount;
+        targetSlot.IsSlotEmpty = false;
+
+        ClearCursorItem();
+    }
+
+    private void MergeAll(StashItemSlotViewModel targetSlot)
+    {
+        // TODO: 향후 GameDataManager를 통해 ItemData의 MaxStackSize를 가져와서 
+        // 한계치까지만 합치고 남은 건 마우스에 남기는 로직을 추가할 수 있습니다.
+
+        targetSlot.ItemStackCount += _heldStackCount;
+        ClearCursorItem();
+    }
+
+    private void SwapItems(StashItemSlotViewModel targetSlot)
+    {
+        // 타겟 슬롯의 데이터 임시 저장
+        string tempId = targetSlot.ItemDataId;
+        string tempUniqueId = targetSlot.ItemUniqueId;
+        int tempCount = targetSlot.ItemStackCount;
+
+        // 타겟 슬롯에 마우스 데이터 덮어쓰기
+        targetSlot.ItemDataId = _dragSlotVm.ItemDataId;
+        targetSlot.ItemUniqueId = _dragSlotVm.ItemUniqueId;
+        targetSlot.ItemStackCount = _heldStackCount;
+
+        // 마우스 커서에 임시 저장한 타겟 데이터 넣기
+        _dragSlotVm.ItemDataId = tempId;
+        _dragSlotVm.ItemUniqueId = tempUniqueId;
+        _heldStackCount = tempCount;
+        _dragSlotVm.ItemStackCount = _heldStackCount;
+    }
+
+    private void PickupOne(StashItemSlotViewModel slotVm)
+    {
+        if (_heldStackCount == 0)
+        {
+            _dragSlotVm.ItemDataId = slotVm.ItemDataId;
+            _dragSlotVm.ItemUniqueId = slotVm.ItemUniqueId;
+            _dragSlotVm.IsSlotEmpty = false;
+            DragSlotUI.gameObject.SetActive(true);
+        }
+
+        _heldStackCount++;
+        _dragSlotVm.ItemStackCount = _heldStackCount;
+
+        slotVm.ItemStackCount--;
+        if (slotVm.ItemStackCount == 0)
+        {
+            ClearSlotData(slotVm);
+        }
+    }
+
+    private void PlaceOne(StashItemSlotViewModel targetSlot)
+    {
+        if (targetSlot.IsSlotEmpty)
+        {
+            targetSlot.ItemDataId = _dragSlotVm.ItemDataId;
+            targetSlot.ItemUniqueId = _dragSlotVm.ItemUniqueId;
+            targetSlot.ItemStackCount = 0;
+            targetSlot.IsSlotEmpty = false;
+        }
+
+        targetSlot.ItemStackCount++;
+        _heldStackCount--;
+
+        if (_heldStackCount == 0)
+        {
+            ClearCursorItem();
+        }
+        else
+        {
+            _dragSlotVm.ItemStackCount = _heldStackCount;
+        }
+    }
+
+    private void ClearCursorItem()
+    {
+        _heldStackCount = 0;
+        _dragSlotVm.ItemDataId = string.Empty;
+        _dragSlotVm.ItemUniqueId = string.Empty;
+        _dragSlotVm.ItemStackCount = 0;
+        _dragSlotVm.IsSlotEmpty = true;
+        DragSlotUI.gameObject.SetActive(false);
+    }
+
+    private void ClearSlotData(StashItemSlotViewModel slotVm)
+    {
+        slotVm.ItemDataId = string.Empty;
+        slotVm.ItemUniqueId = string.Empty;
+        slotVm.ItemStackCount = 0;
+        slotVm.IsSlotEmpty = true;
     }
 }
