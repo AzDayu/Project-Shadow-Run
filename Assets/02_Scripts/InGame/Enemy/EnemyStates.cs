@@ -1,12 +1,15 @@
 ﻿using UnityEngine;
 using UnityEngine.AI;
+
 public abstract class BaseEnemyState : IState
 {
+    private const float FRONT_ANGLE = 90f;
+    private const float SIDE_ANGLE = 180f;
     // 자식 상태 클래스들이 공용으로 사용할 상태머신 참조
     protected EnemyStateMachine stateMachine;
 
     // 기본 감지 반경 세팅 (필요시 자식에서 따로 정의 가능)
-    protected float detectionRadius = 15f;
+    protected float detectionRadius = 20f;
     protected const float PatrolReloadRatio = 0.3f;
     protected const float CombatReloadRatio = 0f;
     float currentSpeed;
@@ -35,32 +38,42 @@ public abstract class BaseEnemyState : IState
 
             Vector3 targetPos = foundPlayer.position + Vector3.up * 0.5f;
             Vector3 direction = (targetPos - startPos).normalized;
+
             float distance = Vector3.Distance(startPos, targetPos);
+            float angle = Vector3.Angle(stateMachine.transform.forward, direction);
 
-           // Debug.Log($"[디버그] 1단계 오버랩 성공. {foundPlayer.name} 조준 중. 거리: {distance}");
-
-            bool isHit = Physics.Raycast(startPos, direction, out RaycastHit hit, distance, stateMachine._sightLayerMask);
-
-            if (isHit)
+            if (IsInDetectionRange(angle, distance))
             {
-                Color rayColor = hit.transform.CompareTag("Player") ? Color.green : Color.red;
-                Debug.DrawLine(startPos, hit.point, rayColor);
+                // Debug.Log($"[디버그] 1단계 오버랩 성공. {foundPlayer.name} 조준 중. 거리: {distance}");
 
-                if (hit.transform.CompareTag("Player"))
+                //bool isHit = Physics.Raycast(startPos, direction, out RaycastHit hit, distance, stateMachine._sightLayerMask);
+
+                //if (isHit)
+                //{
+                //    Color rayColor = hit.transform.CompareTag("Player") ? Color.green : Color.red;
+                //    Debug.DrawLine(startPos, hit.point, rayColor);
+
+                //    if (hit.transform.CompareTag("Player"))
+                //    {
+                //        stateMachine._targetPlayer = foundPlayer;
+                //        Debug.Log($"[{this.GetType().Name}] 성공: 플레이어를 직접 눈으로 확인했습니다!");
+                //        return true;
+                //    }
+                //    else
+                //    {
+                //        Debug.Log($"[{this.GetType().Name}] 실패: 플레이어 방향을 보았으나 중간에 [{hit.transform.name}]이(가) 가로막고 있습니다. 태그: {hit.transform.tag}");
+                //    }
+                //}
+                //else
+                //{
+                //    Debug.DrawRay(startPos, direction * distance, Color.yellow);
+                //    Debug.Log($"[{this.GetType().Name}] 실패: 플레이어 방향으로 레이저를 쐈으나 아무것도 맞지 않고 빗나갔습니다.");
+                //}
+                if (CanChaseTarget(foundPlayer))
                 {
                     stateMachine._targetPlayer = foundPlayer;
-                    Debug.Log($"[{this.GetType().Name}] 성공: 플레이어를 직접 눈으로 확인했습니다!");
                     return true;
                 }
-                else
-                {
-                    Debug.Log($"[{this.GetType().Name}] 실패: 플레이어 방향을 보았으나 중간에 [{hit.transform.name}]이(가) 가로막고 있습니다. 태그: {hit.transform.tag}");
-                }
-            }
-            else
-            {
-                Debug.DrawRay(startPos, direction * distance, Color.yellow);
-                Debug.Log($"[{this.GetType().Name}] 실패: 플레이어 방향으로 레이저를 쐈으나 아무것도 맞지 않고 빗나갔습니다.");
             }
         }
 
@@ -76,7 +89,8 @@ public abstract class BaseEnemyState : IState
 
         Vector3 direction = (targetPos - startPos).normalized;
         float distance = Vector3.Distance(startPos, targetPos);
-
+        if (distance > stateMachine._enemyBase.CurrentWeapon.Range)
+            return false;
         if (Physics.Raycast(startPos, direction, out RaycastHit hit, distance))
         {
             return hit.transform == stateMachine._targetPlayer;
@@ -114,6 +128,30 @@ public abstract class BaseEnemyState : IState
         {
             stateMachine.ChangeState(stateMachine._chaseState);
         }
+    }
+    protected bool IsInDetectionRange(float angle, float distance)
+    {
+        if (angle <= FRONT_ANGLE * 0.5f)
+            return distance <= stateMachine._enemyBase.FrontDetectDistance;
+
+        if (angle <= SIDE_ANGLE * 0.5f)
+            return distance <= stateMachine._enemyBase.SideDetectDistance;
+
+        return distance <= stateMachine._enemyBase.BackDetectDistance;
+    }
+    protected bool CanChaseTarget(Transform target) {
+        Vector3 startPos = stateMachine.transform.position + Vector3.up * 0.5f;
+        Vector3 targetPos = target.position + Vector3.up * 0.5f;
+
+        Vector3 direction = (targetPos - startPos).normalized;
+        float distance = Vector3.Distance(startPos, targetPos);
+
+        if (Physics.Raycast(startPos, direction, out RaycastHit hit, distance, stateMachine._sightLayerMask))
+        {
+            return hit.transform == target;
+        }
+
+        return false;
     }
 }
 public class EnemyIdleState : BaseEnemyState
@@ -235,7 +273,7 @@ public class EnemyChaseState : BaseEnemyState
             return;
         }
        
-        if (DetectPlayer())
+        if (CanChaseTarget(stateMachine._targetPlayer))
         {
             lostTimer = 0f;
             
@@ -244,7 +282,7 @@ public class EnemyChaseState : BaseEnemyState
             stateMachine._agent.SetDestination(stateMachine._lastDetectPosition);
 
 
-            if (Vector3.Distance(stateMachine.transform.position, stateMachine._targetPlayer.position) <= 10f)//적의 고유 공격사거리 설정 필요
+            if (Vector3.Distance(stateMachine.transform.position, stateMachine._targetPlayer.position) <= 15f)//적의 고유 공격사거리 설정 필요
             {
                 if (CanAttackTarget())
                 {

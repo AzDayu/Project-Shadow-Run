@@ -21,6 +21,7 @@ public class TestWeaponBase : MonoBehaviour
     public int MagazineSize => _currentWeaponStat.MagazineSize;
     public int RemainBullets => _remainBullets;
     public float AttackInterval => _currentWeaponStat.AttackInterval;
+    public float Range=>_currentWeaponStat.Range;
 
     protected Dictionary<WeaponPartsType, WeaponPartsData> _weaponPartsDic = new Dictionary<WeaponPartsType, WeaponPartsData>();
     public void Awake()
