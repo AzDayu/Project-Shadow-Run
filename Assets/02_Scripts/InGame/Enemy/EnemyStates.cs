@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.AI;
 public abstract class BaseEnemyState : IState
 {
     // 자식 상태 클래스들이 공용으로 사용할 상태머신 참조
@@ -38,7 +39,7 @@ public abstract class BaseEnemyState : IState
 
            // Debug.Log($"[디버그] 1단계 오버랩 성공. {foundPlayer.name} 조준 중. 거리: {distance}");
 
-            bool isHit = Physics.Raycast(startPos, direction, out RaycastHit hit, distance);
+            bool isHit = Physics.Raycast(startPos, direction, out RaycastHit hit, distance, stateMachine._sightLayerMask);
 
             if (isHit)
             {
@@ -65,6 +66,24 @@ public abstract class BaseEnemyState : IState
 
         return false;
     }
+    protected bool CanAttackTarget()
+    {
+        if (stateMachine._targetPlayer == null)
+            return false;
+
+        Vector3 startPos = stateMachine.transform.position + Vector3.up * 0.5f;
+        Vector3 targetPos = stateMachine._targetPlayer.position + Vector3.up * 0.5f;
+
+        Vector3 direction = (targetPos - startPos).normalized;
+        float distance = Vector3.Distance(startPos, targetPos);
+
+        if (Physics.Raycast(startPos, direction, out RaycastHit hit, distance))
+        {
+            return hit.transform == stateMachine._targetPlayer;
+        }
+
+        return false;
+    }
     protected void UpdateAnimation() 
     {
         currentSpeed = stateMachine._agent.velocity.magnitude;
@@ -87,7 +106,7 @@ public abstract class BaseEnemyState : IState
         {
             stateMachine.ChangeState(stateMachine._patrolState);
         }
-        else if (DetectPlayer())
+        else if (CanAttackTarget())
         {
             stateMachine.ChangeState(stateMachine._attackState);
         }
@@ -104,6 +123,7 @@ public class EnemyIdleState : BaseEnemyState
     public override void EnterState()
     {
         Debug.Log("상태 진입: [Idle] 대기상태.");
+        stateMachine.SetDebugStateColor(EnemyState.Idle);
     }
 
     public override void UpdateState()
@@ -120,6 +140,9 @@ public class EnemyIdleState : BaseEnemyState
 }
 public class EnemyPatrolState : BaseEnemyState
 {
+    private float _patrolRadius = 10f;
+    private Vector3 _patrolTarget;
+    private float _arriveDistance = 0.5f;
     public EnemyPatrolState(EnemyStateMachine stateMachine) : base(stateMachine)
     {
         this.detectionRadius = 15f;
@@ -129,11 +152,17 @@ public class EnemyPatrolState : BaseEnemyState
     {
         Debug.Log("상태 진입: [Patrol] 순찰을 시작합니다.");
         stateMachine._targetPlayer = null;
+        stateMachine.SetDebugStateColor(EnemyState.Patrol);
+        DoPatrol();
     }
 
     public override void UpdateState()
     {
         UpdateAnimation();
+        if (!stateMachine._agent.pathPending && stateMachine._agent.remainingDistance <= _arriveDistance) 
+        {
+            DoPatrol();
+        }
         if (DetectPlayer())
         {
             stateMachine.ChangeState(stateMachine._chaseState);
@@ -144,9 +173,23 @@ public class EnemyPatrolState : BaseEnemyState
             stateMachine.ChangeState(stateMachine._reloadState);
             return;
         }
+       
     }
 
     public override void ExitState() { }
+    public void DoPatrol() 
+    {
+        float radius = _patrolRadius;
+
+        Vector3 randomPos = stateMachine.transform.position + Random.insideUnitSphere * radius;
+
+        if (NavMesh.SamplePosition(randomPos, out NavMeshHit hit, radius, NavMesh.AllAreas))
+        {
+            _patrolTarget = hit.position;
+            stateMachine._agent.SetDestination(_patrolTarget);
+        }
+    }
+
 }
 public class EnemyInvestigateState : BaseEnemyState
 {
@@ -176,6 +219,7 @@ public class EnemyChaseState : BaseEnemyState
     public override void EnterState()
     {
         Debug.Log("[Chase] 추적 시작. 실시간 추격을 가동합니다.");
+        stateMachine.SetDebugStateColor(EnemyState.Chase);
         lostTimer = 0f;
 
         // 진입 순간의 속도를 추격 속도로 올려줍니다
@@ -202,8 +246,11 @@ public class EnemyChaseState : BaseEnemyState
 
             if (Vector3.Distance(stateMachine.transform.position, stateMachine._targetPlayer.position) <= 10f)//적의 고유 공격사거리 설정 필요
             {
-                Debug.Log("[Chase] 플레이어를 포착했습니다. 공격(Attack) 상태로 전환합니다.");
-                stateMachine.ChangeState(stateMachine._attackState);
+                if (CanAttackTarget())
+                {
+                    Debug.Log("[Chase] 플레이어를 포착했습니다. 공격(Attack) 상태로 전환합니다.");
+                    stateMachine.ChangeState(stateMachine._attackState);
+                }
             }
         }
         else
@@ -262,7 +309,7 @@ public class EnemyAttackState : BaseEnemyState
     public override void EnterState()
     {
         Debug.Log("[Attack] 상태 시작");
-
+        stateMachine.SetDebugStateColor(EnemyState.Attack);
         stateMachine._agent.ResetPath();
 
         targetLostTimer = 0f;
@@ -272,14 +319,10 @@ public class EnemyAttackState : BaseEnemyState
 
     public override void UpdateState()
     {
-        if (stateMachine._targetPlayer == null)
-        {
-            stateMachine.ChangeState(stateMachine._patrolState);
-            return;
-        }
-        RotateTowardsTarget(aimPosition);
+        // 플레이어 탐지 및 위치 갱신
+        bool detected = DetectPlayer();
 
-        if (!DetectPlayer())
+        if (!detected)
         {
             targetLostTimer += Time.deltaTime;
 
@@ -294,6 +337,15 @@ public class EnemyAttackState : BaseEnemyState
 
         targetLostTimer = 0f;
         stateMachine._lastDetectPosition = stateMachine._targetPlayer.position;
+
+        // 현재 사격 가능한 상황인지 판단
+        if (!CanAttackTarget())
+        {
+            stateMachine.ChangeState(stateMachine._chaseState);
+            return;
+        }
+
+        RotateTowardsTarget(aimPosition);
         switch (currentPhase)
         {
             case AttackPhase.Aim:
@@ -349,7 +401,7 @@ public class EnemyAttackState : BaseEnemyState
 
     private void RotateTowardsTarget(Vector3 aimPosition)
     {
-        Vector3 direction = aimPosition.normalized;
+        Vector3 direction =(aimPosition - stateMachine.transform.position).normalized;
         direction.y = 0; // 몬스터가 하늘이나 바닥으로 기울어지는 것 방지
 
         if (direction != Vector3.zero)
@@ -385,10 +437,15 @@ public class EnemyReloadState : BaseEnemyState
         _maxReloadTime = stateMachine._enemyBase.CurrentWeapon.ReloadTime;
         _reloadBulletAmount = stateMachine._enemyBase.CurrentWeapon.MagazineSize;
         _reloadTimer = 0f;
-        Debug.Log("[Reload] 재장전 시작."); 
+        Debug.Log("[Reload] 재장전 시작.");
+        stateMachine.SetDebugStateColor(EnemyState.Reload);
     }  // 이 상태로 처음 들어왔을 때 
     public override void UpdateState() 
     {
+        if (DetectPlayer())
+        {
+            stateMachine._lastDetectPosition = stateMachine._targetPlayer.position;
+        }
         _reloadTimer += Time.deltaTime;
         if (_reloadTimer >= _maxReloadTime) 
         {

@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 7556976190150187342}
   - component: {fileID: 5191606480542518365}
   - component: {fileID: 2860544325963731064}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Enemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -171,9 +171,13 @@ MonoBehaviour:
   _playerLayerMask:
     serializedVersion: 2
     m_Bits: 8
+  _sightLayerMask:
+    serializedVersion: 2
+    m_Bits: 127
   _agent: {fileID: 0}
   _targetPlayer: {fileID: 0}
   _lastDetectPosition: {x: 0, y: 0, z: 0}
+  _renderer: {fileID: 8811293881900265946}
   _animator: {fileID: 0}
   _enemyBase: {fileID: 0}
 --- !u!95 &2860544325963731064

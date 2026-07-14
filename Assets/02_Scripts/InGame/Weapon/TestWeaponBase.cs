@@ -53,16 +53,21 @@ public class TestWeaponBase : MonoBehaviour
         if (Physics.Raycast(firePosition, direction.normalized, out RaycastHit hit, _currentWeaponStat.Range))
         {
             Debug.DrawRay(firePosition, direction * hit.distance, Color.red, _currentWeaponStat.Range);
-            Debug.Log($"명중{_remainBullets}발 남음");
+           
             if (hit.transform.TryGetComponent<IDamageable>(out var damageable))
-            {
+            { 
+                Debug.Log($"명중{_remainBullets}발 남음");
                 damageable.TakeDamage(_currentWeaponStat.Damage);
             }
 
             else
             {
-                Debug.Log("빗나감");
+                Debug.Log($"빗나감{_remainBullets}발 남음");
             }
+        }
+        else
+        {
+            Debug.Log($"빗나감{_remainBullets}발 남음");
         }
 
     }

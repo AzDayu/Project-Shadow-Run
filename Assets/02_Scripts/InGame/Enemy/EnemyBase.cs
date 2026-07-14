@@ -13,6 +13,10 @@ public class EnemyBase : MonoBehaviour,IDamageable,IWeaponOwner
     {
         SetWeapon(_testWeapon);
     }
+    void Update()
+    {
+        Debug.DrawRay(transform.position + Vector3.up * 0.5f, transform.forward * 5f, Color.blue);
+    }
     public void SetWeapon(TestWeaponBase weapon)
     {
         CurrentWeapon = weapon;
