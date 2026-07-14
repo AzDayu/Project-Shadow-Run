@@ -81,7 +81,7 @@ public class ShopItemSlotViewModel : ViewModelBase
 
     public void SetItem(ItemStack itemData)
     {
-        ItemDataId = itemData.Item.ItemId;
+        ItemDataId = itemData.Item.Id;
         ItemDataWithStack.Item = itemData.Item;
         ItemDataWithStack.StackCount = itemData.StackCount;
         IsSlotEmpty = false;

@@ -51,7 +51,7 @@ public class InventoryManager : MonoBehaviour
         {
             ItemStack stack = _itemList[i];
 
-            if (stack.Item.ItemId != item.ItemId)
+            if (stack.Item.Id != item.Id)
                 continue;
 
             if (stack.StackCount >= item.MaxStackSize)
@@ -110,7 +110,7 @@ public class InventoryManager : MonoBehaviour
         {
             ItemStack stack = _itemList[i];
 
-            if (stack.Item.ItemId != itemId)
+            if (stack.Item.Id != itemId)
                 continue;
 
             int removeCount = Mathf.Min(stack.StackCount, remainCount);
@@ -144,7 +144,7 @@ public class InventoryManager : MonoBehaviour
 
         foreach (ItemStack stack in _itemList)
         {
-            if (stack.Item.ItemId != itemId)
+            if (stack.Item.Id != itemId)
                 continue;
 
             totalCount += stack.StackCount;
@@ -209,7 +209,7 @@ public class InventoryManager : MonoBehaviour
         Debug.Log($"아이템 드랍 요청: {stack.Item.ItemName} / Count: {count}");
 
         // TODO: 월드 드랍 오브젝트 생성
-        return TryRemoveItem(stack.Item.ItemId, count);
+        return TryRemoveItem(stack.Item.Id, count);
     }
 
     public bool TryRegisterQuickSlot(int inventorySlotIndex, int quickSlotIndex)
@@ -254,7 +254,7 @@ public class InventoryManager : MonoBehaviour
 
         // TODO: UseItemType / UseItemParameterList 기준으로 효과 적용
 
-        bool removed = TryRemoveItem(stack.Item.ItemId, 1);
+        bool removed = TryRemoveItem(stack.Item.Id, 1);
 
         if (removed)
             OnQuickSlotChanged?.Invoke();

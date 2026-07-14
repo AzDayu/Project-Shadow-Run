@@ -80,7 +80,7 @@ public class StashItemSlotViewModel : ViewModelBase
     public void SetItem(long uniqueId, ItemStack itemData) //일단은 유니크 아이디를 사용해서 개별적인 아이템의 구분을 하도록 로직을 작성했으나 이게 어떻게 될런지.
     {
         ItemUniqueId = uniqueId;
-        ItemDataId = itemData.Item.ItemId;
+        ItemDataId = itemData.Item.Id;
         ItemDataWithStack.Item = itemData.Item;
         ItemDataWithStack.StackCount = itemData.StackCount;
         IsSlotEmpty = false;
