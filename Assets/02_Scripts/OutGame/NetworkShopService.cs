@@ -22,6 +22,11 @@ public class NetworkShopService
         return shopVm;
     }
 
+    private void SetShopItem(string itemDataId, int ItemCount)
+    {
+        var itemData = GameDataManager.Instance.GetItemDataById(itemDataId);
+    }
+
     //플레이어가 상점에서 아이템을 구매할 때 사용되는 함수
     public void RequestBuyItem(int shopSlotIndex)
     {

@@ -15,13 +15,17 @@ public class StartUI :UIBase
     public void StartNewGame()
     {
         SaveManager.Instance.CreateNewPlayerData();
+        GameManager.Instance.StartInGame();
         UIManager.Instance.CloseStartUI();
+
     }
 
     public void LoadGame()
     {
         SaveManager.Instance.LoadPlayerData();
+        GameManager.Instance.StartInGame();
         UIManager.Instance.CloseStartUI();
+
     }
 
 }
