@@ -36,9 +36,9 @@ public class GameDataManager : MonoBehaviour
 
         foreach (ItemData item in dataList.Items)
         {
-            if (!_itemDataDict.ContainsKey(item.ItemId))
+            if (!_itemDataDict.ContainsKey(item.Id))
             {
-                _itemDataDict.Add(item.ItemId, item);
+                _itemDataDict.Add(item.Id, item);
             }
         }
 

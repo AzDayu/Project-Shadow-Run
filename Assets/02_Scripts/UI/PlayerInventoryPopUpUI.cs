@@ -129,12 +129,12 @@ public class PlayerInventoryPopUpUI : UIBase
         if (InventoryManager.Instance == null)
             return;
 
-        IReadOnlyList<ItemStack> itemStacks = InventoryManager.Instance.ItemList;
+        IReadOnlyList<ItemModel> ItemModels = InventoryManager.Instance.ItemList;
 
         for (int i = 0; i < _slotUIList.Count; i++)
         {
-            if (i < itemStacks.Count)
-                _slotUIList[i].SetItem(itemStacks[i]);
+            if (i < ItemModels.Count)
+                _slotUIList[i].SetItem(ItemModels[i]);
             else
                 _slotUIList[i].Clear();
         }
@@ -165,7 +165,7 @@ public class PlayerInventoryPopUpUI : UIBase
         _selectedSlot = slot;
         _selectedSlot.SetSelected(true);
 
-        Debug.Log($"선택 슬롯: {slot.SlotIndex}, 아이템: {slot.ItemStack.Item.ItemName}");
+        Debug.Log($"선택 슬롯: {slot.SlotIndex}, 아이템: {slot.ItemModel}");
     }
 
     public void TryUseItem(PlayerInventorySlotUI slot)
@@ -203,7 +203,7 @@ public class PlayerInventoryPopUpUI : UIBase
 
         SetPanelPositionClamped(ContextMenuRect, mousePosition + ContextMenuOffset);
 
-        Debug.Log($"우클릭 메뉴 열기: {slot.ItemStack.Item.ItemName}");
+        Debug.Log($"우클릭 메뉴 열기: {slot.ItemModel.ItemId}");
     }
 
     private void CloseContextMenu()
@@ -222,8 +222,8 @@ public class PlayerInventoryPopUpUI : UIBase
         if (ItemTooltipPanel == null || ItemTooltipRect == null)
             return;
 
-        ItemStack stack = slot.ItemStack;
-        ItemData item = stack.Item;
+        ItemModel stack = slot.ItemModel;
+        ItemData item = GameDataManager.Instance.GetItemDataById(stack.ItemId);
 
         if (TextTooltipName != null)
             TextTooltipName.text = item.ItemName;
@@ -315,9 +315,9 @@ public class PlayerInventoryPopUpUI : UIBase
         HideItemTooltip(slot);
         CloseContextMenu();
 
-        ShowDragSlot(slot.ItemStack, eventData.position);
+        ShowDragSlot(slot.ItemModel, eventData.position);
 
-        Debug.Log($"드래그 시작: {slot.ItemStack.Item.ItemName}");
+        Debug.Log($"드래그 시작: {slot.ItemModel.ItemId}");
     }
 
     public void DragSlot(PlayerInventorySlotUI slot, PointerEventData eventData)
@@ -333,7 +333,7 @@ public class PlayerInventoryPopUpUI : UIBase
         if (_draggingSlot == null)
             return;
 
-        Debug.Log($"드래그 종료: {_draggingSlot.ItemStack.Item.ItemName}");
+        Debug.Log($"드래그 종료: {_draggingSlot.ItemModel.ItemId}");
 
         PlayerQuickSlotUI quickSlotUI = GetQuickSlotUnderPointer(eventData);
 
@@ -412,7 +412,7 @@ public class PlayerInventoryPopUpUI : UIBase
         if (slot == null || !slot.HasItem)
             return;
 
-        ItemData item = slot.ItemStack.Item;
+        ItemData item = GameDataManager.Instance.GetItemDataById(slot.ItemModel.ItemId);
 
         bool canUse = item.ItemType == "Consumable";
         bool canRegisterQuickSlot =
@@ -429,9 +429,9 @@ public class PlayerInventoryPopUpUI : UIBase
             ButtonDrop.gameObject.SetActive(true);
     }
 
-    private void ShowDragSlot (ItemStack stack, Vector2 screenPosition)
+    private void ShowDragSlot (ItemModel stack, Vector2 screenPosition)
     {
-        if (stack == null || stack.Item == null)
+        if (stack == null)
             return;
 
         if (DragIconObject == null || DragIconRect == null || DragIconImage == null)
@@ -439,15 +439,16 @@ public class PlayerInventoryPopUpUI : UIBase
 
         DragIconObject.SetActive(true);
 
-        Sprite icon = ItemIconLoader.LoadIcon(stack.Item);
+        Sprite icon = ItemIconLoader.LoadIcon(GameDataManager.Instance.GetItemDataById(stack.ItemId));
 
         DragIconImage.sprite = icon;
         DragIconImage.gameObject.SetActive(icon != null);
 
         if (TextDragIconCount != null)
         {
-            TextDragIconCount.text = stack.StackCount > 1
-                ? stack.StackCount.ToString()
+            bool showCount = stack.CurrentStackCount > 1;
+            TextDragIconCount.text = showCount
+                ? stack.CurrentStackCount.ToString()
                 : string.Empty;
         }
 
