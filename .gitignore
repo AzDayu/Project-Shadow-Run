@@ -149,3 +149,9 @@ Assets/Thirdparty/Enviroment/Barking_Dog
 Assets/Thirdparty/Enviroment/SciFi Warehouse Kit
 Assets/Thirdparty/Enviroment/Sci-fi_assets
 Assets/Thirdparty/Enviroment/ScifiOfficeLite
+
+# Third Party Assets Ignore
+/[Aa]ssets/Thirdparty/
+/[Aa]ssets/Thirdparty.meta
+/[Aa]ssets/ThirdParty_Premium/
+/[Aa]ssets/ThirdParty_Premium.meta

@@ -534,6 +534,7 @@ GameObject:
   - component: {fileID: 815291810}
   - component: {fileID: 815291809}
   - component: {fileID: 815291808}
+  - component: {fileID: 815291812}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Untagged
@@ -594,6 +595,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &815291812
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 815291807}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a3a52523f76bf64c9518a96173806f9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SaveManager
 --- !u!1 &829092095
 GameObject:
   m_ObjectHideFlags: 0
@@ -1487,6 +1500,10 @@ PrefabInstance:
     - target: {fileID: 4160194660649870061, guid: 8793eb5a13dc45e4ca0bdb2bea7483f3, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: -110
+      objectReference: {fileID: 0}
+    - target: {fileID: 4381595555718922562, guid: 8793eb5a13dc45e4ca0bdb2bea7483f3, type: 3}
+      propertyPath: m_AdditionalShaderChannelsFlag
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 4455703014896394996, guid: 8793eb5a13dc45e4ca0bdb2bea7483f3, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
