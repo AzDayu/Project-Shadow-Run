@@ -51,7 +51,7 @@ public class InventoryManager : MonoBehaviour
         {
             ItemModel stack = _itemList[i];
 
-            if (stack.ItemId != item.ItemId)
+            if (stack.ItemId != item.Id)
                 continue;
 
             if (stack.CurrentStackCount >= item.MaxStackSize)
@@ -80,7 +80,7 @@ public class InventoryManager : MonoBehaviour
 
             int addCount = Mathf.Min(item.MaxStackSize, remainCount);
 
-            _itemList.Add(new ItemModel{ItemId = item.ItemId,CurrentStackCount = addCount});
+            _itemList.Add(new ItemModel{ItemId = item.Id,CurrentStackCount = addCount});
 
             remainCount -= addCount;
         }
