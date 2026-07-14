@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GameDataManager : MonoBehaviour
@@ -32,9 +33,8 @@ public class GameDataManager : MonoBehaviour
             return;
         }
 
-        ItemDataList dataList = JsonUtility.FromJson<ItemDataList>(jsonText.text);
-
-        foreach (ItemData item in dataList.Items)
+        List<ItemData> dataList = JsonConvert.DeserializeObject<List<ItemData>>(jsonText.text);
+        foreach (ItemData item in dataList)
         {
             if (!_itemDataDict.ContainsKey(item.Id))
             {
