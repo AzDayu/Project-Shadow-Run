@@ -8,25 +8,10 @@ public class ShopItemSlotViewModel : ViewModelBase
 
     public void InvokeOnceOnInit()
     {
-        OnPropertyChanged(nameof(ItemUniqueId));
         OnPropertyChanged(nameof(ItemDataId));
-        OnPropertyChanged(nameof(ItemDataWithStack));
-        OnPropertyChanged(nameof(ItemData));
+        OnPropertyChanged(nameof(ItemStackCount));
+        OnPropertyChanged(nameof(ItemSellingPrice));
         OnPropertyChanged(nameof(IsSlotEmpty));
-    }
-
-    private long _itemUniqueId;
-    public long ItemUniqueId
-    {
-        get => _itemUniqueId;
-        set
-        {
-            if (_itemUniqueId != value)
-            {
-                _itemUniqueId = value;
-                OnPropertyChanged(nameof(ItemUniqueId));
-            }
-        }
     }
 
     private string _itemDataId;
@@ -43,16 +28,30 @@ public class ShopItemSlotViewModel : ViewModelBase
         }
     }
 
-    private ItemStack _itemDataWithStack;
-    public ItemStack ItemDataWithStack
+    private int _itemStackCount;
+    public int ItemStackCount
     {
-        get => _itemDataWithStack;
+        get => _itemStackCount;
         set
         {
-            if (_itemDataWithStack != value)
+            if (_itemStackCount != value)
             {
-                _itemDataWithStack = value;
-                OnPropertyChanged(nameof(ItemDataWithStack));
+                _itemStackCount = value;
+                OnPropertyChanged(nameof(ItemStackCount));
+            }
+        }
+    }
+
+    private int _itemSellingPrice;
+    public int ItemSellingPrice
+    {
+        get => _itemSellingPrice;
+        set
+        {
+            if (_itemSellingPrice != value)
+            {
+                _itemSellingPrice = value;
+                OnPropertyChanged(nameof(ItemSellingPrice));
             }
         }
     }
@@ -69,21 +68,5 @@ public class ShopItemSlotViewModel : ViewModelBase
                 OnPropertyChanged(nameof(IsSlotEmpty));
             }
         }
-    }
-
-    public void Clear()
-    {
-        ItemUniqueId = 0;
-        ItemDataId = string.Empty;
-        ItemDataWithStack = null;
-        IsSlotEmpty = true;
-    }
-
-    public void SetItem(ItemStack itemData)
-    {
-        ItemDataId = itemData.Item.ItemId;
-        ItemDataWithStack.Item = itemData.Item;
-        ItemDataWithStack.StackCount = itemData.StackCount;
-        IsSlotEmpty = false;
     }
 }

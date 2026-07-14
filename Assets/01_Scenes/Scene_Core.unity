@@ -368,6 +368,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &474467593 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5800327542317635435, guid: 8793eb5a13dc45e4ca0bdb2bea7483f3, type: 3}
+  m_PrefabInstance: {fileID: 1475136443}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &668105000
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -478,7 +483,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d6cfa3f3d0be1224a96c2efbe4db64ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InGameExit
-  _targetDestination: {fileID: 1191672790}
+  _targetDestination: {fileID: 474467593}
   _waitTime: 3
   _targetTag: Player
 --- !u!65 &716753802
@@ -560,8 +565,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c321f7c9ee5c8940be9126943755ae6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
-  _outGameWorkspacePrefab: {fileID: 1475136444}
-  _inGameWorkspacePrefab: {fileID: 1258468134}
+  _outGameWorkspacePrefab: {fileID: 0}
+  _inGameWorkspacePrefab: {fileID: 0}
 --- !u!114 &815291810
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1134,11 +1139,6 @@ PrefabInstance:
       addedObject: {fileID: 2046955214}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7dae6faf0eccc0e449ab3c71fc126562, type: 3}
---- !u!1 &1258468134 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6080165004189413221, guid: 7dae6faf0eccc0e449ab3c71fc126562, type: 3}
-  m_PrefabInstance: {fileID: 1258468133}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1258468135 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 907300369390396353, guid: 7dae6faf0eccc0e449ab3c71fc126562, type: 3}
@@ -1745,11 +1745,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8793eb5a13dc45e4ca0bdb2bea7483f3, type: 3}
---- !u!1 &1475136444 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2135513008471745078, guid: 8793eb5a13dc45e4ca0bdb2bea7483f3, type: 3}
-  m_PrefabInstance: {fileID: 1475136443}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1533543470
 GameObject:
   m_ObjectHideFlags: 0

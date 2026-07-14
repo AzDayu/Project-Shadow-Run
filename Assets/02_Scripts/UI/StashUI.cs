@@ -11,12 +11,12 @@ public class StashUI : UIBase
     [SerializeField] private Button Button_CloseSelf;
     [SerializeField] private ShopItemPopupUI ShopItemPopup; 
 
-    [SerializeField] private ShopItemSlotUI Prefab_ShopItemSlotUI; //이건 확실하게 상점 슬롯과 분리해야할 듯(가격이 없는 버전으로) -> 상점뷰모델 같이 쓰고 UI만 분리할까 고민중.
+    [SerializeField] private StashItemSlotUI Prefab_ShopItemSlotUI; 
     [SerializeField] private Transform Transform_InventoryContent;
     [SerializeField] private Transform Transform_StashContent;
 
     private StashViewModel _vm;
-    private List<ShopItemSlotUI> _instantiatedSlots = new List<ShopItemSlotUI>();
+    private List<StashItemSlotUI> _instantiatedSlots = new List<StashItemSlotUI>();
     private bool _isInitialized = false;
 
     public void BindViewModel(StashViewModel vm)
@@ -45,17 +45,17 @@ public class StashUI : UIBase
         _vm.InvokeOnceOnInit();
     }
 
-    private void SpawnSlotsZone(List<ShopItemSlotViewModel> slotVms, Transform parentContent)
+    private void SpawnSlotsZone(List<StashItemSlotViewModel> slotVms, Transform parentContent)
     {
         foreach (var slotVm in slotVms)
         {
-            ShopItemSlotUI slotUi = Instantiate(Prefab_ShopItemSlotUI, parentContent);
+            StashItemSlotUI slotUi = Instantiate(Prefab_ShopItemSlotUI, parentContent);
             slotUi.Bind(slotVm, _vm.OnSlotPointerEnter, _vm.OnSlotPointerExit);
             _instantiatedSlots.Add(slotUi);
         }
     }
 
-    private void RebindSlotsZone(List<ShopItemSlotViewModel> slotVms, Transform parentContent)
+    private void RebindSlotsZone(List<StashItemSlotViewModel> slotVms, Transform parentContent)
     {
         // parentContent 자식으로 붙어있는 ShopItemSlotUI들을 탐색하며 새로 바인딩
         int index = 0;
@@ -63,7 +63,7 @@ public class StashUI : UIBase
         {
             if (index >= slotVms.Count) break;
 
-            if (child.TryGetComponent<ShopItemSlotUI>(out var slotUi))
+            if (child.TryGetComponent<StashItemSlotUI>(out var slotUi))
             {
                 slotUi.Bind(slotVms[index], _vm.OnSlotPointerEnter, _vm.OnSlotPointerExit);
                 index++;
@@ -109,10 +109,10 @@ public class StashUI : UIBase
                     Text_CurPlayerCredit.text = $"Player Credit : {_vm.CurPlayerCredit}";
                 }
                 break;
-            case nameof(StashViewModel.HoveredItem):
-                if (_vm.HoveredItem != null)
+            case nameof(StashViewModel.HoveredItemId):
+                if (_vm.HoveredItemId != null)
                 {
-                    ShopItemPopup.SetItemData(_vm.HoveredItem);
+                    ShopItemPopup.SetItemData(_vm.HoveredItemId);
                 }
                 else
                 {
