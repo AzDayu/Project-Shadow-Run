@@ -1,23 +1,24 @@
-﻿using System;
+﻿using Cysharp.Threading.Tasks;
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class ShopItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler
+public class ShopItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     [SerializeField] private Image Image_ItemIcon;
+    [SerializeField] private TMP_Text Text_StackCount;
     [SerializeField] private TMP_Text Text_ItemPrice;
+
 
     private ShopItemSlotViewModel _slotVm;
     public Action<string> _onHoverEnter;
     public Action _onHoverExit;
 
-    public ShopItemSlotType _curSlotType { get; set; }
-    public int _slotIdx { get; set; }
-    public int _itemDataId { get; set; }
+    public Action<ShopItemSlotViewModel, PointerEventData.InputButton> _onClickSlot;
 
-    public void Bind(ShopItemSlotViewModel slotVm, Action<string> onHoverEnter, Action onHoverExit)
+    public void Bind(ShopItemSlotViewModel slotVm, Action<string> onHoverEnter, Action onHoverExit, Action<ShopItemSlotViewModel, PointerEventData.InputButton> onClickSlot)
     {
         if (_slotVm != null)
         {
@@ -25,9 +26,9 @@ public class ShopItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler
         }
 
         _slotVm = slotVm;
-
         _onHoverEnter = onHoverEnter;
         _onHoverExit = onHoverExit;
+        _onClickSlot = onClickSlot;
 
         _slotVm.PropertyChanged += OnSlotPropertyChanged;
         UpdateSlotUI();
@@ -35,7 +36,6 @@ public class ShopItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler
 
     private void OnSlotPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        // 슬롯 데이터가 바뀌면 UI 새로고침
         UpdateSlotUI();
     }
 
@@ -43,23 +43,37 @@ public class ShopItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler
     {
         if (Text_ItemPrice == null || Image_ItemIcon == null) return;
 
-        // 1. 빈 슬롯이거나 데이터가 없으면 투명하게 만들거나 숨기기
         if (_slotVm.IsSlotEmpty == true)
         {
-            Image_ItemIcon.enabled = false;  // 아이콘 숨기기
-            Text_ItemPrice.text = string.Empty; // 가격 글자 지우기
+            Image_ItemIcon.enabled = false;  
+            Text_ItemPrice.text = string.Empty;
+            Text_StackCount.text = string.Empty;
             return;
         }
 
-        // 2. 아이템이 존재할 때 데이터 채우고 켜기
         Image_ItemIcon.enabled = true;
 
-        if (_slotVm.SlotType == ShopItemSlotType.Shop)
-            Text_ItemPrice.text = $"{_slotVm.ItemStackCount} Credit";
-        else
-            Text_ItemPrice.text = $"{_slotVm.ItemSellingPrice} Credit";
+        var itemData = GameDataManager.Instance.GetItemDataById(_slotVm.ItemDataId);
+        if (itemData != null)
+        {
+            GameUtil.LoadAndSetSpriteImage(Image_ItemIcon, itemData.IconPath).Forget();
+        }
 
-        // Image_ItemIcon.sprite = Resources.Load<Sprite>(_slotVm.ItemData.IconPath);
+        Text_ItemPrice.text = $"{_slotVm.ItemSellingPrice} Credit";
+
+        if (_slotVm.ItemStackCount <= 1)
+        {
+            Text_StackCount.text = "";
+        }
+        else
+        {
+            Text_StackCount.text = _slotVm.ItemStackCount.ToString();
+        }
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        _onClickSlot?.Invoke(_slotVm, eventData.button);
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -79,5 +93,4 @@ public class ShopItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler
     {
         if (_slotVm != null) _slotVm.PropertyChanged -= OnSlotPropertyChanged;
     }
-
 }
