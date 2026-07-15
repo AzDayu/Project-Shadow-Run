@@ -13,8 +13,8 @@ public class StashItemSlotViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsSlotEmpty));
     }
 
-    private long _itemUniqueId;
-    public long ItemUniqueId
+    private string _itemUniqueId;
+    public string ItemUniqueId
     {
         get => _itemUniqueId;
         set
