@@ -38,7 +38,7 @@ public class TakeMedicine : MonoBehaviour
             StopCoroutine(_healingCoroutine);
         }
 
-        StartCoroutine(RecoveryRoutine());
+        _healingCoroutine = StartCoroutine(RecoveryRoutine());
     }
 
     private IEnumerator RecoveryRoutine( )
@@ -51,13 +51,13 @@ public class TakeMedicine : MonoBehaviour
         // 지속 시간(healRate)이 경과할 때까지 1초마다 반복
         while (_elapsed < healRate)
         {
-            yield return new WaitForSeconds(1f);
-            _elapsed = _elapsed + 1f; // 1초씩 누적
-
             // PlayerStatusModel.cs의 회복 함수 호출
-            _playerStatus.RecoverHP(healAmount);
+            _playerStatus.RecoverHP(healAmount); // 즉시 회복 
+            _elapsed = _elapsed + 1f;            // 시간 누적 1초 간격
 
             Debug.Log($"[회복 중] 현재 체력: {_playerStatus.CurrentHP} | 남은 지속 시간: {healRate - _elapsed}초");
+
+            yield return new WaitForSeconds(1f); // 회복 후 1초 간격
         }
         _healingCoroutine = null;
     }

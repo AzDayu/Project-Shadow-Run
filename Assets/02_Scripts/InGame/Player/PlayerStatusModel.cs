@@ -53,7 +53,6 @@ public class PlayerStatusModel
             MaxHP
         );
 
-        // 변경 사항이 없으면 이벤트를 실행하지 않고 리턴
         if (Mathf.Approximately(previousHP, CurrentHP))
             return;
 
