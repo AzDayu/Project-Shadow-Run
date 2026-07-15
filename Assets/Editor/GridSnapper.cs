@@ -121,15 +121,16 @@ public class GridSnapper : EditorWindow
     private List<Transform> FindAllSocketsInObject(Transform root)
     {
         List<Transform> sockets = new List<Transform>();
-        // 🌟 [수정 1] false를 넣어 원초적으로 꺼진 오브젝트 탐색 방지
+        // false를 넣어 꺼진 오브젝트 탐색 방지
         Transform[] allChildren = root.GetComponentsInChildren<Transform>(false);
 
         foreach (Transform child in allChildren)
         {
-            if (child.parent != null && child.parent.name == "MatchPoint")
+            // 🌟 [변경] 자식의 이름이 "Socket"인 것을 바로 찾습니다.
+            if (child.name == "Socket")
             {
-                // 부모(MatchPoint)와 자식(01, 02)이 모두 진짜 켜져 있는지 이중으로 확실하게 체크합니다.
-                if (child.gameObject.activeInHierarchy && child.parent.gameObject.activeInHierarchy)
+                // 🌟 [변경] 부모의 active 상태를 체크할 필요 없이, Socket 본인의 활성화 상태만 체크합니다.
+                if (child.gameObject.activeInHierarchy)
                 {
                     sockets.Add(child);
                 }
@@ -142,14 +143,15 @@ public class GridSnapper : EditorWindow
     private List<Transform> FindAllSocketsInScene(GameObject excludeObj)
     {
         List<Transform> sceneSockets = new List<Transform>();
-        Transform[] allTransforms = FindObjectsOfType<Transform>();
+        Transform[] allTransforms = Object.FindObjectsByType<Transform>(FindObjectsSortMode.None);
 
         foreach (Transform t in allTransforms)
         {
-            if (!t.IsChildOf(excludeObj.transform) && t.parent != null && t.parent.name == "MatchPoint")
+            // 🌟 [변경] 내 자식이 아니면서, 이름이 정확히 "Socket"인 대상을 찾습니다.
+            if (!t.IsChildOf(excludeObj.transform) && t.name == "Socket")
             {
-                // 여기도 마찬가지로 완벽한 이중 활성화 체크를 적용합니다.
-                if (t.gameObject.activeInHierarchy && t.parent.gameObject.activeInHierarchy)
+                // 🌟 [변경] Socket 자체의 활성화 상태만 이중 체크 없이 깔끔하게 검사합니다.
+                if (t.gameObject.activeInHierarchy)
                 {
                     sceneSockets.Add(t);
                 }
