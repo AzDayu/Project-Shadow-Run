@@ -325,6 +325,7 @@ GameObject:
   - component: {fileID: 7588999015336974005}
   - component: {fileID: 6622171463591126358}
   - component: {fileID: 4183498448615601335}
+  - component: {fileID: 4968580984755581381}
   m_Layer: 3
   m_Name: Player
   m_TagString: Player
@@ -518,6 +519,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerQuickSlotInputController
   _playerInputHandler: {fileID: 2594667027422455901}
+--- !u!114 &4968580984755581381
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7834500494340706646}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1efc4f78c63f98c40bea7f072bfff5dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerShootTest
+  mainCamera: {fileID: 0}
+  inputHandler: {fileID: 2594667027422455901}
+  range: 100
 --- !u!1 &8761221876698149512
 GameObject:
   m_ObjectHideFlags: 0

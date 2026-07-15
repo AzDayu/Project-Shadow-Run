@@ -37,11 +37,11 @@ public class PlayerWeapon : MonoBehaviour
         // UseItemParameterList의 문자열 데이터를 숫자로 변환하여 할당
         if (weaponData.UseItemParameterList != null && weaponData.UseItemParameterList.Length >= 5)
         {
-            int.Parse(weaponData.UseItemParameterList[0]);
-            float.Parse(weaponData.UseItemParameterList[1]);
-            float.Parse(weaponData.UseItemParameterList[2]);
-            int.Parse(weaponData.UseItemParameterList[3]);
-            float.Parse(weaponData.UseItemParameterList[4]);
+          //int.Parse(weaponData.UseItemParameterList[0]);
+          //float.Parse(weaponData.UseItemParameterList[1]);
+          //float.Parse(weaponData.UseItemParameterList[2]);
+          //int.Parse(weaponData.UseItemParameterList[3]);
+          //float.Parse(weaponData.UseItemParameterList[4]);
         }
 
         currentMag = stat.MagazineSize;

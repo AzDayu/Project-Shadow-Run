@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using Newtonsoft.Json;
 
 public enum WeaponPartsType
 {
@@ -39,9 +40,8 @@ public struct WeaponStat
 }
 
 [System.Serializable]
-public class ItemData
+public class ItemData : BaseData
 {
-    public string Id;
     public string ItemName;
     public string ItemDescription;
     public string ItemType;
@@ -53,7 +53,8 @@ public class ItemData
     public string PrefabPath;
 
     public string UseItemType;
-    public string[] UseItemParameterList;
+    public string UseItemParameterList;
+    public string[] UseItemParameter;
 }
 
 
@@ -67,6 +68,7 @@ public class WeaponData : ItemData
     public float Range;
     public float ReloadTime;
     public float MaxDurability;
+
 }
 
 [System.Serializable]

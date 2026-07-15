@@ -11,33 +11,21 @@ public class DataManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-
-
         LoadFullData();
     }
 
-    [Serializable]
-    private class SerializationWrapper<T>
-    {
-        public List<T> items; // JSON 파일의 루트 키 이름이 "items"여야 함
-    }
-    
-    
+
     public Dictionary<string, PreloadData> _preloadDataDic { get; private set; } = new Dictionary<string, PreloadData>();
     public Dictionary<string, ObjectPoolData> _objectPoolDataDic { get; private set; } = new Dictionary<string, ObjectPoolData>();
     public Dictionary<string, EnemyData> _enemyDataDic { get; private set; } = new Dictionary<string, EnemyData>();
 
+    public Dictionary<string, ItemData> _itemDataDic { get; private set; } = new Dictionary<string, ItemData>();
 
     private Dictionary<string, T> LoadData<T>(string tableName) where T : BaseData
     {
-        // 1. 경로 설정 (확장자 .json 제외!)
-        // Resources/JsonOutput 폴더
-        string resourcePath = $"JsonOutput/{tableName}";
-
-        // 2. 리소스 로드
+        string resourcePath = $"Data/{tableName}";
         TextAsset textAsset = Resources.Load<TextAsset>(resourcePath);
 
-        // 3. 파일 존재 여부 체크
         if (textAsset == null)
         {
             Debug.LogError($"[Error] 리소스를 찾을 수 없습니다: Resources/{resourcePath}");
@@ -46,17 +34,12 @@ public class DataManager : MonoBehaviour
 
         try
         {
-            string jsonString = textAsset.text;
+            List<T> dataList = JsonConvert.DeserializeObject<List<T>>(textAsset.text);
 
-            // 4. JsonUtility용 Wrapper 트릭 적용
-            string wrappedJson = "{\"items\":" + jsonString + "}";
-            SerializationWrapper<T> wrapper = JsonUtility.FromJson<SerializationWrapper<T>>(wrappedJson);
-
-            if (wrapper != null && wrapper.items != null)
+            if (dataList != null)
             {
-                Debug.Log($"{typeof(T).Name} 데이터를 {wrapper.items.Count}개 로드했습니다.");
-                // ToDictionary를 사용하려면 각 클래스(T)에 Id 필드가 있어야 합니다.
-                return wrapper.items.ToDictionary(item => item.Id.ToString());
+                Debug.Log($"{typeof(T).Name} 데이터를 {dataList.Count}개 로드했습니다.");
+                return dataList.ToDictionary(item => item.Id.ToString());
             }
         }
         catch (Exception ex)
@@ -66,46 +49,22 @@ public class DataManager : MonoBehaviour
 
         return new Dictionary<string, T>();
     }
-    
-    
-    public void LoadPreloadData(string jsonPath)
-    {
-        _preloadDataDic = LoadData<PreloadData>(jsonPath);
-    }
-    public void LoadObjectPoolData(string jsonPath)
-    {
-        _objectPoolDataDic = LoadData<ObjectPoolData>(jsonPath);
-    }
-    public void LoadEnemyData(string jsonPath)
-    {
-        _enemyDataDic = LoadData<EnemyData>(jsonPath);
-    }
 
-    public PreloadData GetPreloadData(string id)
-    {
+    public void LoadPreloadData(string jsonPath) => _preloadDataDic = LoadData<PreloadData>(jsonPath);
+    public void LoadObjectPoolData(string jsonPath) => _objectPoolDataDic = LoadData<ObjectPoolData>(jsonPath);
+    public void LoadEnemyData(string jsonPath) => _enemyDataDic = LoadData<EnemyData>(jsonPath);
+    public void LoadItemData(string jsonPath) => _itemDataDic = LoadData<ItemData>(jsonPath);
 
-        if (_preloadDataDic == null || string.IsNullOrEmpty(id)) return null;
-        return _preloadDataDic.TryGetValue(id, out var data) ? data : null;
+    public PreloadData GetPreloadData(string id) => _preloadDataDic != null && _preloadDataDic.TryGetValue(id, out var data) ? data : null;
+    public ObjectPoolData GetObjectPoolData(string id) => _objectPoolDataDic != null && _objectPoolDataDic.TryGetValue(id, out var data) ? data : null;
+    public EnemyData GetEnemyData(string id) => _enemyDataDic != null && _enemyDataDic.TryGetValue(id, out var data) ? data : null;
+    public ItemData GetItemData(string id) => _itemDataDic != null && _itemDataDic.TryGetValue(id, out var data) ? data : null;
 
-    }
-    public ObjectPoolData GetObjectPoolData(string id)
-    {
-
-        if (_objectPoolDataDic == null || string.IsNullOrEmpty(id)) return null;
-        return _objectPoolDataDic.TryGetValue(id, out var data) ? data : null;
-
-    }
-    public EnemyData GetEnemyData(string id)
-    {
-
-        if (_enemyDataDic == null || string.IsNullOrEmpty(id)) return null;
-        return _enemyDataDic.TryGetValue(id, out var data) ? data : null;
-
-    }
     public void LoadFullData()
     {
         LoadPreloadData("PreloadData");
         LoadObjectPoolData("ObjectPoolData");
         LoadEnemyData("EnemyData");
+        LoadItemData("ItemData");
     }
 }
