@@ -81,8 +81,10 @@ public abstract class BaseEnemyState : IState
     }
     protected bool CanAttackTarget()
     {
-        if (stateMachine._targetPlayer == null)
+        if (stateMachine._targetPlayer == null) {
+            Debug.Log("[CanAttackTarget] 사격이 불가능 합니다. 타겟이 없습니다.");
             return false;
+        }
 
         Vector3 startPos = stateMachine.transform.position + Vector3.up * 0.5f;
         Vector3 targetPos = stateMachine._targetPlayer.position + Vector3.up * 0.5f;
@@ -90,12 +92,19 @@ public abstract class BaseEnemyState : IState
         Vector3 direction = (targetPos - startPos).normalized;
         float distance = Vector3.Distance(startPos, targetPos);
         if (distance > stateMachine._enemyBase.CurrentWeapon.Range)
-            return false;
-        if (Physics.Raycast(startPos, direction, out RaycastHit hit, distance))
         {
+            Debug.Log("[CanAttackTarget] 사격이 불가능 합니다. 거리가 안됩니다.");
+            return false;
+        }
+        if (Physics.Raycast(startPos, direction, out RaycastHit hit, distance, stateMachine._shootLayerMask))
+        {
+            Debug.Log($"맞은 오브젝트 : {hit.transform.name}, Layer : {LayerMask.LayerToName(hit.transform.gameObject.layer)}");
+            Debug.Log($"타겟 : {stateMachine._targetPlayer.name}");
+
+            Debug.Log($"[CanAttackTarget] 사격여부{hit.transform == stateMachine._targetPlayer}타겟에 맞았는지");
             return hit.transform == stateMachine._targetPlayer;
         }
-
+        Debug.Log("[CanAttackTarget] 사격이 불가능 합니다. 그외.");
         return false;
     }
     protected void UpdateAnimation() 
@@ -105,7 +114,7 @@ public abstract class BaseEnemyState : IState
         {
             currentSpeed = 0f;
         }
-        stateMachine._animator.SetFloat("MoveSpeed", currentSpeed);
+        stateMachine._animController.ChangeAnimState(EnemyAnimState.Move, currentSpeed);
     }
     protected bool NeedReload(float ratio)
     {
@@ -358,7 +367,7 @@ public class EnemyAttackState : BaseEnemyState
     public override void UpdateState()
     {
         // 플레이어 탐지 및 위치 갱신
-        bool detected = DetectPlayer();
+        bool detected = CanChaseTarget(stateMachine._targetPlayer);
 
         if (!detected)
         {
@@ -380,6 +389,7 @@ public class EnemyAttackState : BaseEnemyState
         if (!CanAttackTarget())
         {
             stateMachine.ChangeState(stateMachine._chaseState);
+            Debug.Log("[Attack] 사격이 불가능 합니다. 추격으로 전환합니다.");
             return;
         }
 
@@ -423,11 +433,12 @@ public class EnemyAttackState : BaseEnemyState
     public override void ExitState()
     {
         Debug.Log("[Attack] 상태 중지.");
+        stateMachine._animController.ResetAnimState();
     }
 
     public void EnemyAttack()
     {
-        stateMachine._animator.SetTrigger("IsAttack");
+        stateMachine._animController.ChangeAnimState(EnemyAnimState.Attack);
 
         Vector3 muzzle = stateMachine.transform.position + Vector3.up * 1.5f;
 
@@ -477,18 +488,32 @@ public class EnemyReloadState : BaseEnemyState
         _reloadTimer = 0f;
         Debug.Log("[Reload] 재장전 시작.");
         stateMachine.SetDebugStateColor(EnemyState.Reload);
+        stateMachine._animController.ChangeAnimState(EnemyAnimState.Reload);
     }  // 이 상태로 처음 들어왔을 때 
     public override void UpdateState() 
     {
-        if (DetectPlayer())
+        // 전투 중 장전이었다면 기존 타겟만 계속 확인
+        if (stateMachine._targetPlayer != null)
         {
-            stateMachine._lastDetectPosition = stateMachine._targetPlayer.position;
+            if (CanChaseTarget(stateMachine._targetPlayer))
+            {
+                stateMachine._lastDetectPosition = stateMachine._targetPlayer.position;
+            }
         }
+        // 순찰 중 장전이었다면 새로 플레이어를 탐지
+        else
+        {
+            DetectPlayer();
+        }
+
         _reloadTimer += Time.deltaTime;
-        if (_reloadTimer >= _maxReloadTime) 
+
+        if (_reloadTimer >= _maxReloadTime)
         {
             stateMachine._enemyBase.CurrentWeapon.Reload(_reloadBulletAmount);
-            Debug.Log($"[Reload] 재장전 끝 현재탄창{stateMachine._enemyBase.CurrentWeapon.RemainBullets}발.");
+
+            Debug.Log($"[Reload] 재장전 끝 현재탄창 {stateMachine._enemyBase.CurrentWeapon.RemainBullets}발.");
+
             EvaluateCombatState();
         }
 
@@ -497,8 +522,7 @@ public class EnemyReloadState : BaseEnemyState
     public override void ExitState() 
     { 
         Debug.Log("[Reload] 재장전 종료.");
-
-       
+        stateMachine._animController.ResetAnimState();
 
     }   // 이 상태에서 빠져나갈 때
 }
