@@ -42,9 +42,9 @@ public class InventoryDebugTester : MonoBehaviour
             return;
         }
 
-        if (GameDataManager.Instance == null)
+        if (DataManager.Instance == null)
         {
-            Debug.LogError("GameDataManager.Instance가 없습니다.");
+            Debug.LogError("DataManager.Instance가 없습니다.");
             return;
         }
 
@@ -54,7 +54,7 @@ public class InventoryDebugTester : MonoBehaviour
                 continue;
 
             int count = Mathf.Max(1, entry.Count);
-            ItemData itemData = GameDataManager.Instance.GetItemDataById(entry.ItemId);
+            ItemData itemData = DataManager.Instance.GetItemData(entry.ItemId);
 
             if (itemData == null)
             {
@@ -71,7 +71,7 @@ public class InventoryDebugTester : MonoBehaviour
             int remainingCount = InventoryManager.Instance.TryAddItem(itemData, count);
 
             Debug.Log(
-                $"테스트 아이템 추가: {itemData.ItemName}, " +
+                $"테스트 아이템 추가: {itemData.Name}, " +
                 $"추가: {count - remainingCount}, 남음: {remainingCount}"
             );
         }
@@ -90,7 +90,7 @@ public class InventoryDebugTester : MonoBehaviour
         }
 
         Debug.Log(
-            $"테스트 무기 추가: {weaponData.ItemName}, " +
+            $"테스트 무기 추가: {weaponData.Name}, " +
             $"추가: {addedCount}, 남음: {count - addedCount}"
         );
     }

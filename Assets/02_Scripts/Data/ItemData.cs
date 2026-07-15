@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using NUnit.Framework.Interfaces;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public enum WeaponPartsType
@@ -39,21 +41,29 @@ public struct WeaponStat
 }
 
 [System.Serializable]
-public class ItemData
+public class ItemData : BaseData
 {
-    public string Id;
-    public string ItemName;
+    public string Name;
     public string ItemDescription;
     public string ItemType;
     public string Grade;
-    public int MaxStackSize;
+    public int MaxStackCount;
     public int SellingPrice;
 
     public string IconPath;
     public string PrefabPath;
 
     public string UseItemType;
-    public string[] UseItemParameterList;
+    public string UseItemParameterList;
+    public string[] UseItemParameters;
+
+    public void ParseUseItemParameters()
+    {
+        if (UseItemParameterList == null || UseItemParameterList == "")
+            UseItemParameters = Array.Empty<string>();
+        else
+            UseItemParameters = UseItemParameterList.Split(',');
+    }
 }
 
 
@@ -62,6 +72,7 @@ public class WeaponData : ItemData
 {
     public float Damage;
     public int MagazineSize;
+    public string AmmoType;
     public float AttackInterval;
     public float Accuracy;
     public float Range;
