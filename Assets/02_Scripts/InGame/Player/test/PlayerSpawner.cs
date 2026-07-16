@@ -5,7 +5,6 @@ using UnityEngine;
 public class PlayerSpawner : MonoBehaviour
 {
     [SerializeField] private GameObject PlayerPrefab;
-    [SerializeField] private CameraBinder PlayerCinemachineCamera;
 
     private void Start()
     {
@@ -28,8 +27,7 @@ public class PlayerSpawner : MonoBehaviour
 
     private void BindPlayerCamera(GameObject player)
     {
-        PlayerSight playerSight =
-            player.GetComponent<PlayerSight>();
+        PlayerSight playerSight = player.GetComponent<PlayerSight>();
 
         if (playerSight == null)
         {
@@ -40,7 +38,15 @@ public class PlayerSpawner : MonoBehaviour
 
         Transform cameraTarget = playerSight.GetPlayerSightTransform();
 
-        PlayerCinemachineCamera.Bind(cameraTarget);
+        if (GameManager.Instance != null && GameManager.Instance.PlayerCinemachineCamera != null)
+        {
+            GameManager.Instance.PlayerCinemachineCamera.Bind(cameraTarget);
+            Debug.Log("PlayerSpawner: 메인 카메라 바인딩 완료!");
+        }
+        else
+        {
+            Debug.LogError("PlayerSpawner: GameManager에 카메라 바인더가 세팅되지 않았습니다!");
+        }
     }
 
     private void BindPlayerHUD(GameObject player)
