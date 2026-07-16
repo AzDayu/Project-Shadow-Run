@@ -165,11 +165,13 @@ public class PlayerInventoryPopUpUI : UIBase
         if (slot == null || !slot.HasItem)
             return;
 
-        if (_selectedSlot != null)
+        if (_selectedSlot != null && _selectedSlot != slot)
             _selectedSlot.SetSelected(false);
 
         _selectedSlot = slot;
         _selectedSlot.SetSelected(true);
+
+        Debug.LogError($"[Inventory] 선택 완료 SlotIndex: {slot.SlotIndex}, ItemId: {slot.ItemModel.ItemId}");
     }
 
     public void TryUseItem(PlayerInventorySlotUI slot)
