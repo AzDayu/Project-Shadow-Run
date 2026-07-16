@@ -48,15 +48,31 @@ public class GameObjectManager : MonoBehaviour
         }
     }
 
+
     public void ClearAllSpawnedObjects()
     {
-        foreach (var obj in _spawnedObjects.Values)
+        List<int> keysToRemove = new List<int>();
+
+        foreach (var kvp in _spawnedObjects)
         {
-            if (obj != null) Destroy(obj);
+            if (kvp.Value != null)
+            {
+                if (kvp.Value.CompareTag("Player"))
+                {
+                    continue;
+                }
+
+                Destroy(kvp.Value);
+            }
+            keysToRemove.Add(kvp.Key);
         }
-        _spawnedObjects.Clear();
-        _instanceIdCounter = 1;
-        Debug.Log("GameObjectManager: 씬 내의 모든 동적 객체 클리어 완료");
+
+        foreach (var key in keysToRemove)
+        {
+            _spawnedObjects.Remove(key);
+        }
+
+        Debug.Log("GameObjectManager: 플레이어를 제외한 씬 내의 모든 동적 객체 클리어 완료");
     }
 
     private int GetNextInstanceId()
