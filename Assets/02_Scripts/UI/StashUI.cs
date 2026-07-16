@@ -162,28 +162,39 @@ public class StashUI : UIBase
     {
         if (_heldStackCount == 0)
         {
-            // 1. 맨손일 때: 클릭한 슬롯의 아이템 '전부' 집어들기
-            if (!clickedSlot.IsSlotEmpty)
+            if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+            {
+                PickupOne(clickedSlot);
+            }
+            else if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+            {
+                PickupHalf(clickedSlot);
+            }
+            else
             {
                 PickupAll(clickedSlot);
             }
         }
         else
         {
-            // 2. 아이템을 들고 있을 때
-            if (clickedSlot.IsSlotEmpty)
+            if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
             {
-                // 2-1. 빈 슬롯: 전부 내려놓기
+                // 다른 아이템에 복사되는 버그 방지 조건
+                if (clickedSlot.ItemDataId == _dragSlotVm.ItemDataId)
+                {
+                    PickupOne(clickedSlot);
+                }
+            }
+            else if (clickedSlot.IsSlotEmpty)
+            {
                 PlaceAll(clickedSlot);
             }
             else if (clickedSlot.ItemDataId == _dragSlotVm.ItemDataId)
             {
-                // 2-2. 같은 아이템: 전부 합치기
                 MergeAll(clickedSlot);
             }
             else
             {
-                // 2-3. 다른 아이템: 서로 스왑(교체)하기
                 SwapItems(clickedSlot);
             }
         }
@@ -193,21 +204,13 @@ public class StashUI : UIBase
     {
         if (_heldStackCount == 0)
         {
-            // 1. 맨손일 때: 클릭한 슬롯에서 '1개만' 집기
-            if (!clickedSlot.IsSlotEmpty)
-            {
-                PickupOne(clickedSlot);
-            }
+            return;
         }
         else
         {
-            if (clickedSlot.IsSlotEmpty)
+            if (clickedSlot.IsSlotEmpty || clickedSlot.ItemDataId == _dragSlotVm.ItemDataId)
             {
                 PlaceOne(clickedSlot);
-            }
-            else if (clickedSlot.ItemDataId == _dragSlotVm.ItemDataId)
-            {
-                PickupOne(clickedSlot);
             }
         }
     }
@@ -215,6 +218,78 @@ public class StashUI : UIBase
     // ==========================================
     // 아래는 위 조작을 수행하는 헬퍼 메서드들입니다.
     // ==========================================
+
+    private void PickupOne(StashItemSlotViewModel slotVm)
+    {
+        if (slotVm == null || slotVm.IsSlotEmpty) return;
+
+        if (_heldStackCount == 0)
+        {
+            _originSlotVm = slotVm;
+            DragSlotUI.gameObject.SetActive(true);
+
+            _dragSlotVm.ItemDataId = slotVm.ItemDataId;
+            _dragSlotVm.ItemUniqueId = slotVm.ItemUniqueId;
+            _dragSlotVm.IsSlotEmpty = false;
+        }
+
+        _heldStackCount++;
+        _dragSlotVm.ItemStackCount = _heldStackCount; // 드래그 슬롯 UI 실시간 갱신
+        slotVm.ItemStackCount--;
+
+        if (slotVm.ItemStackCount == 0)
+        {
+            ClearSlotData(slotVm);
+        }
+    }
+
+    private void PlaceOne(StashItemSlotViewModel targetSlot)
+    {
+        if (targetSlot.IsSlotEmpty)
+        {
+            targetSlot.ItemDataId = _dragSlotVm.ItemDataId;
+            targetSlot.ItemUniqueId = _dragSlotVm.ItemUniqueId;
+            targetSlot.ItemStackCount = 0;
+            targetSlot.IsSlotEmpty = false;
+        }
+
+        targetSlot.ItemStackCount++;
+        _heldStackCount--;
+
+        if (_heldStackCount == 0)
+        {
+            ClearCursorItem();
+        }
+        else
+        {
+            _dragSlotVm.ItemStackCount = _heldStackCount;
+        }
+    }
+
+    private void PickupHalf(StashItemSlotViewModel slotVm)
+    {
+        if (slotVm == null || slotVm.IsSlotEmpty)
+        {
+            return;
+        }
+
+        int halfAmount = Mathf.CeilToInt(slotVm.ItemStackCount / 2.0f);
+        _heldStackCount = halfAmount;
+        _originSlotVm = slotVm;
+
+        DragSlotUI.gameObject.SetActive(true);
+        _dragSlotVm.ItemDataId = slotVm.ItemDataId;
+        _dragSlotVm.ItemUniqueId = slotVm.ItemUniqueId;
+        _dragSlotVm.ItemStackCount = _heldStackCount;
+        _dragSlotVm.IsSlotEmpty = false;
+
+        slotVm.ItemStackCount -= halfAmount;
+
+        if (slotVm.ItemStackCount == 0)
+        {
+            ClearSlotData(slotVm);
+        }
+    }
 
     private void PickupAll(StashItemSlotViewModel slotVm)
     {
@@ -250,17 +325,14 @@ public class StashUI : UIBase
 
     private void SwapItems(StashItemSlotViewModel targetSlot)
     {
-        // 타겟 슬롯의 데이터 임시 저장
         string tempId = targetSlot.ItemDataId;
         string tempUniqueId = targetSlot.ItemUniqueId;
         int tempCount = targetSlot.ItemStackCount;
 
-        // 타겟 슬롯에 마우스 데이터 덮어쓰기
         targetSlot.ItemDataId = _dragSlotVm.ItemDataId;
         targetSlot.ItemUniqueId = _dragSlotVm.ItemUniqueId;
         targetSlot.ItemStackCount = _heldStackCount;
 
-        // 마우스 커서에 임시 저장한 타겟 데이터 넣기
         _dragSlotVm.ItemDataId = tempId;
         _dragSlotVm.ItemUniqueId = tempUniqueId;
         _heldStackCount = tempCount;
@@ -269,49 +341,7 @@ public class StashUI : UIBase
         _originSlotVm = targetSlot;
     }
 
-    private void PickupOne(StashItemSlotViewModel slotVm)
-    {
-        if (_heldStackCount == 0)
-        {
-            _originSlotVm = slotVm;
-            _dragSlotVm.ItemDataId = slotVm.ItemDataId;
-            _dragSlotVm.ItemUniqueId = slotVm.ItemUniqueId;
-            _dragSlotVm.IsSlotEmpty = false;
-            DragSlotUI.gameObject.SetActive(true);
-        }
-
-        _heldStackCount++;
-        _dragSlotVm.ItemStackCount = _heldStackCount;
-        slotVm.ItemStackCount--;
-
-        if (slotVm.ItemStackCount == 0)
-        {
-            ClearSlotData(slotVm);
-        }
-    }
-
-    private void PlaceOne(StashItemSlotViewModel targetSlot)
-    {
-        if (targetSlot.IsSlotEmpty)
-        {
-            targetSlot.ItemDataId = _dragSlotVm.ItemDataId;
-            targetSlot.ItemUniqueId = _dragSlotVm.ItemUniqueId;
-            targetSlot.ItemStackCount = 0;
-            targetSlot.IsSlotEmpty = false;
-        }
-
-        targetSlot.ItemStackCount++;
-        _heldStackCount--;
-
-        if (_heldStackCount == 0)
-        {
-            ClearCursorItem();
-        }
-        else
-        {
-            _dragSlotVm.ItemStackCount = _heldStackCount;
-        }
-    }
+    
 
     private void ClearCursorItem()
     {
