@@ -40,6 +40,25 @@ public class PlayerStatusModel
         HealthChanged?.Invoke(CurrentHP);
     }
 
+    public void RecoverHP( float healAmount )
+    {
+        if (healAmount <= 0f)
+            return;
+
+        float previousHP = CurrentHP;
+
+        CurrentHP = Mathf.Clamp(
+            CurrentHP + healAmount,
+            0f,
+            MaxHP
+        );
+
+        if (Mathf.Approximately(previousHP, CurrentHP))
+            return;
+
+        HealthChanged?.Invoke(CurrentHP);
+    }
+
     public void UseStamina(float amount)
     {
         if (amount <= 0f)

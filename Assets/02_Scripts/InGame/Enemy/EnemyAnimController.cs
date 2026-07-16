@@ -1,0 +1,38 @@
+﻿using UnityEngine;
+
+public enum EnemyAnimState 
+{
+    Idle,
+    Move,
+    Walk,
+    Attack,
+    Reload,
+    Dead
+}
+public class EnemyAnimController : MonoBehaviour
+{
+    public Animator _animator;
+    private void Awake()
+    {
+        _animator= GetComponent<Animator>();
+    }
+    public void ChangeAnimState(EnemyAnimState state) 
+    {
+        switch (state) 
+        {
+            case EnemyAnimState.Idle: break;
+            case EnemyAnimState.Attack: _animator.SetBool("IsAttack",true); break;
+            case EnemyAnimState.Reload: _animator.SetBool("IsReload",true); break;
+            case EnemyAnimState.Dead: break;
+        }
+    }
+    public void ChangeAnimState(EnemyAnimState state, float moveSpeed) 
+    {
+        _animator.SetFloat("MoveSpeed", moveSpeed);
+    }
+    public void ResetAnimState()
+    {
+        _animator.SetBool("IsReload", false);
+        _animator.SetBool("IsAttack", false);
+    }
+}
