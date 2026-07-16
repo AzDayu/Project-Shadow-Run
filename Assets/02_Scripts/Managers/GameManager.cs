@@ -72,6 +72,11 @@ public class GameManager : MonoBehaviour
         switch (_currentGameState)
         {
             case GameState.OutGame:
+                if (GameObjectManager.Instance != null)
+                {
+                    GameObjectManager.Instance.ClearAllSpawnedObjects();
+                }
+
                 if (_outGameWorkspacePrefab != null)
                 {
                     _currentWorkspaceInstance = Instantiate(_outGameWorkspacePrefab);
