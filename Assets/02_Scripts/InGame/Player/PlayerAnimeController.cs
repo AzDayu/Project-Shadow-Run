@@ -1,16 +1,13 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerAnimeController : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [SerializeField] private Animator _playerAnimator;
+
+    public void SetRun(bool isRunning)
     {
-        
+        _playerAnimator.SetBool("isRun", isRunning);
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+
 }

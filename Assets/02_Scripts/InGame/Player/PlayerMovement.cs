@@ -11,6 +11,7 @@ public class PlayerMovement : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private PlayerInputHandler InputHandler;
+    [SerializeField] private PlayerAnimeController AnimeController;
 
     [Header("Movement")]
     [SerializeField] private float WalkSpeed = 2f;
@@ -149,6 +150,7 @@ public class PlayerMovement : MonoBehaviour
 
     private float GetCurrentMoveSpeed(bool isSprinting)
     {
+        AnimeController.SetRun(isSprinting);
         if (_currentPosture == PlayerPosture.Prone)
             return ProneSpeed;
 

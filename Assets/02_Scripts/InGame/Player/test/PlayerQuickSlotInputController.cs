@@ -3,6 +3,7 @@
 public class PlayerQuickSlotInputController : MonoBehaviour
 {
     [SerializeField] private PlayerInputHandler _playerInputHandler;
+    [SerializeField] private PlayerAnimeController AnimeController;
 
     private void OnEnable()
     {
