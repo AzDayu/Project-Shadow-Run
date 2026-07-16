@@ -7,6 +7,20 @@ public class ShopViewModel : ViewModelBase
     public List<ShopItemSlotViewModel> InventoryItemSlotList { get; } = new List<ShopItemSlotViewModel>();
     public List<ShopItemSlotViewModel> StashItemSlotList { get; } = new List<ShopItemSlotViewModel>();
 
+    public ShopViewModel() //임시로 구현. 추후 리스트의 길이를 읽어오는 등의 처리로 바꿀 것.
+    {
+        for (int i = 0; i < 10; i++) 
+        { 
+            ShopItemSlotList.Add(new ShopItemSlotViewModel { SlotIndex = i, SlotType = ShopItemSlotType.Shop });
+        }
+
+        for (int i = 0; i < 30; i++)
+        {
+            InventoryItemSlotList.Add(new ShopItemSlotViewModel { SlotIndex = i, SlotType = ShopItemSlotType.Inventory });
+            StashItemSlotList.Add(new ShopItemSlotViewModel { SlotIndex = i, SlotType = ShopItemSlotType.Stash });
+        }
+    }
+
     public void InvokeOnceOnInit()
     {
         OnPropertyChanged(nameof(CurPlayerCredit));
@@ -38,17 +52,6 @@ public class ShopViewModel : ViewModelBase
                 _hoveredItemId = value;
                 OnPropertyChanged(nameof(HoveredItemId));
             }
-        }
-    }
-
-    public ShopViewModel()
-    {
-        // 최초 10개씩 빈 슬롯 데이터 생성
-        for (int i = 0; i < 10; i++)
-        {
-            ShopItemSlotList.Add(new ShopItemSlotViewModel { SlotIndex = i, SlotType = ShopItemSlotType.Shop });
-            InventoryItemSlotList.Add(new ShopItemSlotViewModel { SlotIndex = i, SlotType = ShopItemSlotType.Inventory });
-            StashItemSlotList.Add(new ShopItemSlotViewModel { SlotIndex = i, SlotType = ShopItemSlotType.Stash });
         }
     }
 

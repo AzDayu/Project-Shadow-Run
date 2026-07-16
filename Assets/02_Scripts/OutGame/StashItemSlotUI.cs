@@ -14,10 +14,6 @@ public class StashItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler
     public Action<string> _onHoverEnter;
     public Action _onHoverExit;
 
-    public ShopItemSlotType _curSlotType { get; set; }
-    public int _slotIdx { get; set; }
-    public int _itemDataId { get; set; }
-
     public Action<StashItemSlotViewModel, PointerEventData.InputButton> _onClickSlot;
 
     public void Bind(StashItemSlotViewModel slotVm, Action<string> onHoverEnter, Action onHoverExit, Action<StashItemSlotViewModel, PointerEventData.InputButton> onClickSlot)

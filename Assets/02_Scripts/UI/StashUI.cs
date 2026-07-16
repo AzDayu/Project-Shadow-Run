@@ -17,10 +17,10 @@ public class StashUI : UIBase
 
     [SerializeField] private StashItemSlotUI DragSlotUI;
 
-    private StashItemSlotViewModel _originSlotVm; 
+    private StashItemSlotViewModel _originSlotVm;
+    private StashItemSlotViewModel _dragSlotVm;
     private int _heldStackCount = 0;
 
-    private StashItemSlotViewModel _dragSlotVm;
 
     private List<StashItemSlotUI> _stashSlotUIList = new List<StashItemSlotUI>();
     private List<StashItemSlotUI> _invenSlotUIList = new List<StashItemSlotUI>();
@@ -32,7 +32,7 @@ public class StashUI : UIBase
     {
         Button_CloseSelf.onClick.RemoveAllListeners();
         Button_CloseSelf.onClick.AddListener(OnClick_CloseButton);
-        SetStashItemSlotOnEnable();
+        BindViewModel();
     }
 
     private void OnDisable()
@@ -46,14 +46,13 @@ public class StashUI : UIBase
 
     private void Update()
     {
-        // 들고 있는 아이템이 있다면 마우스 위치로 이동
         if (!_dragSlotVm.IsSlotEmpty)
         {
             DragSlotUI.transform.position = Input.mousePosition;
         }
     }
 
-    private void SetStashItemSlotOnEnable()
+    private void BindViewModel()
     {
         var stashVm = NetworkManager.Inst.StashService.GetStashViewModel();
         _stashVm = stashVm;
@@ -179,7 +178,7 @@ public class StashUI : UIBase
             }
             else if (clickedSlot.ItemDataId == _dragSlotVm.ItemDataId)
             {
-                // 2-2. 같은 아이템: 전부 합치기 (이것이 유저님이 원하시던 기능!)
+                // 2-2. 같은 아이템: 전부 합치기
                 MergeAll(clickedSlot);
             }
             else
@@ -220,15 +219,14 @@ public class StashUI : UIBase
     private void PickupAll(StashItemSlotViewModel slotVm)
     {
         _heldStackCount = slotVm.ItemStackCount;
+        _originSlotVm = slotVm;
 
-        // 커서에 데이터 복사
+        DragSlotUI.gameObject.SetActive(true);
         _dragSlotVm.ItemDataId = slotVm.ItemDataId;
         _dragSlotVm.ItemUniqueId = slotVm.ItemUniqueId;
         _dragSlotVm.ItemStackCount = _heldStackCount;
         _dragSlotVm.IsSlotEmpty = false;
-        DragSlotUI.gameObject.SetActive(true);
 
-        // 원래 슬롯 완전 초기화
         ClearSlotData(slotVm);
     }
 
@@ -244,8 +242,7 @@ public class StashUI : UIBase
 
     private void MergeAll(StashItemSlotViewModel targetSlot)
     {
-        // TODO: 향후 GameDataManager를 통해 ItemData의 MaxStackSize를 가져와서 
-        // 한계치까지만 합치고 남은 건 마우스에 남기는 로직을 추가할 수 있습니다.
+        // TODO: 향후 GameDataManager를 통해 ItemData의 MaxStackSize를 가져와 한계치까지만 합치고 남은 건 마우스에 남기는 로직을 추가할 수 있음.
 
         targetSlot.ItemStackCount += _heldStackCount;
         ClearCursorItem();
@@ -268,12 +265,15 @@ public class StashUI : UIBase
         _dragSlotVm.ItemUniqueId = tempUniqueId;
         _heldStackCount = tempCount;
         _dragSlotVm.ItemStackCount = _heldStackCount;
+
+        _originSlotVm = targetSlot;
     }
 
     private void PickupOne(StashItemSlotViewModel slotVm)
     {
         if (_heldStackCount == 0)
         {
+            _originSlotVm = slotVm;
             _dragSlotVm.ItemDataId = slotVm.ItemDataId;
             _dragSlotVm.ItemUniqueId = slotVm.ItemUniqueId;
             _dragSlotVm.IsSlotEmpty = false;
@@ -282,8 +282,8 @@ public class StashUI : UIBase
 
         _heldStackCount++;
         _dragSlotVm.ItemStackCount = _heldStackCount;
-
         slotVm.ItemStackCount--;
+
         if (slotVm.ItemStackCount == 0)
         {
             ClearSlotData(slotVm);
@@ -316,6 +316,7 @@ public class StashUI : UIBase
     private void ClearCursorItem()
     {
         _heldStackCount = 0;
+        _originSlotVm = null;
         _dragSlotVm.ItemDataId = string.Empty;
         _dragSlotVm.ItemUniqueId = string.Empty;
         _dragSlotVm.ItemStackCount = 0;
@@ -325,9 +326,9 @@ public class StashUI : UIBase
 
     private void ClearSlotData(StashItemSlotViewModel slotVm)
     {
+        slotVm.IsSlotEmpty = true;
         slotVm.ItemDataId = string.Empty;
         slotVm.ItemUniqueId = string.Empty;
         slotVm.ItemStackCount = 0;
-        slotVm.IsSlotEmpty = true;
     }
 }

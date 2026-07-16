@@ -8,10 +8,26 @@ public class ShopItemSlotViewModel : ViewModelBase
 
     public void InvokeOnceOnInit()
     {
+        OnPropertyChanged(nameof(ItemUniqueId));
         OnPropertyChanged(nameof(ItemDataId));
         OnPropertyChanged(nameof(ItemStackCount));
         OnPropertyChanged(nameof(ItemSellingPrice));
         OnPropertyChanged(nameof(IsSlotEmpty));
+    }
+    
+
+    private string _itemUniqueId;
+    public string ItemUniqueId
+    {
+        get => _itemUniqueId;
+        set
+        {
+            if (_itemUniqueId != value)
+            {
+                _itemUniqueId = value;
+                OnPropertyChanged(nameof(ItemUniqueId));
+            }
+        }
     }
 
     private string _itemDataId;

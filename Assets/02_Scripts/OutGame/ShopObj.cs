@@ -55,12 +55,16 @@ public class ShopObj : MonoBehaviour
     private void OpenShop()
     {
         UIManager.Instance.OpenContentUI(UIType.ShopUI);
-
         var shopUI = UIManager.Instance.GetOpenedUI(UIRootType.ContentUI, UIType.ShopUI) as ShopUI;
+
         if (shopUI != null)
         {
-            shopUI.BindViewModel(new ShopViewModel());
+            NetworkManager.Inst.ShopService.InitShopData();
+            shopUI.BindViewModel(NetworkManager.Inst.ShopService.GetShopViewModel());
             Debug.Log("ViewModel 바인딩 성공!");
+
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
         }
         else
         {
@@ -71,5 +75,8 @@ public class ShopObj : MonoBehaviour
     private void CloseShop()
     {
         UIManager.Instance.CloseUI(UIRootType.ContentUI, UIType.ShopUI);
+
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
     }
 }
