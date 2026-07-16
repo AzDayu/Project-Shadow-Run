@@ -29,7 +29,12 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject _outGameWorkspacePrefab;
     [SerializeField] private GameObject _inGameWorkspacePrefab;
 
+    [Header("카메라 설정")]
+    [SerializeField] private CameraBinder _playerCinemachineCamera;
+    public CameraBinder PlayerCinemachineCamera => _playerCinemachineCamera;
+
     private GameObject _currentWorkspaceInstance;
+
 
     private void Awake()
     {
@@ -49,7 +54,7 @@ public class GameManager : MonoBehaviour
         _currentGameState = GameState.Core;
         Debug.Log("GameManager: 코어 시스템 초기화 완료. 아웃게임(로비) 프리팹을 생성합니다.");
 
-        ChangeState(GameState.OutGame);
+        ChangeState(GameState.InGame);
     }
 
     public void ChangeState(GameState newState)
@@ -67,11 +72,22 @@ public class GameManager : MonoBehaviour
         switch (_currentGameState)
         {
             case GameState.OutGame:
+                if (GameObjectManager.Instance != null)
+                {
+                    GameObjectManager.Instance.ClearAllSpawnedObjects();
+                }
+
                 if (_outGameWorkspacePrefab != null)
                 {
                     _currentWorkspaceInstance = Instantiate(_outGameWorkspacePrefab);
                     _currentWorkspaceInstance.name = "[Workspace] OutGame_Lobby";
                     Debug.Log("GameManager: 아웃게임 프리팹 배치 완료.");
+
+                    LobbySpawnPos lobbyWorkspace = _currentWorkspaceInstance.GetComponent<LobbySpawnPos>();
+                    if (lobbyWorkspace != null && lobbyWorkspace.LobbySpawnPoint != null)
+                    {
+                        SetupLobbyPositions(lobbyWorkspace.LobbySpawnPoint);
+                    }
                 }
                 else
                 {
@@ -107,5 +123,28 @@ public class GameManager : MonoBehaviour
     public void StartInGame()
     {
         ChangeState(GameState.InGame);
+    }
+
+    private void SetupLobbyPositions(Transform lobbySpawnTarget)
+    {
+        GameObject player = GameObject.FindWithTag("Player");
+        if (player != null)
+        {
+            CharacterController controller = player.GetComponent<CharacterController>();
+            if (controller != null)
+            {
+                controller.enabled = false;
+            }
+
+            player.transform.position = lobbySpawnTarget.position;
+            player.transform.rotation = lobbySpawnTarget.rotation;
+
+            if (controller != null)
+            {
+                controller.enabled = true;
+            }
+
+            Debug.Log("GameManager: 플레이어 캐릭터를 LobbySpawnPos로 순간이동 시켰습니다.");
+        }
     }
 }
