@@ -32,7 +32,7 @@ public static class ItemIconLoader
     }
 }
 
-public class PlayerQuickSlotUI : MonoBehaviour, IPointerClickHandler
+public class PlayerQuickSlotUI : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
     [SerializeField] private int QuickSlotIndex;
 
@@ -40,6 +40,9 @@ public class PlayerQuickSlotUI : MonoBehaviour, IPointerClickHandler
     [SerializeField] private Image IconImage;
     [SerializeField] private TMP_Text TextCount;
     [SerializeField] private GameObject SelectedFrame;
+
+    [Header("Tooltip")]
+    [SerializeField] private PlayerInventoryTooltipController ItemTooltip;
 
     public ItemModel ItemModelSlot
     {
@@ -174,5 +177,25 @@ public class PlayerQuickSlotUI : MonoBehaviour, IPointerClickHandler
             return;
 
         InventoryManager.Instance.TryUnregisterQuickSlot(QuickSlotIndex);
+
+        if (ItemTooltip != null)
+            ItemTooltip.Hide();
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        if (!HasItem)
+            return;
+
+        if (ItemTooltip == null)
+            return;
+
+        ItemTooltip.Show(ItemModelSlot, eventData.position);
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        if (ItemTooltip != null)
+            ItemTooltip.Hide();
     }
 }

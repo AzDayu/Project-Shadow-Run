@@ -540,12 +540,12 @@ RectTransform:
   - {fileID: 7191550838688141977}
   - {fileID: 3022880729896523259}
   - {fileID: 2649380365901093573}
-  - {fileID: 2449911307640857094}
   - {fileID: 981731031099525153}
   - {fileID: 2866614860020745354}
   - {fileID: 3781392164146845740}
   - {fileID: 2317106649553301457}
   - {fileID: 3845119574566927358}
+  - {fileID: 2531730593885354611}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -566,11 +566,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInventoryPopUpUI
   SlotParent: {fileID: 2649380365901093573}
-  ItemTooltipPanel: {fileID: 6202394115005011752}
-  ItemTooltipRect: {fileID: 2449911307640857094}
-  TextTooltipName: {fileID: 8399718791496910244}
-  TextTooltipDescription: {fileID: 3843473171930037082}
-  TooltipOffset: {x: 20, y: -20}
   ContextMenuPanel: {fileID: 7688796366975051243}
   ContextMenuRect: {fileID: 981731031099525153}
   ButtonUse: {fileID: 3843586687994264057}
@@ -581,6 +576,7 @@ MonoBehaviour:
   DragIconRect: {fileID: 3845119574566927358}
   DragIconImage: {fileID: 2035136418403870088}
   TextDragIconCount: {fileID: 4435337062795507972}
+  ItemTooltip: {fileID: 3759896023990536527}
 --- !u!1 &2287900627051535769
 GameObject:
   m_ObjectHideFlags: 0
@@ -1463,6 +1459,56 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!1 &4747880181357986723
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2531730593885354611}
+  - component: {fileID: 3759896023990536527}
+  m_Layer: 0
+  m_Name: TooltipController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2531730593885354611
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4747880181357986723}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2449911307640857094}
+  m_Father: {fileID: 4668114684273187523}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3759896023990536527
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4747880181357986723}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad788422775d9964587b8147a1c7de2d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerInventoryTooltipController
+  TooltipPanel: {fileID: 6202394115005011752}
+  TooltipRect: {fileID: 2449911307640857094}
+  TextItemName: {fileID: 8399718791496910244}
+  TextItemDescription: {fileID: 3843473171930037082}
+  TooltipOffset: {x: 20, y: -20}
 --- !u!1 &4939829252483307310
 GameObject:
   m_ObjectHideFlags: 0
@@ -1650,6 +1696,7 @@ MonoBehaviour:
   IconImage: {fileID: 3881009118702571484}
   TextCount: {fileID: 8743519929577500435}
   SelectedFrame: {fileID: 8822278655417823340}
+  ItemTooltip: {fileID: 3759896023990536527}
 --- !u!1 &5575170650622776037
 GameObject:
   m_ObjectHideFlags: 0
@@ -1827,14 +1874,14 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6202394115005011752}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5869297379375405451}
   - {fileID: 6274001092656177758}
-  m_Father: {fileID: 4668114684273187523}
+  m_Father: {fileID: 2531730593885354611}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -2015,6 +2062,7 @@ MonoBehaviour:
   IconImage: {fileID: 1056825484211297020}
   TextCount: {fileID: 3393923464101234288}
   SelectedFrame: {fileID: 5575170650622776037}
+  ItemTooltip: {fileID: 3759896023990536527}
 --- !u!1 &6213532002180086800
 GameObject:
   m_ObjectHideFlags: 0
@@ -2338,6 +2386,7 @@ MonoBehaviour:
   IconImage: {fileID: 1650542059363076907}
   TextCount: {fileID: 3304390247356138392}
   SelectedFrame: {fileID: 1638841601312083382}
+  ItemTooltip: {fileID: 3759896023990536527}
 --- !u!1 &7556461780480794684
 GameObject:
   m_ObjectHideFlags: 0

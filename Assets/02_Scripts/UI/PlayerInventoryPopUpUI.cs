@@ -9,13 +9,6 @@ public class PlayerInventoryPopUpUI : UIBase
     [Header("Slot")]
     [SerializeField] private Transform SlotParent;
 
-    [Header("Tooltip")]
-    [SerializeField] private GameObject ItemTooltipPanel;
-    [SerializeField] private RectTransform ItemTooltipRect;
-    [SerializeField] private TMP_Text TextTooltipName;
-    [SerializeField] private TMP_Text TextTooltipDescription;
-    [SerializeField] private Vector2 TooltipOffset = new Vector2(20f, -20f);
-
     [Header("Context Menu")]
     [SerializeField] private GameObject ContextMenuPanel;
     [SerializeField] private RectTransform ContextMenuRect;
@@ -29,6 +22,9 @@ public class PlayerInventoryPopUpUI : UIBase
     [SerializeField] private RectTransform DragIconRect;
     [SerializeField] private Image DragIconImage;
     [SerializeField] private TMP_Text TextDragIconCount;
+
+    [Header("Tooltip")]
+    [SerializeField] private PlayerInventoryTooltipController ItemTooltip;
 
     private readonly List<PlayerInventorySlotUI> _slotUIList = new();
 
@@ -47,7 +43,6 @@ public class PlayerInventoryPopUpUI : UIBase
         InitSlots();
         InitContextButtons();
 
-        HideItemTooltip(null);
         CloseContextMenu();
         HideDragSlot ();
     }
@@ -59,7 +54,6 @@ public class PlayerInventoryPopUpUI : UIBase
 
         RefreshInventory();
 
-        HideItemTooltip(null);
         CloseContextMenu();
     }
 
@@ -68,17 +62,11 @@ public class PlayerInventoryPopUpUI : UIBase
         if (InventoryManager.Instance != null)
             InventoryManager.Instance.OnInventoryChanged -= RefreshInventory;
 
-        HideItemTooltip(null);
         CloseContextMenu();
     }
 
     private void Update()
     {
-        if (ItemTooltipPanel != null && ItemTooltipPanel.activeSelf)
-        {
-            SetPanelPositionClamped(ItemTooltipRect, Input.mousePosition + (Vector3)TooltipOffset);
-        }
-
         if (ContextMenuPanel != null && ContextMenuPanel.activeSelf)
         {
             if (Input.GetMouseButtonDown(0))
@@ -186,7 +174,6 @@ public class PlayerInventoryPopUpUI : UIBase
 
         InventoryManager.Instance.TryUseItem(slot.SlotIndex);
 
-        HideItemTooltip(slot);
         CloseContextMenu();
     }
 
@@ -216,36 +203,6 @@ public class PlayerInventoryPopUpUI : UIBase
 
         if (ContextMenuPanel != null)
             ContextMenuPanel.SetActive(false);
-    }
-
-    public void ShowItemTooltip(PlayerInventorySlotUI slot, Vector2 mousePosition)
-    {
-        if (slot == null || !slot.HasItem)
-            return;
-
-        if (ItemTooltipPanel == null || ItemTooltipRect == null)
-            return;
-
-        ItemModel stack = slot.ItemModel;
-        ItemData item = DataManager.Instance.GetItemData(stack.ItemId);
-
-        if (TextTooltipName != null)
-            TextTooltipName.text = item.Name;
-
-        if (TextTooltipDescription != null)
-            TextTooltipDescription.text = item.ItemDescription;
-
-        ItemTooltipPanel.SetActive(true);
-
-        LayoutRebuilder.ForceRebuildLayoutImmediate(ItemTooltipRect);
-
-        SetPanelPositionClamped(ItemTooltipRect, mousePosition + TooltipOffset);
-    }
-
-    public void HideItemTooltip(PlayerInventorySlotUI slot)
-    {
-        if (ItemTooltipPanel != null)
-            ItemTooltipPanel.SetActive(false);
     }
 
     private void SetPanelPositionClamped(RectTransform panelRect, Vector2 screenPosition)
@@ -316,7 +273,6 @@ public class PlayerInventoryPopUpUI : UIBase
 
         _draggingSlot = slot;
 
-        HideItemTooltip(slot);
         CloseContextMenu();
 
         ShowDragSlot(slot.ItemModel, eventData.position);
@@ -394,7 +350,6 @@ public class PlayerInventoryPopUpUI : UIBase
         InventoryManager.Instance.TryDropItem(_contextTargetSlot.SlotIndex, dropCount);
 
         CloseContextMenu();
-        HideItemTooltip(_contextTargetSlot);
     }
 
     private void OnClickRegisterQuickSlot()
@@ -408,7 +363,6 @@ public class PlayerInventoryPopUpUI : UIBase
         InventoryManager.Instance.TryRegisterQuickSlot(_contextTargetSlot.SlotIndex);
 
         CloseContextMenu();
-        HideItemTooltip(_contextTargetSlot);
     }
 
     private void RefreshContextMenuButtons(PlayerInventorySlotUI slot)
@@ -477,5 +431,22 @@ public class PlayerInventoryPopUpUI : UIBase
 
         if (TextDragIconCount != null)
             TextDragIconCount.text = string.Empty;
+    }
+
+    public void ShowItemTooltip(PlayerInventorySlotUI slot, Vector2 mousePosition)
+    {
+        if (slot == null || !slot.HasItem)
+            return;
+
+        if (ItemTooltip == null)
+            return;
+
+        ItemTooltip.Show(slot.ItemModel, mousePosition);
+    }
+
+    public void HideItemTooltip(PlayerInventorySlotUI slot)
+    {
+        if (ItemTooltip != null)
+            ItemTooltip.Hide();
     }
 }
