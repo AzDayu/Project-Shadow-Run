@@ -28,7 +28,10 @@ public class PlayerQuickSlotInputController : MonoBehaviour
         if (InventoryManager.Instance == null)
             return;
 
-        InventoryManager.Instance.TrySelectQuickSlot(quickSlotIndex);
+        if(InventoryManager.Instance.TrySelectQuickSlot(quickSlotIndex))
+        {
+            AnimeController.SwapWeaponPosture();
+        }
     }
 
     private void OnFirePerformed()

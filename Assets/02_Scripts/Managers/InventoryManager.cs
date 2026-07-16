@@ -330,22 +330,22 @@ public class InventoryManager : MonoBehaviour
     public bool TrySelectQuickSlot(int quickSlotIndex)
     {
         if (quickSlotIndex < 0 || quickSlotIndex >= _quickSlotList.Length)
-        {
-            Debug.LogWarning($"잘못된 퀵슬롯 선택입니다. Index: {quickSlotIndex}");
             return false;
-        }
 
         ItemModel stack = _quickSlotList[quickSlotIndex];
 
         if (!IsValidStack(stack))
-        {
-            Debug.LogWarning($"비어있는 퀵슬롯입니다. Index: {quickSlotIndex}");
             return false;
+
+        if (_selectedQuickSlotIndex == quickSlotIndex)
+        {
+            _selectedQuickSlotIndex = -1;
         }
-
-        _selectedQuickSlotIndex = quickSlotIndex;
-
-        Debug.Log($"퀵슬롯 선택: {quickSlotIndex}, Item: {DataManager.Instance.GetItemData(stack.ItemId).Name}");
+        else
+        {
+            _selectedQuickSlotIndex = quickSlotIndex;
+            Debug.Log($"퀵슬롯 선택: {quickSlotIndex}, Item: {DataManager.Instance.GetItemData(stack.ItemId).Name}");
+        }
 
         OnSelectedQuickSlotChanged?.Invoke();
 
@@ -530,5 +530,23 @@ public class InventoryManager : MonoBehaviour
             OnSelectedQuickSlotChanged?.Invoke();
 
         return true;
+    }
+
+    public WeaponType ReturnWeaponTypeFromQuickSlotID()
+    {
+        if (SelectedQuickSlotIndex > -1)
+        {
+            switch (_quickSlotList[SelectedQuickSlotIndex].ItemId)
+            {
+                case string value when value.Contains("Weapon_AR"):
+                    return WeaponType.Rifle;
+                case string value when value.Contains("Weapon_Pistol"):
+                    return WeaponType.Pistol;
+                default:
+                    return WeaponType.None;
+            }
+        }
+
+        return WeaponType.None;
     }
 }
