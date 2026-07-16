@@ -1649,7 +1649,7 @@ MonoBehaviour:
   QuickSlotIndex: 2
   IconImage: {fileID: 3881009118702571484}
   TextCount: {fileID: 8743519929577500435}
-  SelectedFrame: {fileID: 0}
+  SelectedFrame: {fileID: 8822278655417823340}
 --- !u!1 &5575170650622776037
 GameObject:
   m_ObjectHideFlags: 0
@@ -2014,7 +2014,7 @@ MonoBehaviour:
   QuickSlotIndex: 0
   IconImage: {fileID: 1056825484211297020}
   TextCount: {fileID: 3393923464101234288}
-  SelectedFrame: {fileID: 0}
+  SelectedFrame: {fileID: 5575170650622776037}
 --- !u!1 &6213532002180086800
 GameObject:
   m_ObjectHideFlags: 0
@@ -2337,7 +2337,7 @@ MonoBehaviour:
   QuickSlotIndex: 1
   IconImage: {fileID: 1650542059363076907}
   TextCount: {fileID: 3304390247356138392}
-  SelectedFrame: {fileID: 0}
+  SelectedFrame: {fileID: 1638841601312083382}
 --- !u!1 &7556461780480794684
 GameObject:
   m_ObjectHideFlags: 0

@@ -506,4 +506,29 @@ public class InventoryManager : MonoBehaviour
         if (selectedQuickSlotChanged)
             OnSelectedQuickSlotChanged?.Invoke();
     }
+
+    public bool TryUnregisterQuickSlot(int quickSlotIndex)
+    {
+        if (quickSlotIndex < 0 || quickSlotIndex >= _quickSlotList.Length)
+            return false;
+
+        ItemModel itemModel = _quickSlotList[quickSlotIndex];
+
+        if (!IsValidStack(itemModel))
+            return false;
+
+        _quickSlotList[quickSlotIndex] = null;
+
+        bool selectedSlotUnregistered = (_selectedQuickSlotIndex == quickSlotIndex);
+
+        if (selectedSlotUnregistered)
+            _selectedQuickSlotIndex = -1;
+
+        OnQuickSlotChanged?.Invoke();
+
+        if (selectedSlotUnregistered)
+            OnSelectedQuickSlotChanged?.Invoke();
+
+        return true;
+    }
 }

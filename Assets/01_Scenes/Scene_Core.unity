@@ -245,7 +245,7 @@ MonoBehaviour:
   AddOnStart: 1
   TestItems:
   - ItemId: Item_Medical_Kit_01
-    Count: 1
+    Count: 10
   - ItemId: Item_Weapon_AR_01
     Count: 1
   - ItemId: Item_Weapon_AR_02
@@ -253,7 +253,7 @@ MonoBehaviour:
   - ItemId: Item_Weapon_SMG_02
     Count: 1
   - ItemId: Item_Loot_Watch
-    Count: 1
+    Count: 2
 --- !u!1 &383023749
 GameObject:
   m_ObjectHideFlags: 0

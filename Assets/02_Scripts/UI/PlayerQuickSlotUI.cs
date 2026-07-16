@@ -2,6 +2,7 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public static class ItemIconLoader
 {
@@ -31,7 +32,7 @@ public static class ItemIconLoader
     }
 }
 
-public class PlayerQuickSlotUI : MonoBehaviour
+public class PlayerQuickSlotUI : MonoBehaviour, IPointerClickHandler
 {
     [SerializeField] private int QuickSlotIndex;
 
@@ -39,6 +40,24 @@ public class PlayerQuickSlotUI : MonoBehaviour
     [SerializeField] private Image IconImage;
     [SerializeField] private TMP_Text TextCount;
     [SerializeField] private GameObject SelectedFrame;
+
+    public ItemModel ItemModelSlot
+    {
+        get
+        {
+            if (InventoryManager.Instance == null)
+                return null;
+
+            IReadOnlyList<ItemModel> quickSlots = InventoryManager.Instance.QuickSlotList;
+
+            if (QuickSlotIndex < 0 || (QuickSlotIndex >= quickSlots.Count))
+                return null;
+
+            return quickSlots[QuickSlotIndex];
+        }
+    }
+
+    public bool HasItem => ItemModelSlot != null && ItemModelSlot.CurrentStackCount > 0;
 
     public int SlotIndex => QuickSlotIndex;
 
@@ -94,7 +113,7 @@ public class PlayerQuickSlotUI : MonoBehaviour
     {
         if (IconImage != null)
         {
-            Sprite icon = ItemIconLoader.LoadIcon(GameDataManager.Instance.GetItemDataById(stack.ItemId));
+            Sprite icon = ItemIconLoader.LoadIcon(DataManager.Instance.GetItemData(stack.ItemId));
 
             IconImage.sprite = icon;
             IconImage.enabled = icon != null;
@@ -141,5 +160,19 @@ public class PlayerQuickSlotUI : MonoBehaviour
 
         if (SelectedFrame != null)
             SelectedFrame.SetActive(selected);
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (eventData.button != PointerEventData.InputButton.Right)
+            return;
+
+        if (!HasItem)
+            return;
+
+        if (InventoryManager.Instance == null)
+            return;
+
+        InventoryManager.Instance.TryUnregisterQuickSlot(QuickSlotIndex);
     }
 }
