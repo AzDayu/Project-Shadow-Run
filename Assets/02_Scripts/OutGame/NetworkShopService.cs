@@ -41,7 +41,7 @@ public class NetworkShopService
 
     private void SetShopItemSlot(ShopItemSlotViewModel slot, string dataId, int count)
     {
-        var itemData = GameDataManager.Instance.GetItemDataById(dataId);
+        var itemData = DataManager.Instance.GetItemData(dataId);
 
         slot.ItemUniqueId = string.Empty;
         slot.ItemDataId = itemData.Id;
@@ -59,7 +59,7 @@ public class NetworkShopService
             if (i >= targetSlots.Count) break;
 
             var savedItem = savedItems[i];
-            var itemData = GameDataManager.Instance.GetItemDataById(savedItem.ItemId);
+            var itemData = DataManager.Instance.GetItemData(savedItem.ItemId);
 
             targetSlots[i].ItemUniqueId = savedItem.InstanceId; // 유저 아이템은 유니크 ID 유지
             targetSlots[i].ItemDataId = savedItem.ItemId;
