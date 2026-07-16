@@ -2,7 +2,7 @@
 
 public class ShopObj : MonoBehaviour
 {
-    [SerializeField] private KeyCode _interactKey = KeyCode.E;
+    private KeyCode _interactKey = KeyCode.E;
 
     private bool _isPlayerInside = false;
     //private PlayerController _playerController; 나중에 플레이어 컨트롤러가 추가되면 주석해제. 플레이어가 상점UI를 열고있을 때 플레이어의 움직임을 막기 위함.
@@ -13,14 +13,12 @@ public class ShopObj : MonoBehaviour
         {
             if (UIManager.Instance.IsUIOpened(UIType.ShopUI))
             {
-                Debug.Log("ShopObj: 상점 UI가 이미 열려 있습니다.");
-
+                CloseShop();
                 return; 
             }
-            {
-                OpenShop();
-                Debug.Log("ShopObj: 상점 UI를 열었습니다.");
-            }
+
+            OpenShop();
+            Debug.Log("ShopObj: 상점 UI를 열었습니다.");
         }
 
         if (Input.GetKeyDown(KeyCode.Escape))

@@ -155,5 +155,3 @@ Assets/Thirdparty/Enviroment/ScifiOfficeLite
 /[Aa]ssets/Thirdparty.meta
 /[Aa]ssets/ThirdParty_Premium/
 /[Aa]ssets/ThirdParty_Premium.meta
-Assets/GabrielAguiarProductions
-Assets/GabrielAguiarProductions.meta

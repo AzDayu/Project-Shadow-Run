@@ -2,31 +2,30 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class StashViewModel : ViewModelBase, IContainerPropertyChanged<long>
+public class StashViewModel : ViewModelBase
 {
-    public event Action<string, ContainerEventType, long> ContainerPropertyChanged;
+    public int _maxStashSlot = 30;
 
-    public List<StashItemSlotViewModel> InventoryItemSlotList { get; } = new List<StashItemSlotViewModel>();
-    public List<StashItemSlotViewModel> StashItemSlotList { get; } = new List<StashItemSlotViewModel>();
+    public StashItemSlotViewModel[] StashSlots { get; set; }
+
+    public StashViewModel()
+    {
+        StashSlots = new StashItemSlotViewModel[_maxStashSlot];
+        for (int i = 0; i < _maxStashSlot; i++)
+        {
+            StashSlots[i] = new StashItemSlotViewModel
+            {
+                SlotIndex = i,
+                SlotType = ShopItemSlotType.Stash, 
+                IsSlotEmpty = true
+            };
+        }
+    }
 
     public void InvokeOnceOnInit()
     {
-        OnPropertyChanged(nameof(StashItemList));
+        OnPropertyChanged(nameof(CurPlayerCredit));
         OnPropertyChanged(nameof(HoveredItemId));
-    }
-
-    private Dictionary<long, StashItemSlotViewModel> _stashItemList = new Dictionary<long, StashItemSlotViewModel>();
-    public Dictionary<long, StashItemSlotViewModel> StashItemList
-    {
-        get => _stashItemList;
-        set
-        {
-            if (_stashItemList != value)
-            {
-                _stashItemList = value;
-                OnPropertyChanged(nameof(StashItemList));
-            }
-        }
     }
 
     private int _curPlayerCredit;
@@ -55,22 +54,6 @@ public class StashViewModel : ViewModelBase, IContainerPropertyChanged<long>
                 OnPropertyChanged(nameof(HoveredItemId));
             }
         }
-    }
-
-    public void AddItemSlotViewModel(StashItemSlotViewModel slotVm)
-    {
-        _stashItemList.Add(slotVm.ItemUniqueId, slotVm);
-        ContainerPropertyChanged?.Invoke(nameof(StashItemList), ContainerEventType.Add, slotVm.ItemUniqueId);
-    }
-
-    public void RemoveItemSlotViewModel(long uniqueId)
-    {
-        if (_stashItemList.ContainsKey(uniqueId) == true)
-        {
-            _stashItemList.Remove(uniqueId);
-        }
-
-        ContainerPropertyChanged?.Invoke(nameof(StashItemList), ContainerEventType.Remove, uniqueId);
     }
 
     public void OnSlotPointerEnter(string itemDataId)
