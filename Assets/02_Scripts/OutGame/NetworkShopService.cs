@@ -28,9 +28,9 @@ public class NetworkShopService
         var vm = GetShopViewModel();
 
         //Test용 하드코딩. 추후 별도의 테이블 작성 후 JSON 변환할것.
-        SetShopItemSlot(vm.ShopItemSlotList[0], "Item_Medical_Kit_01", 99, 1500);
-        SetShopItemSlot(vm.ShopItemSlotList[1], "Item_Ammo_556", 999, 50);
-        SetShopItemSlot(vm.ShopItemSlotList[2], "Item_Weapon_AR_01", 5, 25000);
+        SetShopItemSlot(vm.ShopItemSlotList[0], "Item_Medical_Kit_01", 99);
+        SetShopItemSlot(vm.ShopItemSlotList[1], "Item_Ammo_556", 999);
+        SetShopItemSlot(vm.ShopItemSlotList[2], "Item_Weapon_AR_01", 5);
 
         PlayerModel playerData = SaveManager.Instance.LoadPlayerData();
         vm.CurPlayerCredit = playerData.CurrentCredit;
@@ -39,12 +39,14 @@ public class NetworkShopService
         LoadPlayerItemsToShopZone(playerData.StashItems, vm.StashItemSlotList);
     }
 
-    private void SetShopItemSlot(ShopItemSlotViewModel slot, string dataId, int count, int price)
+    private void SetShopItemSlot(ShopItemSlotViewModel slot, string dataId, int count)
     {
+        var itemData = GameDataManager.Instance.GetItemDataById(dataId);
+
         slot.ItemUniqueId = string.Empty;
-        slot.ItemDataId = dataId;
+        slot.ItemDataId = itemData.Id;
         slot.ItemStackCount = count;
-        slot.ItemSellingPrice = price; // 구매가
+        slot.ItemSellingPrice = itemData.SellingPrice; // 구매가
         slot.IsSlotEmpty = false;
     }
 
