@@ -4,8 +4,6 @@ using UnityEngine;
 public class LobbyDoor : MonoBehaviour
 {
     [Header("이동 설정")]
-    [Tooltip("일정 시간 후 이동시킬 목적지(빈 오브젝트)")]
-    [SerializeField] private Transform _targetDestination;
 
     [Tooltip("트리거 진입 후 대기해야 하는 시간 (초)")]
     [SerializeField] private float _waitTime = 3.0f;
@@ -55,28 +53,15 @@ public class LobbyDoor : MonoBehaviour
     {
         yield return new WaitForSeconds(_waitTime);
 
-        if (_targetDestination != null)
+        Debug.Log($"[{targetObject.name}] 탈출 성공! 로비(InGame) 공간으로 전환합니다.");
+
+        if (GameManager.Instance != null)
         {
-            CharacterController controller = targetObject.GetComponent<CharacterController>();
-
-            if (controller != null)
-            {
-                controller.enabled = false;
-                targetObject.transform.position = _targetDestination.position;
-                controller.enabled = true;
-            }
-            else
-            {
-                targetObject.transform.position = _targetDestination.position;
-            }
-
-            Debug.Log($"[{targetObject.name}] 대기 완료! {_targetDestination.name} 위치로 순간이동했습니다.");
+            GameManager.Instance.StartInGame();
         }
         else
         {
-            Debug.LogWarning("이동할 목적지(Target Destination)가 설정되지 않았습니다! 인스펙터를 확인해주세요.");
+            Debug.LogError("StartInGame: GameManager 싱글톤 인스턴스를 찾을 수 없습니다!");
         }
-
-        _teleportCoroutine = null;
     }
 }
