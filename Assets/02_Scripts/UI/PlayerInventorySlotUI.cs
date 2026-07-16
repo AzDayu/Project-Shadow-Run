@@ -47,7 +47,7 @@ public class PlayerInventorySlotUI : MonoBehaviour,
 
         if (ImageItemIcon != null)
         {
-            ImageItemIcon.sprite = ItemIconLoader.LoadIcon(GameDataManager.Instance.GetItemDataById(stack.ItemId));
+            ImageItemIcon.sprite = ItemIconLoader.LoadIcon(DataManager.Instance.GetItemData(stack.ItemId));
             ImageItemIcon.enabled = ImageItemIcon.sprite != null;
         }
 
@@ -90,6 +90,12 @@ public class PlayerInventorySlotUI : MonoBehaviour,
 
     public void OnPointerEnter(PointerEventData eventData)
     {
+        Debug.Log(
+        $"슬롯 진입: {_slotIndex}, " +
+        $"HasItem: {HasItem}, " +
+        $"ItemId: {_ItemModel?.ItemId ?? "NULL"}, " +
+        $"Owner: {(_owner != null)}"
+        );
         if (!HasItem)
             return;
 

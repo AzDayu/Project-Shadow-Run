@@ -15,7 +15,7 @@ public class StartUI :UIBase
     public void StartNewGame()
     {
         SaveManager.Instance.CreateNewPlayerData();
-        GameManager.Instance.StartGame();
+        GameManager.Instance.StartInGame();
         UIManager.Instance.CloseStartUI();
 
     }
@@ -23,7 +23,7 @@ public class StartUI :UIBase
     public void LoadGame()
     {
         SaveManager.Instance.LoadPlayerData();
-        GameManager.Instance.StartGame();
+        GameManager.Instance.StartInGame();
         UIManager.Instance.CloseStartUI();
 
     }

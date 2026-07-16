@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Unity.Android.Gradle.Manifest;
 using UnityEngine;
 
 public class NetworkShopService
@@ -20,6 +21,50 @@ public class NetworkShopService
         var shopVm = new ShopViewModel();
         _shopViewModel = shopVm;
         return shopVm;
+    }
+
+    public void InitShopData()
+    {
+        var vm = GetShopViewModel();
+
+        //Test용 하드코딩. 추후 별도의 테이블 작성 후 JSON 변환할것.
+        SetShopItemSlot(vm.ShopItemSlotList[0], "Item_Medical_Kit_01", 99, 1500);
+        SetShopItemSlot(vm.ShopItemSlotList[1], "Item_Ammo_556", 999, 50);
+        SetShopItemSlot(vm.ShopItemSlotList[2], "Item_Weapon_AR_01", 5, 25000);
+
+        PlayerModel playerData = SaveManager.Instance.LoadPlayerData();
+        vm.CurPlayerCredit = playerData.CurrentCredit;
+
+        LoadPlayerItemsToShopZone(playerData.InventoryItems, vm.InventoryItemSlotList);
+        LoadPlayerItemsToShopZone(playerData.StashItems, vm.StashItemSlotList);
+    }
+
+    private void SetShopItemSlot(ShopItemSlotViewModel slot, string dataId, int count, int price)
+    {
+        slot.ItemUniqueId = string.Empty;
+        slot.ItemDataId = dataId;
+        slot.ItemStackCount = count;
+        slot.ItemSellingPrice = price; // 구매가
+        slot.IsSlotEmpty = false;
+    }
+
+    private void LoadPlayerItemsToShopZone(List<ItemModel> savedItems, List<ShopItemSlotViewModel> targetSlots)
+    {
+        foreach (var slot in targetSlots) slot.IsSlotEmpty = true;
+
+        for (int i = 0; i < savedItems.Count; i++)
+        {
+            if (i >= targetSlots.Count) break;
+
+            var savedItem = savedItems[i];
+            var itemData = GameDataManager.Instance.GetItemDataById(savedItem.ItemId);
+
+            targetSlots[i].ItemUniqueId = savedItem.InstanceId; // 유저 아이템은 유니크 ID 유지
+            targetSlots[i].ItemDataId = savedItem.ItemId;
+            targetSlots[i].ItemStackCount = savedItem.CurrentStackCount;
+            targetSlots[i].ItemSellingPrice = itemData != null ? itemData.SellingPrice : 0; // 판매가
+            targetSlots[i].IsSlotEmpty = false;
+        }
     }
 
     //플레이어가 상점에서 아이템을 구매할 때 사용되는 함수

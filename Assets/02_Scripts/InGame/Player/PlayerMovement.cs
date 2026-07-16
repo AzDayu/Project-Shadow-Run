@@ -18,6 +18,13 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float SprintSpeed = 8f;
     [SerializeField] private float JumpPower = 5f;
 
+    [Header("Stamina")]
+    [SerializeField] private float SprintStaminaUsePerSecond = 20f;
+    [SerializeField] private float StaminaRecoveryPerSecond = 15f;
+    [SerializeField] private float SprintRestartStaminaRatio = 0.2f;
+    private PlayerStatus _playerStatus;
+    private bool _isSprintExhausted;
+
     [Header("Ground Check")]
     [SerializeField] private Transform GroundCheck;
     [SerializeField] private float GroundRadius = 0.2f;
@@ -64,20 +71,20 @@ public class PlayerMovement : MonoBehaviour
             StandingCollider.radius * 2f
         );
 
-        _crouchColliderCenter =
-            CalculateColliderCenter(_crouchColliderHeight);
+        _crouchColliderCenter = CalculateColliderCenter(_crouchColliderHeight);
 
         _crouchHeadPosition = _standingHeadPosition;
-        _crouchHeadPosition.y =
-            _standingHeadPosition.y * CrouchHeadHeightRatio;
+        _crouchHeadPosition.y = _standingHeadPosition.y * CrouchHeadHeightRatio;
 
         _proneHeadPosition = _standingHeadPosition;
-        _proneHeadPosition.y =
-            _standingHeadPosition.y * ProneHeadHeightRatio;
+        _proneHeadPosition.y = _standingHeadPosition.y * ProneHeadHeightRatio;
 
         _targetColliderHeight = _standingColliderHeight;
         _targetColliderCenter = _standingColliderCenter;
         _targetHeadPosition = _standingHeadPosition;
+
+        _rigidbody = GetComponent<Rigidbody>();
+        _playerStatus = GetComponent<PlayerStatus>();
 
         StandingCollider.enabled = true;
         ProneCollider.enabled = false;
@@ -122,19 +129,25 @@ public class PlayerMovement : MonoBehaviour
     {
         Vector2 input = InputHandler.MoveInput;
 
-        Vector3 moveDir =
-            transform.forward * input.y +
-            transform.right * input.x;
+        Vector3 moveDir = transform.forward * input.y + transform.right * input.x;
 
         moveDir.Normalize();
 
-        float currentSpeed = GetCurrentMoveSpeed(input);
+        UpdateSprintExhaustion();
 
-        _rigidbody.linearVelocity 
-            = new Vector3(moveDir.x * currentSpeed, _rigidbody.linearVelocity.y, moveDir.z * currentSpeed);
+        bool wantsToSprint = _currentPosture == PlayerPosture.Standing && InputHandler.IsSprintPressed && input.y > 0f;
+
+        bool isSprinting = wantsToSprint && !_isSprintExhausted && _playerStatus.Model.CurrentStamina > 0f;
+
+        UpdateStamina(isSprinting);
+
+        float currentSpeed = GetCurrentMoveSpeed(isSprinting);
+
+        _rigidbody.linearVelocity = new Vector3(moveDir.x * currentSpeed, _rigidbody.linearVelocity.y, moveDir.z * currentSpeed
+        );
     }
 
-    private float GetCurrentMoveSpeed(Vector2 input)
+    private float GetCurrentMoveSpeed(bool isSprinting)
     {
         if (_currentPosture == PlayerPosture.Prone)
             return ProneSpeed;
@@ -142,11 +155,7 @@ public class PlayerMovement : MonoBehaviour
         if (_currentPosture == PlayerPosture.Crouching)
             return CrouchSpeed;
 
-        bool canSprint =
-            InputHandler.IsSprintPressed &&
-            input.y > 0f;
-
-        if (canSprint)
+        if (isSprinting)
             return SprintSpeed;
 
         if (InputHandler.IsWalkPressed)
@@ -264,5 +273,39 @@ public class PlayerMovement : MonoBehaviour
             _targetColliderCenter,
             PostureChangeSpeed * Time.fixedDeltaTime
         );
+    }
+
+    private void UpdateStamina(bool isSprinting)
+    {
+        if (isSprinting)
+        {
+            float useAmount = SprintStaminaUsePerSecond * Time.fixedDeltaTime;
+
+            _playerStatus.Model.UseStamina(useAmount);
+
+            if (_playerStatus.Model.CurrentStamina <= 0f)
+            {
+                _isSprintExhausted = true;
+            }
+            return;
+        }
+
+        float recoverAmount = StaminaRecoveryPerSecond * Time.fixedDeltaTime;
+        _playerStatus.Model.RecoverStamina(
+            recoverAmount
+        );
+    }
+
+    private void UpdateSprintExhaustion()
+    {
+        if (!_isSprintExhausted)
+            return;
+
+        float restartStamina = _playerStatus.Model.MaxStamina * SprintRestartStaminaRatio;
+
+        if (_playerStatus.Model.CurrentStamina >= restartStamina)
+        {
+            _isSprintExhausted = false;
+        }
     }
 }

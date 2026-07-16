@@ -1,5 +1,4 @@
-﻿{
-  "Items": [
+﻿[
     {
       "Id": "Item_Weapon_Pistol_01",
       "Name": "실렌시오 권총",
@@ -560,4 +559,3 @@
       "UseItemParameterList": null
     }
   ]
-}

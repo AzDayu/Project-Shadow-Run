@@ -1,22 +1,22 @@
-﻿using System;
+﻿using Cysharp.Threading.Tasks;
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class StashItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler
+public class StashItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     [SerializeField] private Image Image_ItemIcon;
+    [SerializeField] private TMP_Text Text_StackCount;
 
     private StashItemSlotViewModel _slotVm;
     public Action<string> _onHoverEnter;
     public Action _onHoverExit;
 
-    public ShopItemSlotType _curSlotType { get; set; }
-    public int _slotIdx { get; set; }
-    public int _itemDataId { get; set; }
+    public Action<StashItemSlotViewModel, PointerEventData.InputButton> _onClickSlot;
 
-    public void Bind(StashItemSlotViewModel slotVm, Action<string> onHoverEnter, Action onHoverExit)
+    public void Bind(StashItemSlotViewModel slotVm, Action<string> onHoverEnter, Action onHoverExit, Action<StashItemSlotViewModel, PointerEventData.InputButton> onClickSlot)
     {
         if (_slotVm != null)
         {
@@ -24,9 +24,9 @@ public class StashItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler
         }
 
         _slotVm = slotVm;
-
         _onHoverEnter = onHoverEnter;
         _onHoverExit = onHoverExit;
+        _onClickSlot = onClickSlot;
 
         _slotVm.PropertyChanged += OnSlotPropertyChanged;
         UpdateSlotUI();
@@ -34,25 +34,39 @@ public class StashItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler
 
     private void OnSlotPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        // 슬롯 데이터가 바뀌면 UI 새로고침
         UpdateSlotUI();
     }
 
     private void UpdateSlotUI()
     {
-        if (Image_ItemIcon == null) return;
-
-        // 1. 빈 슬롯이거나 데이터가 없으면 투명하게 만들거나 숨기기
         if (_slotVm.IsSlotEmpty == true)
         {
-            Image_ItemIcon.enabled = false;  // 아이콘 숨기기
+            Image_ItemIcon.enabled = false;
+            Text_StackCount.text = "";
             return;
         }
 
-        // 2. 아이템이 존재할 때 데이터 채우고 켜기
         Image_ItemIcon.enabled = true;
 
-        // Image_ItemIcon.sprite = Resources.Load<Sprite>(_slotVm.ItemData.IconPath);
+        var itemData = GameDataManager.Instance.GetItemDataById(_slotVm.ItemDataId);
+        if (itemData != null)
+        {
+            GameUtil.LoadAndSetSpriteImage(Image_ItemIcon, itemData.IconPath).Forget();
+        }
+
+        if (_slotVm.ItemStackCount <= 1)
+        {
+            Text_StackCount.text = ""; 
+        }
+        else
+        {
+            Text_StackCount.text = _slotVm.ItemStackCount.ToString(); 
+        }
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        _onClickSlot?.Invoke(_slotVm, eventData.button);
     }
 
     public void OnPointerEnter(PointerEventData eventData)

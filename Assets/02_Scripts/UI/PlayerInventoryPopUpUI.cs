@@ -127,14 +127,20 @@ public class PlayerInventoryPopUpUI : UIBase
     private void RefreshInventory()
     {
         if (InventoryManager.Instance == null)
+        {
+            Debug.LogError("[Inventory UI] InventoryManager.Instance가 없습니다.");
             return;
+        }
 
-        IReadOnlyList<ItemModel> ItemModels = InventoryManager.Instance.ItemList;
+        IReadOnlyList<ItemModel> itemModels = InventoryManager.Instance.ItemList;
 
         for (int i = 0; i < _slotUIList.Count; i++)
         {
-            if (i < ItemModels.Count)
-                _slotUIList[i].SetItem(ItemModels[i]);
+            if (i < itemModels.Count)
+            {
+                ItemModel itemModel = itemModels[i];
+                _slotUIList[i].SetItem(itemModel);
+            }
             else
                 _slotUIList[i].Clear();
         }
@@ -164,8 +170,6 @@ public class PlayerInventoryPopUpUI : UIBase
 
         _selectedSlot = slot;
         _selectedSlot.SetSelected(true);
-
-        Debug.Log($"선택 슬롯: {slot.SlotIndex}, 아이템: {slot.ItemModel}");
     }
 
     public void TryUseItem(PlayerInventorySlotUI slot)
@@ -202,8 +206,6 @@ public class PlayerInventoryPopUpUI : UIBase
         LayoutRebuilder.ForceRebuildLayoutImmediate(ContextMenuRect);
 
         SetPanelPositionClamped(ContextMenuRect, mousePosition + ContextMenuOffset);
-
-        Debug.Log($"우클릭 메뉴 열기: {slot.ItemModel.ItemId}");
     }
 
     private void CloseContextMenu()
@@ -223,10 +225,10 @@ public class PlayerInventoryPopUpUI : UIBase
             return;
 
         ItemModel stack = slot.ItemModel;
-        ItemData item = GameDataManager.Instance.GetItemDataById(stack.ItemId);
+        ItemData item = DataManager.Instance.GetItemData(stack.ItemId);
 
         if (TextTooltipName != null)
-            TextTooltipName.text = item.ItemName;
+            TextTooltipName.text = item.Name;
 
         if (TextTooltipDescription != null)
             TextTooltipDescription.text = item.ItemDescription;
@@ -386,8 +388,8 @@ public class PlayerInventoryPopUpUI : UIBase
 
         if (InventoryManager.Instance == null)
             return;
-
-        InventoryManager.Instance.TryDropItem(_contextTargetSlot.SlotIndex, 1);
+        int dropCount = _contextTargetSlot.ItemModel.CurrentStackCount;
+        InventoryManager.Instance.TryDropItem(_contextTargetSlot.SlotIndex, dropCount);
 
         CloseContextMenu();
         HideItemTooltip(_contextTargetSlot);
@@ -412,7 +414,7 @@ public class PlayerInventoryPopUpUI : UIBase
         if (slot == null || !slot.HasItem)
             return;
 
-        ItemData item = GameDataManager.Instance.GetItemDataById(slot.ItemModel.ItemId);
+        ItemData item = DataManager.Instance.GetItemData(slot.ItemModel.ItemId);
 
         bool canUse = item.ItemType == "Consumable";
         bool canRegisterQuickSlot =
@@ -439,7 +441,7 @@ public class PlayerInventoryPopUpUI : UIBase
 
         DragIconObject.SetActive(true);
 
-        Sprite icon = ItemIconLoader.LoadIcon(GameDataManager.Instance.GetItemDataById(stack.ItemId));
+        Sprite icon = ItemIconLoader.LoadIcon(DataManager.Instance.GetItemData(stack.ItemId));
 
         DragIconImage.sprite = icon;
         DragIconImage.gameObject.SetActive(icon != null);
