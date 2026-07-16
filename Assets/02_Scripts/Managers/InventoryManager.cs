@@ -273,7 +273,30 @@ public class InventoryManager : MonoBehaviour
 
     public bool TryRegisterQuickSlot(int inventorySlotIndex)
     {
-        return TryRegisterQuickSlot(inventorySlotIndex, 0);
+        ItemModel itemModel = GetItemModel(inventorySlotIndex);
+
+        if (!IsValidStack(itemModel))
+            return false;
+
+        if (!CanRegisterQuickSlot(itemModel))
+            return false;
+
+        for (int i = 0; i < _quickSlotList.Length; i++)
+        {
+            if (!IsSameItemModel(_quickSlotList[i], itemModel))
+                continue;
+            return true;
+        }
+
+        for (int i = 0; i < _quickSlotList.Length; i++)
+        {
+            if (IsValidStack(_quickSlotList[i]))
+                continue;
+
+            return TryRegisterQuickSlot(inventorySlotIndex, i);
+        }
+
+        return false;
     }
 
     private bool TryUseConsumable(ItemModel stack)

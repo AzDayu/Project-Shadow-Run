@@ -13,19 +13,6 @@
       "UseItemParameterList": "Damage:15,Recoil:20,RPM:400"
     },
     {
-      "Id": "Item_Ammo_556",
-      "Name": "5.56mm 표준탄",
-      "Description": "볼텍스 AR 및 표준 소총에 사용되는 군용 탄약.",
-      "ItemType": "Ammo",
-      "Grade": "Normal",
-      "MaxStackCount": 60,
-      "SellingPrice": 100,
-      "IconPath": "Icon/Ammo_556",
-      "PrefabPath": "Prefab/Ammo_556",
-      "UseItemType": null,
-      "UseItemParameterList": null
-    },
-    {
       "Id": "Item_Medical_Kit_01",
       "Name": "휴대용 구급팩",
       "Description": "전장용 압박 붕대와 소독약이 들어있는 기본 의료 키트. 체력을 즉시 일부 회복합니다.",
