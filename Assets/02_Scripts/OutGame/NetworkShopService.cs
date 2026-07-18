@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Unity.Android.Gradle.Manifest;
 using UnityEngine;
 
 public class NetworkShopService
@@ -35,8 +34,58 @@ public class NetworkShopService
         PlayerModel playerData = SaveManager.Instance.LoadPlayerData();
         vm.CurPlayerCredit = playerData.CurrentCredit;
 
-        LoadPlayerItemsToShopZone(playerData.InventoryItems, vm.InventoryItemSlotList);
+        var inventoryItems = InventoryManager.Instance.ItemList;
+        LoadPlayerItemsToShopZone(new List<ItemModel>(inventoryItems), vm.InventoryItemSlotList);
+        //LoadPlayerItemsToShopZone(playerData.InventoryItems, vm.InventoryItemSlotList);
+
         LoadPlayerItemsToShopZone(playerData.StashItems, vm.StashItemSlotList);
+    }
+
+    // 이하 상점UI내에서 일어난 데이터 변동을 UI가 닫히며 저장하고 동기화 시키는 메서드. 인벤토리에 데이터를 덮어씌우는 메서드(SyncInventoryFromUI) 추가 요청할 것.
+    public void SyncDataOnClose()
+    {
+        var vm = GetShopViewModel();
+        PlayerModel playerData = SaveManager.Instance.LoadPlayerData();
+
+        // 1. 변동된 크레딧 갱신
+        playerData.CurrentCredit = vm.CurPlayerCredit;
+
+        // 2. 뷰모델 데이터 -> ItemModel 리스트로 변환 (인벤토리)
+        List<ItemModel> newInventory = new List<ItemModel>();
+        foreach (var slot in vm.InventoryItemSlotList)
+        {
+            if (!slot.IsSlotEmpty)
+            {
+                newInventory.Add(new ItemModel
+                {
+                    InstanceId = slot.ItemUniqueId,
+                    ItemId = slot.ItemDataId,
+                    CurrentStackCount = slot.ItemStackCount
+                });
+            }
+        }
+
+        // InventoryManager에 변경된 인벤토리 데이터 덮어쓰기
+        //playerData.InventoryItems = newInventory;
+        //InventoryManager.Instance.SyncInventoryFromUI(newInventory);
+
+        // 3. 뷰모델 데이터 -> ItemModel 리스트로 변환 (창고)
+        List<ItemModel> newStash = new List<ItemModel>();
+        foreach (var slot in vm.StashItemSlotList)
+        {
+            if (!slot.IsSlotEmpty)
+            {
+                newStash.Add(new ItemModel
+                {
+                    InstanceId = slot.ItemUniqueId,
+                    ItemId = slot.ItemDataId,
+                    CurrentStackCount = slot.ItemStackCount
+                });
+            }
+        }
+
+        playerData.StashItems = newStash;
+        SaveManager.Instance.SavePlayerData(playerData);
     }
 
     private void SetShopItemSlot(ShopItemSlotViewModel slot, string dataId, int count)

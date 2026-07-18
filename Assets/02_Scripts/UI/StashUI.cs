@@ -26,7 +26,6 @@ public class StashUI : UIBase
     private List<StashItemSlotUI> _invenSlotUIList = new List<StashItemSlotUI>();
 
     private StashViewModel _stashVm;
-    //private InventoryViewModel _inventoryVm;
 
     private void OnEnable()
     {
@@ -40,7 +39,6 @@ public class StashUI : UIBase
         if (_stashVm != null)
         {
             _stashVm.PropertyChanged -= OnPropChanged_View;
-            //if (_inventoryVm != null) _inventoryVm.PropertyChanged -= OnPropChanged_View;
         }
     }
 
@@ -58,10 +56,6 @@ public class StashUI : UIBase
         _stashVm = stashVm;
         _stashVm.PropertyChanged += OnPropChanged_View;
         _stashVm.InvokeOnceOnInit();
-
-        //_inventoryVm = NetworkManager.Inst.InventoryService.GetInventoryViewModel();
-        //_inventoryVm.PropertyChanged += OnPropChanged_View;
-        //_inventoryVm.InvokeOnceOnInit();
 
         if (_dragSlotVm == null)
         {
@@ -88,15 +82,15 @@ public class StashUI : UIBase
             }
         }
 
-        //if (_inventorySlotUIList.Count == 0)
-        //{
-        //    foreach (var slotVm in _inventoryVm.InventorySlots) // ⭐ 인벤토리 VM에서 데이터 가져옴
-        //    {
-        //        var slotUI = Instantiate(Prefab_ShopItemSlotUI, Transform_InventoryContent);
-        //        slotUI.Bind(slotVm, OnSlotHoverEnter, OnSlotHoverExit, OnSlotClicked);
-        //        _inventorySlotUIList.Add(slotUI);
-        //    }
-        //}
+        if (_invenSlotUIList.Count == 0)
+        {
+            foreach (var slotVm in _stashVm.InventorySlots) 
+            {
+                var slotUI = Instantiate(Prefab_StashItemSlotUI, Transform_InventoryContent);
+                slotUI.Bind(slotVm, OnSlotHoverEnter, OnSlotHoverExit, OnSlotClicked);
+                _invenSlotUIList.Add(slotUI);
+            }
+        }
     }
 
     private void OnPropChanged_View(object sender, PropertyChangedEventArgs e)
@@ -128,6 +122,8 @@ public class StashUI : UIBase
 
     public void CloseStashUI()
     {
+        NetworkManager.Inst.StashService.SyncDataOnClose();
+
         UIManager.Instance.CloseContentUI(UIType.StashUI);
 
         if (ShopItemPopup != null)
