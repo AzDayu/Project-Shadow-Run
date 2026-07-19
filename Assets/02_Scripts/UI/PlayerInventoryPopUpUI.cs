@@ -81,8 +81,7 @@ public class PlayerInventoryPopUpUI : UIBase
     {
         _slotUIList.Clear();
 
-        PlayerInventorySlotUI[] slots =
-            SlotParent.GetComponentsInChildren<PlayerInventorySlotUI>(true);
+        PlayerInventorySlotUI[] slots = SlotParent.GetComponentsInChildren<PlayerInventorySlotUI>(true);
 
         for (int i = 0; i < slots.Length; i++)
         {
@@ -295,22 +294,59 @@ public class PlayerInventoryPopUpUI : UIBase
 
         Debug.Log($"드래그 종료: {_draggingSlot.ItemModel.ItemId}");
 
-        PlayerQuickSlotUI quickSlotUI = GetQuickSlotUnderPointer(eventData);
+        PlayerEquipmentSlotUI equipmentSlotUI = GetEquipmentSlotUnderPointer(eventData);
 
-        if (quickSlotUI != null && InventoryManager.Instance != null)
+        if (equipmentSlotUI != null && InventoryManager.Instance != null)
         {
-            InventoryManager.Instance.TryRegisterQuickSlot(
+            bool equipped = InventoryManager.Instance.TryEquipItem(
                 _draggingSlot.SlotIndex,
-                quickSlotUI.SlotIndex
+                equipmentSlotUI.EquipmentType
             );
 
-            Debug.Log($"퀵슬롯 드롭 감지: QuickSlotIndex {quickSlotUI.SlotIndex}");
+            if (equipped)
+            {
+                Debug.Log($"장비 슬롯 드롭 완료: EquipmentType {equipmentSlotUI.EquipmentType}");
+            }
+        }
+        else
+        {
+            PlayerQuickSlotUI quickSlotUI = GetQuickSlotUnderPointer(eventData);
+
+            if (quickSlotUI != null && InventoryManager.Instance != null)
+            {
+                InventoryManager.Instance.TryRegisterQuickSlot(
+                    _draggingSlot.SlotIndex,
+                    quickSlotUI.SlotIndex
+                );
+
+                Debug.Log($"퀵슬롯 드롭 감지: QuickSlotIndex {quickSlotUI.SlotIndex}");
+            }
         }
 
         HideDragSlot();
 
         _draggingSlot = null;
     }
+
+    private PlayerEquipmentSlotUI GetEquipmentSlotUnderPointer(PointerEventData eventData)
+    {
+        if (EventSystem.current == null)
+            return null;
+
+        List<RaycastResult> results = new();
+        EventSystem.current.RaycastAll(eventData, results);
+
+        foreach (RaycastResult result in results)
+        {
+            PlayerEquipmentSlotUI equipmentSlotUI = result.gameObject.GetComponentInParent<PlayerEquipmentSlotUI>();
+
+            if (equipmentSlotUI != null)
+                return equipmentSlotUI;
+        }
+
+        return null;
+    }
+
     private PlayerQuickSlotUI GetQuickSlotUnderPointer(PointerEventData eventData)
     {
         if (EventSystem.current == null)
@@ -321,8 +357,7 @@ public class PlayerInventoryPopUpUI : UIBase
 
         foreach (RaycastResult result in results)
         {
-            PlayerQuickSlotUI quickSlotUI =
-                result.gameObject.GetComponentInParent<PlayerQuickSlotUI>();
+            PlayerQuickSlotUI quickSlotUI = result.gameObject.GetComponentInParent<PlayerQuickSlotUI>();
 
             if (quickSlotUI != null)
                 return quickSlotUI;
@@ -374,8 +409,7 @@ public class PlayerInventoryPopUpUI : UIBase
 
         bool canUse = item.ItemType == "Consumable";
         bool canRegisterQuickSlot =
-            item.ItemType == "Weapon" ||
-            item.ItemType == "Consumable";
+            (item.ItemType == "Weapon") || (item.ItemType == "Consumable");
 
         if (ButtonUse != null)
             ButtonUse.gameObject.SetActive(canUse);
@@ -387,7 +421,7 @@ public class PlayerInventoryPopUpUI : UIBase
             ButtonDrop.gameObject.SetActive(true);
     }
 
-    private void ShowDragSlot (ItemModel stack, Vector2 screenPosition)
+    private void ShowDragSlot(ItemModel stack, Vector2 screenPosition)
     {
         if (stack == null)
             return;
