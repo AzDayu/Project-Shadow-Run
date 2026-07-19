@@ -1,0 +1,82 @@
+[
+  {
+    "Id": "Tile_Start_01",
+    "Type": "Start",
+    "Scale": "A",
+    "SpawnWeight": 1,
+    "MinCount": 1,
+    "MaxCount": 1,
+    "SocketCount": 1,
+    "PrefabPath": "Assets/03_Prefabs/Environment/Tileset/Tileset01/Tiie_Start_01.prefab"
+  },
+  {
+    "Id": "Tile_Exit_01",
+    "Type": "Exit",
+    "Scale": "A",
+    "SpawnWeight": 1,
+    "MinCount": 1,
+    "MaxCount": 3,
+    "SocketCount": 1,
+    "PrefabPath": "Assets/03_Prefabs/Environment/Tileset/Tileset01/Tiie_Exit_01.prefab"
+  },
+  {
+    "Id": "Tile_A02",
+    "Type": "Normal",
+    "Scale": "A",
+    "SpawnWeight": 1,
+    "MinCount": 1,
+    "MaxCount": 3,
+    "SocketCount": 1,
+    "PrefabPath": "Assets/03_Prefabs/Environment/Tileset/Tileset01/Tiie_A02.prefab"
+  },
+  {
+    "Id": "Tile_A03",
+    "Type": "Normal",
+    "Scale": "A",
+    "SpawnWeight": 1,
+    "MinCount": 1,
+    "MaxCount": 3,
+    "SocketCount": 1,
+    "PrefabPath": "Assets/03_Prefabs/Environment/Tileset/Tileset01/Tiie_A03.prefab"
+  },
+  {
+    "Id": "Tile_B01",
+    "Type": "Normal",
+    "Scale": "B",
+    "SpawnWeight": 1,
+    "MinCount": 1,
+    "MaxCount": 3,
+    "SocketCount": 2,
+    "PrefabPath": "Assets/03_Prefabs/Environment/Tileset/Tileset01/Tiie_B01.prefab"
+  },
+  {
+    "Id": "Tile_B02",
+    "Type": "Normal",
+    "Scale": "B",
+    "SpawnWeight": 1,
+    "MinCount": 1,
+    "MaxCount": 3,
+    "SocketCount": 2,
+    "PrefabPath": "Assets/03_Prefabs/Environment/Tileset/Tileset01/Tiie_B02.prefab"
+  },
+  {
+    "Id": "Tile_B03",
+    "Type": "Normal",
+    "Scale": "B",
+    "SpawnWeight": 1,
+    "MinCount": 1,
+    "MaxCount": 3,
+    "SocketCount": 4,
+    "PrefabPath": "Assets/03_Prefabs/Environment/Tileset/Tileset01/Tiie_B03.prefab"
+  },
+  {
+    "Id": "Tile_B04",
+    "Type": "Normal",
+    "Scale": "B",
+    "SpawnWeight": 1,
+    "MinCount": 1,
+    "MaxCount": 3,
+    "SocketCount": 2,
+    "PrefabPath": "Assets/03_Prefabs/Environment/Tileset/Tileset01/Tiie_B04.prefab"
+  }
+]

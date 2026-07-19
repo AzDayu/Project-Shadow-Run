@@ -15,7 +15,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1139327780311607376
 Transform:
   m_ObjectHideFlags: 0
@@ -49,7 +49,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &5064114700827715505
 Transform:
   m_ObjectHideFlags: 0
@@ -284,6 +284,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4039009982039501004}
+  - component: {fileID: 6872228694759404768}
   m_Layer: 6
   m_Name: 02
   m_TagString: Untagged
@@ -308,6 +309,22 @@ Transform:
   - {fileID: 2939515929142705685}
   m_Father: {fileID: 5601663903290673115}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6872228694759404768
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2056392181397350447}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5b70605b126b5b4bbde423deae3bf48, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TileSocket
+  _openPart: {fileID: 382111545490464251}
+  _closedPart: {fileID: 2652537037311727772}
+  _isInitiallyOpen: 0
+  _connectionPoint: {fileID: 4149215165587013080}
 --- !u!1 &2334719100439166390
 GameObject:
   m_ObjectHideFlags: 0
@@ -420,7 +437,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &2939515929142705685
 Transform:
   m_ObjectHideFlags: 0
@@ -582,7 +599,8 @@ GameObject:
   - component: {fileID: 3953740543575996352}
   - component: {fileID: 479043285761980811}
   - component: {fileID: 7173520066737688001}
-  m_Layer: 0
+  - component: {fileID: 8051279235890644480}
+  m_Layer: 9
   m_Name: Tiie_B04
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -664,6 +682,18 @@ MonoBehaviour:
   m_MinRegionArea: 2
   m_NavMeshData: {fileID: 23800000, guid: 8da10a2d396c7d346b38d3cc3f1b9329, type: 2}
   m_BuildHeightMesh: 0
+--- !u!114 &8051279235890644480
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5033706313656175177}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 960140fbde6a9d84c84a1c599797df52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TileController
 --- !u!1 &5283549402431204961
 GameObject:
   m_ObjectHideFlags: 0
@@ -794,6 +824,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 72683546967071913}
+  - component: {fileID: 4917242341146478765}
   m_Layer: 6
   m_Name: 01
   m_TagString: Untagged
@@ -818,6 +849,22 @@ Transform:
   - {fileID: 3267319302013587985}
   m_Father: {fileID: 5601663903290673115}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4917242341146478765
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5632144661306373706}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5b70605b126b5b4bbde423deae3bf48, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TileSocket
+  _openPart: {fileID: 71333125918506602}
+  _closedPart: {fileID: 5963403382204386214}
+  _isInitiallyOpen: 0
+  _connectionPoint: {fileID: 8097679555319876695}
 --- !u!1 &5963403382204386214
 GameObject:
   m_ObjectHideFlags: 0
@@ -833,7 +880,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &3267319302013587985
 Transform:
   m_ObjectHideFlags: 0

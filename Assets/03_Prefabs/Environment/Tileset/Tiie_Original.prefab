@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1135640275010286064}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Open
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -41,7 +41,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6783897866189089509}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Celling
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -72,13 +72,13 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3982782195665500376}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Close
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &3982782195665500376
 Transform:
   m_ObjectHideFlags: 0
@@ -103,7 +103,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7861034360803041275}
-  m_Layer: 0
+  - component: {fileID: 1451947828766643088}
+  - component: {fileID: 662097471220246785}
+  m_Layer: 6
   m_Name: 01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -127,6 +129,33 @@ Transform:
   - {fileID: 3982782195665500376}
   m_Father: {fileID: 2276185003509405744}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1451947828766643088
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2344306239909524602}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e843ad4a50e1254ab6445e82f8ed9a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PassageController
+  _openPart: {fileID: 1056096851489113820}
+  _closedPart: {fileID: 2033810890198025951}
+  _isInitiallyOpen: 1
+--- !u!114 &662097471220246785
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2344306239909524602}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5b70605b126b5b4bbde423deae3bf48, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TileSocket
 --- !u!1 &2680111499395109779
 GameObject:
   m_ObjectHideFlags: 0
@@ -137,7 +166,7 @@ GameObject:
   m_Component:
   - component: {fileID: 934163918752558572}
   - component: {fileID: 7474586569209460414}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Socket
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -193,7 +222,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1464644602188914500}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Corridors
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -224,7 +253,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 406805432635161208}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Colliders
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -255,7 +284,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5535024931589123141}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: CatWalk
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -287,7 +316,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2276185003509405744}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Passage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -321,7 +350,7 @@ GameObject:
   - component: {fileID: 6205225293074518073}
   - component: {fileID: 7306272190342646598}
   - component: {fileID: 7016789035367249366}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Tiie_Original
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -412,7 +441,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1504590590025628122}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Object
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -443,7 +472,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7437089371979225268}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Wall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -474,7 +503,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3487917285195971538}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Floor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -508,6 +537,10 @@ PrefabInstance:
     - target: {fileID: 100000, guid: ce1e1c6afeb8a4c4da4ab18e701d36cc, type: 3}
       propertyPath: m_Name
       value: (0, 0)
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: ce1e1c6afeb8a4c4da4ab18e701d36cc, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: ce1e1c6afeb8a4c4da4ab18e701d36cc, type: 3}
       propertyPath: m_LocalPosition.x

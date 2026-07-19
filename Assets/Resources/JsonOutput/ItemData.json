@@ -1,0 +1,79 @@
+[
+  {
+    "Id": "Item_Weapon_AR_01",
+    "Name": "볼텍스 AR",
+    "Description": "메가코프의 제식 돌격소총.",
+    "ItemType": "Weapon",
+    "Grade": "Rare",
+    "MaxStackCount": 1,
+    "SellingPrice": 45000,
+    "IconPath": "Icon/Weapon_AR_01",
+    "PrefabPath": "Prefab/Weapon_AR_01",
+    "UseItemType": "WeaponStat",
+    "UseItemParameterList": [
+      "Damage:35",
+      "Recoil:75",
+      "RPM:600"
+    ]
+  },
+  {
+    "Id": "Item_Consumable_Medkit",
+    "Name": "나노 치료제",
+    "Description": "투여 즉시 HP를 회복하는 주사기.",
+    "ItemType": "Consumable",
+    "Grade": "Normal",
+    "MaxStackCount": 5,
+    "SellingPrice": 3000,
+    "IconPath": "Icon/Item_Medkit_1",
+    "PrefabPath": "Prefab/Item_Medkit_1",
+    "UseItemType": "StatChangeHp",
+    "UseItemParameterList": [
+      "100"
+    ]
+  },
+  {
+    "Id": "Item_Loot_CPU",
+    "Name": "양자 CPU",
+    "Description": "타 세력에게 비싸게 팔 수 있는 주요 부품.",
+    "ItemType": "Material",
+    "Grade": "Epic",
+    "MaxStackCount": 10,
+    "SellingPrice": 15000,
+    "IconPath": "Icon/Item_Loot_CPU",
+    "PrefabPath": "Prefab/Item_Loot_CPU",
+    "UseItemType": null,
+    "UseItemParameterList": null
+  },
+  {
+    "Id": "Item_Ammo_556",
+    "Name": "5.56mm 탄약",
+    "Description": "표준 소총 탄약.",
+    "ItemType": "Ammo",
+    "Grade": "Normal",
+    "MaxStackCount": 60,
+    "SellingPrice": 50,
+    "IconPath": "Icon/Item_Ammo_556",
+    "PrefabPath": "Prefab/Item_Ammo_556",
+    "UseItemType": "StatChangeAmmo",
+    "UseItemParameterList": [
+      "60"
+    ]
+  },
+  {
+    "Id": "Item_Box_Secure",
+    "Name": "보안 컨테이너",
+    "Description": "무엇이 들어있을지 모르는 보안 상자.",
+    "ItemType": "Normal",
+    "Grade": "Epic",
+    "MaxStackCount": 10,
+    "SellingPrice": 1000,
+    "IconPath": "Icon/Item_Box_Secure",
+    "PrefabPath": "Prefab/Item_Box_Secure",
+    "UseItemType": "RandomItemBox",
+    "UseItemParameterList": [
+      "Item_Loot_CPU:1",
+      "Item_Consumable_Medkit:3",
+      "Item_Gold:500"
+    ]
+  }
+]
