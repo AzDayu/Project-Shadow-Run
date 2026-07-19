@@ -8,10 +8,13 @@ public enum EnemyState
     Investigate, // 2. 수색 (소리 감지)
     Chase,       // 3. 추적 (눈으로 발견)
     Attack,      // 4. 공격
-    Retreat,      // 5. 도망 및 치료
-    Reload,
+    Retreat,     // 5. 도망 및 치료
+    Reload,     //6.재장전
+    CoverAction,//7. 엄폐, 재장전들 다음 전투상태 판단
     Dead
 }
+
+
 public interface IState
 {
     void EnterState();  // 이 상태로 처음 들어왔을 때 
@@ -27,14 +30,17 @@ public class EnemyStateMachine : MonoBehaviour
     public LayerMask _playerLayerMask;
     public LayerMask _sightLayerMask;
     public LayerMask _shootLayerMask;
+    public LayerMask _coverWallLayerMask;
     // 다른 상태 클래스들이 공통으로 쓸 유니티 컴포넌트들을 미리 캐싱
     [HideInInspector] public NavMeshAgent _agent;
     [HideInInspector] public Transform _targetPlayer;
     [HideInInspector] public Vector3 _lastDetectPosition; // 플레이어를 마지막으로 목격한 위치
 
+    public CoverWallInfo _currentCoverWallInfo;//현재 엄폐중인 위치
+
     [SerializeField] private MeshRenderer _renderer;//디버깅용
 
-
+    public EnemyState _previousEnemyState;
     public EnemyAnimController _animController;
     public EnemyBase _enemyBase;
     // 예시용 상태 객체들
@@ -45,6 +51,7 @@ public class EnemyStateMachine : MonoBehaviour
     public EnemyAttackState _attackState;
     public EnemyReloadState _reloadState;
     public EnemyRetreatState _retreatState;
+    public EnemyCoverActionState _coverActionState;
     public EnemyDeadState _deadState;
     
     
@@ -63,6 +70,7 @@ public class EnemyStateMachine : MonoBehaviour
         _attackState = new EnemyAttackState(this);
         _reloadState = new EnemyReloadState(this);
         _retreatState = new EnemyRetreatState(this);
+        _coverActionState = new EnemyCoverActionState(this);
         _deadState = new EnemyDeadState(this);
     }
 

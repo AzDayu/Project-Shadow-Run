@@ -1,22 +1,25 @@
 ﻿using UnityEngine;
 using UnityEngine.AI;
 
+
 public abstract class BaseEnemyState : IState
 {
     private const float FRONT_ANGLE = 90f;
     private const float SIDE_ANGLE = 180f;
+    protected const float PATROL_RELOAD_RATIO = 0.3f;
+    protected const float COMBAT_RELOAD_RATIO = 0f;
+
     // 자식 상태 클래스들이 공용으로 사용할 상태머신 참조
-    protected EnemyStateMachine stateMachine;
+    protected EnemyStateMachine _stateMachine;
 
     // 기본 감지 반경 세팅 (필요시 자식에서 따로 정의 가능)
-    protected float detectionRadius = 20f;
-    protected const float PatrolReloadRatio = 0.3f;
-    protected const float CombatReloadRatio = 0f;
-    float currentSpeed;
+    protected float _detectionRadius = 20f;
+    
+    float _currentSpeed;
     // 생성자
     public BaseEnemyState(EnemyStateMachine stateMachine)
     {
-        this.stateMachine = stateMachine;
+        this._stateMachine = stateMachine;
     }
 
     public abstract void EnterState();
@@ -26,52 +29,27 @@ public abstract class BaseEnemyState : IState
     /// <summary>
     /// 모든 자식 상태(Idle, Patrol, Investigate 등)가 쓸 수 있는 플레이어 감지 함수
     /// </summary>
-    protected bool DetectPlayer()//플레이어를 탐지하고 레이캐스트로 적중했을시,
+    protected bool CanDetectTarget()//플레이어를 탐지하고 레이캐스트로 적중했을시, Patrol 상태에서 사용하기 위한 보호막
     {
-        Collider[] hitColliders = Physics.OverlapSphere(stateMachine.transform.position, detectionRadius, stateMachine._playerLayerMask);
+        Collider[] hitColliders = Physics.OverlapSphere(_stateMachine.transform.position, _detectionRadius, _stateMachine._playerLayerMask);
 
         if (hitColliders.Length > 0)
         {
             Transform foundPlayer = hitColliders[0].transform;
 
-            Vector3 startPos = stateMachine.transform.position + Vector3.up * 0.5f;
+            Vector3 startPos = _stateMachine.transform.position + Vector3.up * 0.5f;
 
             Vector3 targetPos = foundPlayer.position + Vector3.up * 0.5f;
             Vector3 direction = (targetPos - startPos).normalized;
 
             float distance = Vector3.Distance(startPos, targetPos);
-            float angle = Vector3.Angle(stateMachine.transform.forward, direction);
+            float angle = Vector3.Angle(_stateMachine.transform.forward, direction);
 
             if (IsInDetectionRange(angle, distance))
             {
-                // Debug.Log($"[디버그] 1단계 오버랩 성공. {foundPlayer.name} 조준 중. 거리: {distance}");
-
-                //bool isHit = Physics.Raycast(startPos, direction, out RaycastHit hit, distance, stateMachine._sightLayerMask);
-
-                //if (isHit)
-                //{
-                //    Color rayColor = hit.transform.CompareTag("Player") ? Color.green : Color.red;
-                //    Debug.DrawLine(startPos, hit.point, rayColor);
-
-                //    if (hit.transform.CompareTag("Player"))
-                //    {
-                //        stateMachine._targetPlayer = foundPlayer;
-                //        Debug.Log($"[{this.GetType().Name}] 성공: 플레이어를 직접 눈으로 확인했습니다!");
-                //        return true;
-                //    }
-                //    else
-                //    {
-                //        Debug.Log($"[{this.GetType().Name}] 실패: 플레이어 방향을 보았으나 중간에 [{hit.transform.name}]이(가) 가로막고 있습니다. 태그: {hit.transform.tag}");
-                //    }
-                //}
-                //else
-                //{
-                //    Debug.DrawRay(startPos, direction * distance, Color.yellow);
-                //    Debug.Log($"[{this.GetType().Name}] 실패: 플레이어 방향으로 레이저를 쐈으나 아무것도 맞지 않고 빗나갔습니다.");
-                //}
                 if (CanChaseTarget(foundPlayer))
                 {
-                    stateMachine._targetPlayer = foundPlayer;
+                    _stateMachine._targetPlayer = foundPlayer;
                     return true;
                 }
             }
@@ -79,89 +57,94 @@ public abstract class BaseEnemyState : IState
 
         return false;
     }
-    protected bool CanAttackTarget()
+    protected bool CanAttackTargetPlayer()
     {
-        if (stateMachine._targetPlayer == null) {
+        if (_stateMachine._targetPlayer == null) {
             Debug.Log("[CanAttackTarget] 사격이 불가능 합니다. 타겟이 없습니다.");
             return false;
         }
 
-        Vector3 startPos = stateMachine.transform.position + Vector3.up * 0.5f;
-        Vector3 targetPos = stateMachine._targetPlayer.position + Vector3.up * 0.5f;
+        Vector3 startPos = _stateMachine.transform.position + Vector3.up * 0.5f;
+        Vector3 targetPos = _stateMachine._targetPlayer.position + Vector3.up * 0.5f;
 
+        return CanAttackTarget(startPos,targetPos);
+    }
+    protected bool CanAttackTarget(Vector3 startPos, Vector3 targetPos) 
+    {
         Vector3 direction = (targetPos - startPos).normalized;
         float distance = Vector3.Distance(startPos, targetPos);
-        if (distance > stateMachine._enemyBase.CurrentWeapon.Range)
+        if (distance > _stateMachine._enemyBase.CurrentWeapon.Range)
         {
             Debug.Log("[CanAttackTarget] 사격이 불가능 합니다. 거리가 안됩니다.");
             return false;
         }
-        if (Physics.Raycast(startPos, direction, out RaycastHit hit, distance, stateMachine._shootLayerMask))
+        if (Physics.Raycast(startPos, direction, out RaycastHit hit, distance, _stateMachine._shootLayerMask))
         {
             Debug.Log($"맞은 오브젝트 : {hit.transform.name}, Layer : {LayerMask.LayerToName(hit.transform.gameObject.layer)}");
-            Debug.Log($"타겟 : {stateMachine._targetPlayer.name}");
-
-            Debug.Log($"[CanAttackTarget] 사격여부{hit.transform == stateMachine._targetPlayer}타겟에 맞았는지");
-            return hit.transform == stateMachine._targetPlayer;
+            return hit.transform == _stateMachine._targetPlayer;
         }
         Debug.Log("[CanAttackTarget] 사격이 불가능 합니다. 그외.");
         return false;
     }
-    protected void UpdateAnimation() 
+    protected void UpdateMoveAnimation() 
     {
-        currentSpeed = stateMachine._agent.velocity.magnitude;
-        if (currentSpeed < 0.2f)
+        _currentSpeed = _stateMachine._agent.velocity.magnitude;
+        if (_currentSpeed < 0.2f)
         {
-            currentSpeed = 0f;
+            _currentSpeed = 0f;
         }
-        stateMachine._animController.ChangeAnimState(EnemyAnimState.Move, currentSpeed);
+        _stateMachine._animController.ChangeAnimState(EnemyAnimState.Move, _currentSpeed);
     }
     protected bool NeedReload(float ratio)
     {
-        int remainBullets = stateMachine._enemyBase.CurrentWeapon.RemainBullets;
-        int magazineSize = stateMachine._enemyBase.CurrentWeapon.MagazineSize;
+        int remainBullets = _stateMachine._enemyBase.CurrentWeapon.RemainBullets;
+        int magazineSize = _stateMachine._enemyBase.CurrentWeapon.MagazineSize;
 
         return remainBullets <= magazineSize * ratio;
     }
     protected void EvaluateCombatState() //독립적인 행동이 끝나고 다음 행동을 이어나가기 위함(장전 등)
     {
-        if (stateMachine._targetPlayer == null)
+        if (_stateMachine._targetPlayer == null)
         {
-            stateMachine.ChangeState(stateMachine._patrolState);
+            _stateMachine.ChangeState(_stateMachine._patrolState);
         }
-        else if (CanAttackTarget())
+        else if (CanAttackTargetPlayer())
         {
-            stateMachine.ChangeState(stateMachine._attackState);
+            _stateMachine.ChangeState(_stateMachine._attackState);
         }
         else
         {
-            stateMachine.ChangeState(stateMachine._chaseState);
+            _stateMachine.ChangeState(_stateMachine._chaseState);
         }
     }
-    protected bool IsInDetectionRange(float angle, float distance)
+    protected bool IsInDetectionRange(float angle, float distance) //(Patrol상태 전용) 탐지거리내에 있는지
     {
         if (angle <= FRONT_ANGLE * 0.5f)
-            return distance <= stateMachine._enemyBase.FrontDetectDistance;
+            return distance <= _stateMachine._enemyBase.FrontDetectDistance;
 
         if (angle <= SIDE_ANGLE * 0.5f)
-            return distance <= stateMachine._enemyBase.SideDetectDistance;
+            return distance <= _stateMachine._enemyBase.SideDetectDistance;
 
-        return distance <= stateMachine._enemyBase.BackDetectDistance;
+        return distance <= _stateMachine._enemyBase.BackDetectDistance;
     }
-    protected bool CanChaseTarget(Transform target) {
-        Vector3 startPos = stateMachine.transform.position + Vector3.up * 0.5f;
+    protected bool CanChaseTarget(Transform target) {//적이 내 시야에 있는지(방향 상관 안함)(거리도 상관 안하도록 변경 필요)
+
+      
+        Vector3 startPos = _stateMachine.transform.position + Vector3.up * 0.5f;
         Vector3 targetPos = target.position + Vector3.up * 0.5f;
 
         Vector3 direction = (targetPos - startPos).normalized;
         float distance = Vector3.Distance(startPos, targetPos);
 
-        if (Physics.Raycast(startPos, direction, out RaycastHit hit, distance, stateMachine._sightLayerMask))
+        if (Physics.Raycast(startPos, direction, out RaycastHit hit, distance, _stateMachine._sightLayerMask))
         {
             return hit.transform == target;
         }
 
         return false;
     }
+    protected bool NeedChangeCover() { return true; }
+    
 }
 public class EnemyIdleState : BaseEnemyState
 {
@@ -170,17 +153,12 @@ public class EnemyIdleState : BaseEnemyState
     public override void EnterState()
     {
         Debug.Log("상태 진입: [Idle] 대기상태.");
-        stateMachine.SetDebugStateColor(EnemyState.Idle);
+        _stateMachine.SetDebugStateColor(EnemyState.Idle);
     }
 
     public override void UpdateState()
     {
-        stateMachine.ChangeState(stateMachine._patrolState);
-        if (NeedReload(PatrolReloadRatio))
-        {
-            stateMachine.ChangeState(stateMachine._reloadState);
-            return;
-        }
+        _stateMachine.ChangeState(_stateMachine._patrolState);
     }
 
     public override void ExitState() { }
@@ -192,32 +170,33 @@ public class EnemyPatrolState : BaseEnemyState
     private float _arriveDistance = 0.5f;
     public EnemyPatrolState(EnemyStateMachine stateMachine) : base(stateMachine)
     {
-        this.detectionRadius = 15f;
+        this._detectionRadius = 15f;
     }
 
     public override void EnterState()
     {
         Debug.Log("상태 진입: [Patrol] 순찰을 시작합니다.");
-        stateMachine._targetPlayer = null;
-        stateMachine.SetDebugStateColor(EnemyState.Patrol);
+        _stateMachine._targetPlayer = null;
+        _stateMachine.SetDebugStateColor(EnemyState.Patrol);
         DoPatrol();
     }
 
     public override void UpdateState()
     {
-        UpdateAnimation();
-        if (!stateMachine._agent.pathPending && stateMachine._agent.remainingDistance <= _arriveDistance) 
+        UpdateMoveAnimation();
+        if (!_stateMachine._agent.pathPending && _stateMachine._agent.remainingDistance <= _arriveDistance) 
         {
             DoPatrol();
         }
-        if (DetectPlayer())
+        if (CanDetectTarget())
         {
-            stateMachine.ChangeState(stateMachine._chaseState);
+            _stateMachine.ChangeState(_stateMachine._chaseState);
             return;
         }
-        if (NeedReload(PatrolReloadRatio))
+        if (NeedReload(PATROL_RELOAD_RATIO))
         {
-            stateMachine.ChangeState(stateMachine._reloadState);
+            _stateMachine._previousEnemyState = EnemyState.Patrol;
+            _stateMachine.ChangeState(_stateMachine._reloadState);
             return;
         }
        
@@ -228,12 +207,12 @@ public class EnemyPatrolState : BaseEnemyState
     {
         float radius = _patrolRadius;
 
-        Vector3 randomPos = stateMachine.transform.position + Random.insideUnitSphere * radius;
+        Vector3 randomPos = _stateMachine.transform.position + Random.insideUnitSphere * radius;
 
         if (NavMesh.SamplePosition(randomPos, out NavMeshHit hit, radius, NavMesh.AllAreas))
         {
             _patrolTarget = hit.position;
-            stateMachine._agent.SetDestination(_patrolTarget);
+            _stateMachine._agent.SetDestination(_patrolTarget);
         }
     }
 
@@ -243,16 +222,16 @@ public class EnemyInvestigateState : BaseEnemyState
     // 생성자
     public EnemyInvestigateState(EnemyStateMachine stateMachine) : base(stateMachine) 
     { 
-        this.detectionRadius = 20f; 
+        this._detectionRadius = 20f; 
     }
     public override void EnterState() { }  // 이 상태로 처음 들어왔을 때 
-    public override void UpdateState() { UpdateAnimation(); } // 매 프레임 실행될 로직 
+    public override void UpdateState() { UpdateMoveAnimation(); } // 매 프레임 실행될 로직 
     public override void ExitState() { }   // 이 상태에서 빠져나갈 때
 }
 public class EnemyChaseState : BaseEnemyState
 {
     private float lostTimer;
-    private float maxLostTime = 5.0f; // 시야에서 사라진 후 4초 동안은 마지막 위치로 추격
+    private float maxLostTime = 5.0f; // 시야에서 사라진 후 5초 동안은 마지막 위치로 추격
 
     // 이미 추적 중일 때는 더 넓은 범위(놓치는 범위)를 적용하기 위해 부모의 반경을 덮어씌움
     private float chaseLoseRadius = 25f;
@@ -260,43 +239,43 @@ public class EnemyChaseState : BaseEnemyState
     public EnemyChaseState(EnemyStateMachine stateMachine) : base(stateMachine)
     {
         // 추적 중일 때의 감지 반경 설정
-        this.detectionRadius = chaseLoseRadius;
+        this._detectionRadius = chaseLoseRadius;
     }
 
     public override void EnterState()
     {
         Debug.Log("[Chase] 추적 시작. 실시간 추격을 가동합니다.");
-        stateMachine.SetDebugStateColor(EnemyState.Chase);
+        _stateMachine.SetDebugStateColor(EnemyState.Chase);
         lostTimer = 0f;
 
         // 진입 순간의 속도를 추격 속도로 올려줍니다
-        stateMachine._agent.speed = 5f;
+        _stateMachine._agent.speed = 5f;
     }
 
     public override void UpdateState()
     {
-        UpdateAnimation();
-        if (stateMachine._targetPlayer == null)
+        UpdateMoveAnimation();
+        if (_stateMachine._targetPlayer == null)
         {
-            stateMachine.ChangeState(stateMachine._patrolState);
+            _stateMachine.ChangeState(_stateMachine._patrolState);
             return;
         }
        
-        if (CanChaseTarget(stateMachine._targetPlayer))
+        if (CanChaseTarget(_stateMachine._targetPlayer))
         {
             lostTimer = 0f;
             
-            stateMachine._lastDetectPosition = stateMachine._targetPlayer.position;
+            _stateMachine._lastDetectPosition = _stateMachine._targetPlayer.position;
            
-            stateMachine._agent.SetDestination(stateMachine._lastDetectPosition);
+            _stateMachine._agent.SetDestination(_stateMachine._lastDetectPosition);
 
 
-            if (Vector3.Distance(stateMachine.transform.position, stateMachine._targetPlayer.position) <= 15f)//적의 고유 공격사거리 설정 필요
+            if (Vector3.Distance(_stateMachine.transform.position, _stateMachine._targetPlayer.position) <= 30f)//적의 고유 공격사거리 설정 필요
             {
-                if (CanAttackTarget())
+                if (CanAttackTargetPlayer())
                 {
                     Debug.Log("[Chase] 플레이어를 포착했습니다. 공격(Attack) 상태로 전환합니다.");
-                    stateMachine.ChangeState(stateMachine._attackState);
+                    _stateMachine.ChangeState(_stateMachine._attackState);
                 }
             }
         }
@@ -304,21 +283,16 @@ public class EnemyChaseState : BaseEnemyState
         {
             lostTimer += Time.deltaTime;
             
-            stateMachine._agent.SetDestination(stateMachine._lastDetectPosition);
+            _stateMachine._agent.SetDestination(_stateMachine._lastDetectPosition);
            
             if (lostTimer >= maxLostTime)
             {
                 Debug.Log("[Chase] 플레이어를 완전히 놓쳤습니다. 수색(Investigate) 상태로 전환합니다.");
                
                // stateMachine.ChangeState(stateMachine.investigateState);
-                stateMachine.ChangeState(stateMachine._patrolState);
+                _stateMachine.ChangeState(_stateMachine._patrolState);
                 return;
             }
-        }
-        if (NeedReload(CombatReloadRatio))
-        {
-            stateMachine.ChangeState(stateMachine._reloadState);
-            return;
         }
     }
 
@@ -330,6 +304,7 @@ public class EnemyChaseState : BaseEnemyState
 public enum AttackPhase
 {
     Aim,
+    Burst,
     Cooldown
 }
 
@@ -347,27 +322,32 @@ public class EnemyAttackState : BaseEnemyState
     private float maxTargetLostTime = 0.8f;
 
     private AttackPhase currentPhase;
+    private int maxBurstCount = 3;
+    private int currentBurstCount=0;
+
+    private float burstInterval = 0.3f;
+    private float burstTimer;
 
     public EnemyAttackState(EnemyStateMachine stateMachine) : base(stateMachine)
     {
-        this.detectionRadius = 20f; // 사격 감지 범위
+        this._detectionRadius = 20f; // 사격 감지 범위
     }
 
     public override void EnterState()
     {
         Debug.Log("[Attack] 상태 시작");
-        stateMachine.SetDebugStateColor(EnemyState.Attack);
-        stateMachine._agent.ResetPath();
-
+        _stateMachine.SetDebugStateColor(EnemyState.Attack);
+        _stateMachine._agent.ResetPath();
+        
         targetLostTimer = 0f;
-        attackInterval = stateMachine._enemyBase.CurrentWeapon.AttackInterval;
+        attackInterval = _stateMachine._enemyBase.CurrentWeapon.AttackInterval;
         StartAim();
     }
 
     public override void UpdateState()
     {
         // 플레이어 탐지 및 위치 갱신
-        bool detected = CanChaseTarget(stateMachine._targetPlayer);
+        bool detected = CanChaseTarget(_stateMachine._targetPlayer);
 
         if (!detected)
         {
@@ -375,7 +355,7 @@ public class EnemyAttackState : BaseEnemyState
 
             if (targetLostTimer >= maxTargetLostTime)
             {
-                stateMachine.ChangeState(stateMachine._chaseState);
+                _stateMachine.ChangeState(_stateMachine._chaseState);
                 Debug.Log("[Attack] 플레이어가 시야에서 완전히 사라졌습니다. 추격으로 전환합니다.");
             }
 
@@ -383,12 +363,12 @@ public class EnemyAttackState : BaseEnemyState
         }
 
         targetLostTimer = 0f;
-        stateMachine._lastDetectPosition = stateMachine._targetPlayer.position;
+        _stateMachine._lastDetectPosition = _stateMachine._targetPlayer.position;
 
         // 현재 사격 가능한 상황인지 판단
-        if (!CanAttackTarget())
+        if (!CanAttackTargetPlayer())
         {
-            stateMachine.ChangeState(stateMachine._chaseState);
+            _stateMachine.ChangeState(_stateMachine._chaseState);
             Debug.Log("[Attack] 사격이 불가능 합니다. 추격으로 전환합니다.");
             return;
         }
@@ -402,61 +382,71 @@ public class EnemyAttackState : BaseEnemyState
 
                 if (aimTimer >= aimDuration)
                 {
+                    currentBurstCount = 0;
+                    burstTimer = 0;
+
+                    currentPhase = AttackPhase.Burst;
+                }
+
+                break;
+            case AttackPhase.Burst:
+
+                burstTimer += Time.deltaTime;
+
+                if (burstTimer >= burstInterval)
+                {
+                    burstTimer = 0f;
+
                     EnemyAttack();
 
-                    currentPhase = AttackPhase.Cooldown;
-                    attackIntervalTimer = 0f;
+                    currentBurstCount++;
 
-                   // stateMachine.animator.SetBool("IsAiming", false);
+                    if (currentBurstCount >= maxBurstCount)
+                    {
+                        _stateMachine._animController.ChangeAnimState(EnemyAnimState.Move, 0f);
+                        _stateMachine._coverActionState.StartNewCoverAction();
+                        _stateMachine.ChangeState(_stateMachine._coverActionState);
+                        return;
+                    }
                 }
-
-                break;
-
-            case AttackPhase.Cooldown:
-
-                attackIntervalTimer += Time.deltaTime;
-
-                if (attackIntervalTimer >= attackInterval)
-                {
-                    StartAim();
-                }
-
                 break;
         }
-        if (NeedReload(CombatReloadRatio))
-        {
-            stateMachine.ChangeState(stateMachine._reloadState);
-            return;
-        }
+        //if (NeedReload(COMBAT_RELOAD_RATIO))
+        //{
+        //    Debug.Log("어택페이즈 장전");
+        //    _stateMachine._previousEnemyState = EnemyState.Attack;
+        //    _stateMachine.ChangeState(_stateMachine._reloadState);
+        //    return;
+        //}
     }
 
     public override void ExitState()
     {
         Debug.Log("[Attack] 상태 중지.");
-        stateMachine._animController.ResetAnimState();
+        _stateMachine._animController.ResetAnimState();
     }
 
     public void EnemyAttack()
     {
-        stateMachine._animController.ChangeAnimState(EnemyAnimState.Attack);
+        _stateMachine._animController.ChangeAnimState(EnemyAnimState.Attack);
 
-        Vector3 muzzle = stateMachine.transform.position + Vector3.up * 1.5f;
+        Vector3 muzzle = _stateMachine.transform.position + Vector3.up * 1.5f;
 
         Vector3 dir = (aimPosition - muzzle).normalized;
         Debug.Log("[Attack] 발사.");
-        stateMachine._enemyBase.CurrentWeapon.Fire(muzzle,dir);
+        _stateMachine._enemyBase.CurrentWeapon.Fire(muzzle,dir);
        
     }
 
     private void RotateTowardsTarget(Vector3 aimPosition)
     {
-        Vector3 direction =(aimPosition - stateMachine.transform.position).normalized;
+        Vector3 direction =(aimPosition - _stateMachine.transform.position).normalized;
         direction.y = 0; // 몬스터가 하늘이나 바닥으로 기울어지는 것 방지
 
         if (direction != Vector3.zero)
         {
             Quaternion targetRotation = Quaternion.LookRotation(direction);
-            stateMachine.transform.rotation = Quaternion.Slerp(stateMachine.transform.rotation, targetRotation, Time.deltaTime * 10f);
+            _stateMachine.transform.rotation = Quaternion.Slerp(_stateMachine.transform.rotation, targetRotation, Time.deltaTime * 10f);
         }
     }
     private void StartAim()
@@ -466,7 +456,7 @@ public class EnemyAttackState : BaseEnemyState
         aimTimer = 0f;
 
         // 플레이어 현재 위치를 저장
-        aimPosition = stateMachine._targetPlayer.position + Vector3.up * 0.5f;
+        aimPosition = _stateMachine._targetPlayer.position + Vector3.up * 0.5f;
 
         // 약간의 오차 추가
         //aimPosition += new Vector3(Random.Range(-0.25f, 0.25f),Random.Range(-0.1f, 0.1f), Random.Range(-0.25f, 0.25f));
@@ -483,38 +473,38 @@ public class EnemyReloadState : BaseEnemyState
     public EnemyReloadState(EnemyStateMachine stateMachine) : base(stateMachine) { }
     public override void EnterState() 
     {
-        _maxReloadTime = stateMachine._enemyBase.CurrentWeapon.ReloadTime;
-        _reloadBulletAmount = stateMachine._enemyBase.CurrentWeapon.MagazineSize;
+        _maxReloadTime = _stateMachine._enemyBase.CurrentWeapon.ReloadTime;
+        _reloadBulletAmount = _stateMachine._enemyBase.CurrentWeapon.MagazineSize;
         _reloadTimer = 0f;
         Debug.Log("[Reload] 재장전 시작.");
-        stateMachine.SetDebugStateColor(EnemyState.Reload);
-        stateMachine._animController.ChangeAnimState(EnemyAnimState.Reload);
+        _stateMachine.SetDebugStateColor(EnemyState.Reload);
+        _stateMachine._animController.ChangeAnimState(EnemyAnimState.Reload);
     }  // 이 상태로 처음 들어왔을 때 
     public override void UpdateState() 
     {
         // 전투 중 장전이었다면 기존 타겟만 계속 확인
-        if (stateMachine._targetPlayer != null)
+        if (_stateMachine._targetPlayer != null)
         {
-            if (CanChaseTarget(stateMachine._targetPlayer))
+            if (CanChaseTarget(_stateMachine._targetPlayer))
             {
-                stateMachine._lastDetectPosition = stateMachine._targetPlayer.position;
+                _stateMachine._lastDetectPosition = _stateMachine._targetPlayer.position;
             }
         }
         // 순찰 중 장전이었다면 새로 플레이어를 탐지
         else
         {
-            DetectPlayer();
+            CanDetectTarget();
         }
 
         _reloadTimer += Time.deltaTime;
 
         if (_reloadTimer >= _maxReloadTime)
         {
-            stateMachine._enemyBase.CurrentWeapon.Reload(_reloadBulletAmount);
+            _stateMachine._enemyBase.CurrentWeapon.Reload(_reloadBulletAmount);
 
-            Debug.Log($"[Reload] 재장전 끝 현재탄창 {stateMachine._enemyBase.CurrentWeapon.RemainBullets}발.");
+            Debug.Log($"[Reload] 재장전 끝 현재탄창 {_stateMachine._enemyBase.CurrentWeapon.RemainBullets}발.");
 
-            EvaluateCombatState();
+            ReturnToPreviousState();
         }
 
 
@@ -522,10 +512,246 @@ public class EnemyReloadState : BaseEnemyState
     public override void ExitState() 
     { 
         Debug.Log("[Reload] 재장전 종료.");
-        stateMachine._animController.ResetAnimState();
+        _stateMachine._animController.ResetAnimState();
 
     }   // 이 상태에서 빠져나갈 때
+    private void ReturnToPreviousState() 
+    {
+        switch (_stateMachine._previousEnemyState) 
+        {
+            case EnemyState.Patrol:
+                _stateMachine.ChangeState(_stateMachine._patrolState);
+                break;
+            case EnemyState.Attack:
+                _stateMachine.ChangeState(_stateMachine._attackState); 
+                break;
+            case EnemyState.CoverAction:
+                _stateMachine.ChangeState(_stateMachine._coverActionState);
+                break;
+            default: break;
+        }
+    }
 }
+public enum CoverPhase
+{
+    FindCover,
+    NoCoverCooldown,
+    MoveToCover,
+    Hide,
+    Peek
+}
+
+public class EnemyCoverActionState : BaseEnemyState
+{
+    private CoverPhase _currentCoverPhase;
+    private CoverPhase _resumeCoverPhase;
+    private float _cooldownTimer =0f;
+    
+    public EnemyCoverActionState(EnemyStateMachine stateMachine) : base(stateMachine) { }
+    public override void EnterState()
+    {
+        Debug.Log("커버액션 엔터");
+    }  // 이 상태로 처음 들어왔을 때 
+    public override void UpdateState()
+    {
+        Debug.Log("커버액션 업데이트");
+        Debug.Log($"현재상태{_currentCoverPhase}");
+        switch (_currentCoverPhase)
+        {
+            case CoverPhase.FindCover:
+                if (TryFindCoverWall(out _stateMachine._currentCoverWallInfo))
+                {
+                    _currentCoverPhase = CoverPhase.MoveToCover;
+                    MoveToCoverWall();
+                }
+                else
+                {
+                    _cooldownTimer = 0f;
+                    _currentCoverPhase = CoverPhase.NoCoverCooldown;
+                }
+                break;
+            case CoverPhase.MoveToCover:
+                UpdateMoveAnimation();
+                if (IsArrivedToCover())
+                {
+                   // _stateMachine._animController.ChangeAnimState(EnemyAnimState.Move, 0f);
+                    _cooldownTimer = 0f;
+                    _currentCoverPhase = CoverPhase.Hide;
+                }
+                break;
+            case CoverPhase.NoCoverCooldown:
+
+                _cooldownTimer += Time.deltaTime;
+                if (NeedReload(COMBAT_RELOAD_RATIO))
+                {
+                    Debug.Log("NoCoverCooldown페이즈 장전");
+                    _stateMachine._previousEnemyState = EnemyState.CoverAction;
+                    _stateMachine.ChangeState(_stateMachine._reloadState);
+                    return; 
+                }                
+                if (_cooldownTimer >= 0.5f) 
+                {
+                    _stateMachine.ChangeState(_stateMachine._attackState);
+                }
+
+                break;
+            case CoverPhase.Hide:
+                if (NeedReload(COMBAT_RELOAD_RATIO))
+                {
+                    Debug.Log("Hide페이즈 장전");
+                   // _currentCoverPhase = CoverPhase.Peek;
+                    _stateMachine._previousEnemyState = EnemyState.CoverAction;
+                    _stateMachine.ChangeState(_stateMachine._reloadState);
+                    return;
+                }
+                _cooldownTimer += Time.deltaTime;
+                if (_cooldownTimer >= 0.5f)
+                {   
+                    _currentCoverPhase = CoverPhase.Peek;
+                    PeekToShoot();                    
+                }
+                break;
+            case CoverPhase.Peek:
+                UpdateMoveAnimation();
+                if (IsArrivedToPeek())
+                {
+                   // _stateMachine._animController.ChangeAnimState(EnemyAnimState.Move, 0f);
+                    _currentCoverPhase = CoverPhase.FindCover;
+                    _stateMachine.ChangeState(_stateMachine._attackState);
+                }
+                break;
+        }
+
+    }
+    public override void ExitState()
+    {
+    }
+    public bool TryFindCoverWall(out CoverWallInfo wallInfo)
+    {
+        wallInfo = null;
+        Collider[] hitColliders = Physics.OverlapSphere(_stateMachine.transform.position, 50f, _stateMachine._coverWallLayerMask);
+
+        foreach (Collider col in hitColliders)
+        {
+            CoverWall wall = col.GetComponentInParent<CoverWall>();
+
+            if (wall == null)
+                continue;
+
+            CoverWallInfo info = new CoverWallInfo();
+            info.Wall = wall;
+
+            if (TrySelectCoverWall(info))
+            {
+                wallInfo = info;
+                return true;
+            }
+        }
+
+        return false;
+    }
+    public void PeekToShoot() 
+    {
+        if (_stateMachine._currentCoverWallInfo == null)
+        {
+            _currentCoverPhase = CoverPhase.NoCoverCooldown;
+            return;
+        }
+        else
+        {
+            _stateMachine._agent.stoppingDistance = 1f;
+            _stateMachine._agent.SetDestination(_stateMachine._currentCoverWallInfo.PeekPoint.position);
+        }
+    }
+    public void MoveToCoverWall() {
+        if (_stateMachine._currentCoverWallInfo == null)
+        {
+            _currentCoverPhase = CoverPhase.NoCoverCooldown;
+            return;
+        }
+        else 
+        {
+            _stateMachine._agent.stoppingDistance = 1.5f;
+            _stateMachine._agent.SetDestination(_stateMachine._currentCoverWallInfo.SelectedHidePoint.HidePoint.position);
+        }
+    }
+    public bool IsArrivedToCover() 
+    {
+        if (_stateMachine._agent.pathPending)
+            return false;
+
+        return _stateMachine._agent.remainingDistance <= _stateMachine._agent.stoppingDistance;
+    }
+    public bool IsArrivedToPeek() 
+    {
+        if (_stateMachine._agent.pathPending)
+            return false;
+
+        return _stateMachine._agent.remainingDistance <= _stateMachine._agent.stoppingDistance;
+    }
+   
+    public void StartNewCoverAction() 
+    {
+        _currentCoverPhase = CoverPhase.FindCover;
+    }
+    public bool TrySelectCoverWall(CoverWallInfo wallInfo) 
+    {
+        if (TrySelectHidePoint(wallInfo))
+        {
+            if (CanAttackTarget(wallInfo.SelectedHidePoint.PeekLeft.position + Vector3.up * 0.5f, _stateMachine._targetPlayer.position))
+            {
+                wallInfo.PeekPoint = wallInfo.SelectedHidePoint.PeekLeft;
+                return true;
+            }
+            else if (CanAttackTarget(wallInfo.SelectedHidePoint.PeekRight.position + Vector3.up * 0.5f, _stateMachine._targetPlayer.position)) 
+            {
+                wallInfo.PeekPoint = wallInfo.SelectedHidePoint.PeekRight;
+                return true;
+            }
+            return false;
+        }
+        else 
+        { 
+            return false; 
+        }
+    }
+    public bool TrySelectHidePoint(CoverWallInfo wallInfo) 
+    {   
+        Vector3 startPos = _stateMachine._targetPlayer.position + Vector3.up * 0.5f;
+        Vector3 targetPos1 = wallInfo.Wall._coverHidePoint1.HidePoint.position + Vector3.up * 0.5f;
+        Vector3 targetPos2 = wallInfo.Wall._coverHidePoint2.HidePoint.position + Vector3.up * 0.5f;
+       
+        if (IsWallBetween(startPos, targetPos1, wallInfo.Wall))
+        {
+            wallInfo.SelectedHidePoint = wallInfo.Wall._coverHidePoint1;
+            return true;
+        }
+        else if (IsWallBetween(startPos, targetPos2, wallInfo.Wall))
+        {
+            wallInfo.SelectedHidePoint = wallInfo.Wall._coverHidePoint2;
+            return true;
+        }
+        else 
+        {
+            return false;
+        }
+    }
+    public bool IsWallBetween(Vector3 startPos, Vector3 targetPos, CoverWall wall) 
+    {
+        Vector3 direction = (targetPos - startPos).normalized;
+        float distance = Vector3.Distance(startPos, targetPos);
+
+        if (Physics.Raycast(startPos, direction, out RaycastHit hit, distance, _stateMachine._coverWallLayerMask))
+        {
+            return hit.collider.GetComponentInParent<CoverWall>() == wall;
+        }
+        else 
+        {
+            return false; 
+        }
+    }
+}
+
 public class EnemyRetreatState : BaseEnemyState
 {
     // 생성자

@@ -114,6 +114,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 6276848713882654189}
     m_Modifications:
+    - target: {fileID: 5191606480542518365, guid: cafb4226b82dda54997cf17c0864f57f, type: 3}
+      propertyPath: _coverWallLayerMask.m_Bits
+      value: 512
+      objectReference: {fileID: 0}
     - target: {fileID: 6396259497830996238, guid: cafb4226b82dda54997cf17c0864f57f, type: 3}
       propertyPath: m_Name
       value: Enemy
