@@ -26,10 +26,15 @@ public class NetworkShopService
     {
         var vm = GetShopViewModel();
 
-        //Test용 하드코딩. 추후 별도의 테이블 작성 후 JSON 변환할것.
-        SetShopItemSlot(vm.ShopItemSlotList[0], "Item_Medical_Kit_01", 99);
-        SetShopItemSlot(vm.ShopItemSlotList[1], "Item_Ammo_556", 999);
-        SetShopItemSlot(vm.ShopItemSlotList[2], "Item_Weapon_AR_01", 5);
+        int slotIndex = 0;
+
+        foreach (var shopItem in DataManager.Instance._shopItemDataDic.Values)
+        {
+            if (slotIndex >= vm.ShopItemSlotList.Count) break;
+
+            SetShopItemSlot(vm.ShopItemSlotList[slotIndex], shopItem.ItemId, shopItem.StockCount);
+            slotIndex++;
+        }
 
         PlayerModel playerData = SaveManager.Instance.LoadPlayerData();
         vm.CurPlayerCredit = playerData.CurrentCredit;

@@ -39,6 +39,8 @@ public class DataManager : MonoBehaviour
 
     public Dictionary<string, ItemData> _itemDataDic { get; private set; } = new Dictionary<string, ItemData>();
 
+    public Dictionary<string, ShopItemData> _shopItemDataDic { get; private set; } = new Dictionary<string, ShopItemData>();
+
     private Dictionary<string, T> LoadData<T>(string tableName) where T : BaseData
     {
         string resourcePath = $"Data/{tableName}";
@@ -72,6 +74,7 @@ public class DataManager : MonoBehaviour
     public void LoadObjectPoolData(string jsonPath) => _objectPoolDataDic = LoadData<ObjectPoolData>(jsonPath);
     public void LoadEnemyData(string jsonPath) => _enemyDataDic = LoadData<EnemyData>(jsonPath);
     public void LoadItemData(string jsonPath) => _itemDataDic = LoadData<ItemData>(jsonPath);
+    public void LoadShopItemData(string jsonPath) => _shopItemDataDic = LoadData<ShopItemData>(jsonPath);
 
     public PreloadData GetPreloadData(string id) => _preloadDataDic != null && _preloadDataDic.TryGetValue(id, out var data) ? data : null;
     public ObjectPoolData GetObjectPoolData(string id) => _objectPoolDataDic != null && _objectPoolDataDic.TryGetValue(id, out var data) ? data : null;
@@ -84,5 +87,6 @@ public class DataManager : MonoBehaviour
         LoadObjectPoolData("ObjectPoolData");
         LoadEnemyData("EnemyData");
         LoadItemData("ItemData");
+        LoadShopItemData("ShopItemData");
     }
 }
