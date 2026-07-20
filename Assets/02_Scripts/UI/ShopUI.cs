@@ -152,6 +152,7 @@ public class ShopUI : UIBase
     private void HandleLeftClick(ShopItemSlotViewModel clickedSlot)
     {
         bool isCtrlInput = ((Input.GetKey(KeyCode.LeftControl)) || (Input.GetKey(KeyCode.RightControl)));
+        bool isShiftInput = (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
 
         if (_heldStackCount == 0)
         {
@@ -159,7 +160,7 @@ public class ShopUI : UIBase
             {
                 PickupOne(clickedSlot);
             }
-            else if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+            else if (isShiftInput)
             {
                 PickupHalf(clickedSlot);
             }
@@ -227,7 +228,9 @@ public class ShopUI : UIBase
         slotVm.ItemStackCount--;
 
         if (slotVm.ItemStackCount == 0)
+        {
             ClearSlotData(slotVm);
+        }
     }
 
     private void PlaceOne(ShopItemSlotViewModel targetSlot)
