@@ -1,11 +1,17 @@
 ﻿using UnityEngine;
+using System;
 
 public class PlayerItemInteractor : MonoBehaviour
 {
     [SerializeField] private PlayerInputHandler InputHandler;
     [SerializeField] private PlayerSight PlayerSight;
-    [SerializeField, Min(0f)] private float InteractionDistance = 3f;
+    [SerializeField] private float InteractionDistance = 3f;
     [SerializeField] private LayerMask ItemLayerMask;
+
+    private FieldItem _currentTarget;
+
+    public FieldItem CurrentTarget => _currentTarget;
+    public event Action<FieldItem> OnTargetChanged;
 
     private void OnEnable()
     {
@@ -15,9 +21,21 @@ public class PlayerItemInteractor : MonoBehaviour
     private void OnDisable()
     {
         InputHandler.GetItemPerformed -= TryPickupLookedAtItem;
+        SetCurrentTarget(null);
     }
 
-    private void TryPickupLookedAtItem()
+    private void Update()
+    {
+        if (InputHandler.IsGameplayInputBlocked)
+        {
+            SetCurrentTarget(null);
+            return;
+        }
+
+        SetCurrentTarget(FindLookedAtItem());
+    }
+
+    private FieldItem FindLookedAtItem()
     {
         Transform sight = PlayerSight.GetPlayerSightTransform();
 
@@ -29,14 +47,26 @@ public class PlayerItemInteractor : MonoBehaviour
                 ItemLayerMask,
                 QueryTriggerInteraction.Collide))
         {
-            return;
+            return null;
         }
 
-        FieldItem fieldItem = hit.collider.GetComponentInParent<FieldItem>();
+        return hit.collider.GetComponentInParent<FieldItem>();
+    }
 
-        if (fieldItem == null)
+    private void SetCurrentTarget(FieldItem target)
+    {
+        if (ReferenceEquals(_currentTarget, target))
             return;
 
-        fieldItem.TryPickup();
+        _currentTarget = target;
+        OnTargetChanged?.Invoke(_currentTarget);
+    }
+
+    private void TryPickupLookedAtItem()
+    {
+        if (_currentTarget == null)
+            return;
+
+        _currentTarget.TryPickup();
     }
 }

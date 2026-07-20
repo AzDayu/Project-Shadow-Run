@@ -2,46 +2,80 @@
 
 public class FieldItem : MonoBehaviour
 {
-    [SerializeField] private string ItemId;
-    [SerializeField] private int Count = 1;
+    [SerializeReference] private ItemModel _itemModel = new ItemModel
+    {
+        CurrentStackCount = 1
+    };
+
+    public ItemModel ItemModel => _itemModel;
+
+    private void Start()
+    {
+        InitializePlacedItemModel();
+    }
+
+    private void InitializePlacedItemModel()
+    {
+        if (_itemModel == null || DataManager.Instance == null)
+            return;
+
+        ItemData itemData = DataManager.Instance.GetItemData(_itemModel.ItemId);
+
+        if (itemData is not WeaponData weaponData || _itemModel is WeaponModel)
+            return;
+
+        _itemModel = new WeaponModel
+        {
+            InstanceId = gameObject.GetInstanceID().ToString(),
+            ItemId = _itemModel.ItemId,
+            CurrentStackCount = Mathf.Max(1, _itemModel.CurrentStackCount),
+            CurrentAmmo = weaponData.MagazineSize,
+            CurrentDurability = weaponData.MaxDurability,
+            AttachedParts = new System.Collections.Generic.List<ItemModel>()
+        };
+    }
 
     public bool TryPickup()
     {
         if (InventoryManager.Instance == null || DataManager.Instance == null)
             return false;
 
-        ItemData itemData = DataManager.Instance.GetItemData(ItemId);
+        if (_itemModel == null)
+            return false;
+
+        ItemData itemData = DataManager.Instance.GetItemData(_itemModel.ItemId);
 
         if (itemData == null)
             return false;
 
-        if (itemData is WeaponData weaponData)
-            return TryPickupWeapon(weaponData);
+        if (itemData is WeaponData)
+            return TryPickupWeapon();
 
-        int remainingCount = InventoryManager.Instance.TryAddItem(itemData, Count);
-        bool pickedUpAny = remainingCount < Count;
-        Count = remainingCount;
+        int previousCount = _itemModel.CurrentStackCount;
+        int remainingCount = InventoryManager.Instance.TryAddItem(itemData, previousCount);
+        bool pickedUpAny = remainingCount < previousCount;
+        _itemModel.CurrentStackCount = remainingCount;
 
-        if (Count <= 0)
+        if (_itemModel.CurrentStackCount <= 0)
             Destroy(gameObject);
 
         return pickedUpAny;
     }
 
-    private bool TryPickupWeapon(WeaponData weaponData)
+    private bool TryPickupWeapon()
     {
-        if (Count != 1)
-        {
-            Debug.LogWarning("필드 무기의 Count는 1이어야 합니다.", this);
+        if (_itemModel is not WeaponModel weaponModel)
             return false;
-        }
+
+        if (weaponModel.CurrentStackCount != 1)
+            return false;
 
         string instanceId = gameObject.GetInstanceID().ToString();
+        weaponModel.InstanceId = instanceId;
 
-        if (!InventoryManager.Instance.TryAddWeapon(weaponData, instanceId))
+        if (!InventoryManager.Instance.TryAddWeapon(weaponModel))
             return false;
 
-        Count = 0;
         Destroy(gameObject);
         return true;
     }

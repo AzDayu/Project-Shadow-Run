@@ -570,25 +570,47 @@ public class InventoryManager : MonoBehaviour
         if (weaponData.ItemType != "Weapon")
             return false;
 
-        if (_itemList.Count >= MaxSlotCount)
-            return false;
-
         if (string.IsNullOrWhiteSpace(instanceId))
         {
             Debug.LogWarning("무기 InstanceId가 없습니다.");
             return false;
         }
 
-        ItemModel weaponStack = new ItemModel
+        WeaponModel weaponModel = new WeaponModel
         {
             InstanceId = instanceId,
             ItemId = weaponData.Id,
-            CurrentStackCount = 1
+            CurrentStackCount = 1,
+            CurrentAmmo = weaponData.MagazineSize,
+            CurrentDurability = weaponData.MaxDurability,
+            AttachedParts = new List<ItemModel>()
         };
 
-        _itemList.Add(weaponStack);
+        return TryAddWeapon(weaponModel);
+    }
 
-        TryRegisterWeaponToEmptyQuickSlot(weaponStack);
+    public bool TryAddWeapon(WeaponModel weaponModel)
+    {
+        if (weaponModel == null)
+            return false;
+
+        if (string.IsNullOrWhiteSpace(weaponModel.InstanceId))
+            return false;
+
+        if (weaponModel.CurrentStackCount != 1)
+            return false;
+
+        ItemData itemData = DataManager.Instance.GetItemData(weaponModel.ItemId);
+
+        if (itemData is not WeaponData)
+            return false;
+
+        if (_itemList.Count >= MaxSlotCount)
+            return false;
+
+        _itemList.Add(weaponModel);
+
+        TryRegisterWeaponToEmptyQuickSlot(weaponModel);
 
         OnInventoryChanged?.Invoke();
 

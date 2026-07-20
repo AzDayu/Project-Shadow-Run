@@ -84,8 +84,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d00ae1d7ca94119bd881c232a0964e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FieldItem
-  ItemId: Item_Weapon_AR_02
-  Count: 1
+  _itemModel:
+    rid: 1000
+  references:
+    version: 2
+    RefIds:
+    - rid: 1000
+      type: {class: ItemModel, ns: , asm: Assembly-CSharp}
+      data:
+        InstanceId: 
+        ItemId: 
+        CurrentStackCount: 1
 --- !u!65 &8321922343961017501
 BoxCollider:
   m_ObjectHideFlags: 0
