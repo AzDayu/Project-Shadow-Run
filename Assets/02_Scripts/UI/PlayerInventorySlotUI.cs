@@ -84,8 +84,23 @@ public class PlayerInventorySlotUI : MonoBehaviour,
 
     public void SetSelected(bool selected)
     {
-        if (SelectedFrame != null)
-            SelectedFrame.SetActive(selected);
+        if (SelectedFrame == null)
+        {
+            Debug.LogError(
+            $"[InventorySlot] SelectedFrame이 없습니다. " +
+            $"SlotIndex: {_slotIndex}"
+        );
+            return;
+        }
+
+        SelectedFrame.SetActive(selected);
+
+        Debug.Log(
+        $"[InventorySlot] 선택 상태 변경 / " +
+        $"SlotIndex: {_slotIndex}, " +
+        $"Selected: {selected}, " +
+        $"FrameActive: {SelectedFrame.activeSelf}"
+    );
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -109,6 +124,13 @@ public class PlayerInventorySlotUI : MonoBehaviour,
 
     public void OnPointerClick(PointerEventData eventData)
     {
+        Debug.Log(
+       $"[InventorySlot] 클릭 / " +
+       $"SlotIndex: {_slotIndex}, " +
+       $"HasItem: {HasItem}, " +
+       $"Button: {eventData.button}"
+       );
+
         if (!HasItem)
             return;
 

@@ -9,13 +9,6 @@ public class PlayerInventoryPopUpUI : UIBase
     [Header("Slot")]
     [SerializeField] private Transform SlotParent;
 
-    [Header("Tooltip")]
-    [SerializeField] private GameObject ItemTooltipPanel;
-    [SerializeField] private RectTransform ItemTooltipRect;
-    [SerializeField] private TMP_Text TextTooltipName;
-    [SerializeField] private TMP_Text TextTooltipDescription;
-    [SerializeField] private Vector2 TooltipOffset = new Vector2(20f, -20f);
-
     [Header("Context Menu")]
     [SerializeField] private GameObject ContextMenuPanel;
     [SerializeField] private RectTransform ContextMenuRect;
@@ -29,6 +22,9 @@ public class PlayerInventoryPopUpUI : UIBase
     [SerializeField] private RectTransform DragIconRect;
     [SerializeField] private Image DragIconImage;
     [SerializeField] private TMP_Text TextDragIconCount;
+
+    [Header("Tooltip")]
+    [SerializeField] private PlayerInventoryTooltipController ItemTooltip;
 
     private readonly List<PlayerInventorySlotUI> _slotUIList = new();
 
@@ -47,7 +43,6 @@ public class PlayerInventoryPopUpUI : UIBase
         InitSlots();
         InitContextButtons();
 
-        HideItemTooltip(null);
         CloseContextMenu();
         HideDragSlot ();
     }
@@ -59,7 +54,6 @@ public class PlayerInventoryPopUpUI : UIBase
 
         RefreshInventory();
 
-        HideItemTooltip(null);
         CloseContextMenu();
     }
 
@@ -68,17 +62,11 @@ public class PlayerInventoryPopUpUI : UIBase
         if (InventoryManager.Instance != null)
             InventoryManager.Instance.OnInventoryChanged -= RefreshInventory;
 
-        HideItemTooltip(null);
         CloseContextMenu();
     }
 
     private void Update()
     {
-        if (ItemTooltipPanel != null && ItemTooltipPanel.activeSelf)
-        {
-            SetPanelPositionClamped(ItemTooltipRect, Input.mousePosition + (Vector3)TooltipOffset);
-        }
-
         if (ContextMenuPanel != null && ContextMenuPanel.activeSelf)
         {
             if (Input.GetMouseButtonDown(0))
@@ -93,8 +81,7 @@ public class PlayerInventoryPopUpUI : UIBase
     {
         _slotUIList.Clear();
 
-        PlayerInventorySlotUI[] slots =
-            SlotParent.GetComponentsInChildren<PlayerInventorySlotUI>(true);
+        PlayerInventorySlotUI[] slots = SlotParent.GetComponentsInChildren<PlayerInventorySlotUI>(true);
 
         for (int i = 0; i < slots.Length; i++)
         {
@@ -165,11 +152,13 @@ public class PlayerInventoryPopUpUI : UIBase
         if (slot == null || !slot.HasItem)
             return;
 
-        if (_selectedSlot != null)
+        if (_selectedSlot != null && _selectedSlot != slot)
             _selectedSlot.SetSelected(false);
 
         _selectedSlot = slot;
         _selectedSlot.SetSelected(true);
+
+        Debug.LogError($"[Inventory] 선택 완료 SlotIndex: {slot.SlotIndex}, ItemId: {slot.ItemModel.ItemId}");
     }
 
     public void TryUseItem(PlayerInventorySlotUI slot)
@@ -184,7 +173,6 @@ public class PlayerInventoryPopUpUI : UIBase
 
         InventoryManager.Instance.TryUseItem(slot.SlotIndex);
 
-        HideItemTooltip(slot);
         CloseContextMenu();
     }
 
@@ -214,36 +202,6 @@ public class PlayerInventoryPopUpUI : UIBase
 
         if (ContextMenuPanel != null)
             ContextMenuPanel.SetActive(false);
-    }
-
-    public void ShowItemTooltip(PlayerInventorySlotUI slot, Vector2 mousePosition)
-    {
-        if (slot == null || !slot.HasItem)
-            return;
-
-        if (ItemTooltipPanel == null || ItemTooltipRect == null)
-            return;
-
-        ItemModel stack = slot.ItemModel;
-        ItemData item = DataManager.Instance.GetItemData(stack.ItemId);
-
-        if (TextTooltipName != null)
-            TextTooltipName.text = item.Name;
-
-        if (TextTooltipDescription != null)
-            TextTooltipDescription.text = item.ItemDescription;
-
-        ItemTooltipPanel.SetActive(true);
-
-        LayoutRebuilder.ForceRebuildLayoutImmediate(ItemTooltipRect);
-
-        SetPanelPositionClamped(ItemTooltipRect, mousePosition + TooltipOffset);
-    }
-
-    public void HideItemTooltip(PlayerInventorySlotUI slot)
-    {
-        if (ItemTooltipPanel != null)
-            ItemTooltipPanel.SetActive(false);
     }
 
     private void SetPanelPositionClamped(RectTransform panelRect, Vector2 screenPosition)
@@ -314,7 +272,6 @@ public class PlayerInventoryPopUpUI : UIBase
 
         _draggingSlot = slot;
 
-        HideItemTooltip(slot);
         CloseContextMenu();
 
         ShowDragSlot(slot.ItemModel, eventData.position);
@@ -337,22 +294,59 @@ public class PlayerInventoryPopUpUI : UIBase
 
         Debug.Log($"드래그 종료: {_draggingSlot.ItemModel.ItemId}");
 
-        PlayerQuickSlotUI quickSlotUI = GetQuickSlotUnderPointer(eventData);
+        PlayerEquipmentSlotUI equipmentSlotUI = GetEquipmentSlotUnderPointer(eventData);
 
-        if (quickSlotUI != null && InventoryManager.Instance != null)
+        if (equipmentSlotUI != null && InventoryManager.Instance != null)
         {
-            InventoryManager.Instance.TryRegisterQuickSlot(
+            bool equipped = InventoryManager.Instance.TryEquipItem(
                 _draggingSlot.SlotIndex,
-                quickSlotUI.SlotIndex
+                equipmentSlotUI.EquipmentType
             );
 
-            Debug.Log($"퀵슬롯 드롭 감지: QuickSlotIndex {quickSlotUI.SlotIndex}");
+            if (equipped)
+            {
+                Debug.Log($"장비 슬롯 드롭 완료: EquipmentType {equipmentSlotUI.EquipmentType}");
+            }
+        }
+        else
+        {
+            PlayerQuickSlotUI quickSlotUI = GetQuickSlotUnderPointer(eventData);
+
+            if (quickSlotUI != null && InventoryManager.Instance != null)
+            {
+                InventoryManager.Instance.TryRegisterQuickSlot(
+                    _draggingSlot.SlotIndex,
+                    quickSlotUI.SlotIndex
+                );
+
+                Debug.Log($"퀵슬롯 드롭 감지: QuickSlotIndex {quickSlotUI.SlotIndex}");
+            }
         }
 
         HideDragSlot();
 
         _draggingSlot = null;
     }
+
+    private PlayerEquipmentSlotUI GetEquipmentSlotUnderPointer(PointerEventData eventData)
+    {
+        if (EventSystem.current == null)
+            return null;
+
+        List<RaycastResult> results = new();
+        EventSystem.current.RaycastAll(eventData, results);
+
+        foreach (RaycastResult result in results)
+        {
+            PlayerEquipmentSlotUI equipmentSlotUI = result.gameObject.GetComponentInParent<PlayerEquipmentSlotUI>();
+
+            if (equipmentSlotUI != null)
+                return equipmentSlotUI;
+        }
+
+        return null;
+    }
+
     private PlayerQuickSlotUI GetQuickSlotUnderPointer(PointerEventData eventData)
     {
         if (EventSystem.current == null)
@@ -363,8 +357,7 @@ public class PlayerInventoryPopUpUI : UIBase
 
         foreach (RaycastResult result in results)
         {
-            PlayerQuickSlotUI quickSlotUI =
-                result.gameObject.GetComponentInParent<PlayerQuickSlotUI>();
+            PlayerQuickSlotUI quickSlotUI = result.gameObject.GetComponentInParent<PlayerQuickSlotUI>();
 
             if (quickSlotUI != null)
                 return quickSlotUI;
@@ -392,7 +385,6 @@ public class PlayerInventoryPopUpUI : UIBase
         InventoryManager.Instance.TryDropItem(_contextTargetSlot.SlotIndex, dropCount);
 
         CloseContextMenu();
-        HideItemTooltip(_contextTargetSlot);
     }
 
     private void OnClickRegisterQuickSlot()
@@ -406,7 +398,6 @@ public class PlayerInventoryPopUpUI : UIBase
         InventoryManager.Instance.TryRegisterQuickSlot(_contextTargetSlot.SlotIndex);
 
         CloseContextMenu();
-        HideItemTooltip(_contextTargetSlot);
     }
 
     private void RefreshContextMenuButtons(PlayerInventorySlotUI slot)
@@ -418,8 +409,7 @@ public class PlayerInventoryPopUpUI : UIBase
 
         bool canUse = item.ItemType == "Consumable";
         bool canRegisterQuickSlot =
-            item.ItemType == "Weapon" ||
-            item.ItemType == "Consumable";
+            (item.ItemType == "Weapon") || (item.ItemType == "Consumable");
 
         if (ButtonUse != null)
             ButtonUse.gameObject.SetActive(canUse);
@@ -431,7 +421,7 @@ public class PlayerInventoryPopUpUI : UIBase
             ButtonDrop.gameObject.SetActive(true);
     }
 
-    private void ShowDragSlot (ItemModel stack, Vector2 screenPosition)
+    private void ShowDragSlot(ItemModel stack, Vector2 screenPosition)
     {
         if (stack == null)
             return;
@@ -475,5 +465,22 @@ public class PlayerInventoryPopUpUI : UIBase
 
         if (TextDragIconCount != null)
             TextDragIconCount.text = string.Empty;
+    }
+
+    public void ShowItemTooltip(PlayerInventorySlotUI slot, Vector2 mousePosition)
+    {
+        if (slot == null || !slot.HasItem)
+            return;
+
+        if (ItemTooltip == null)
+            return;
+
+        ItemTooltip.Show(slot.ItemModel, mousePosition);
+    }
+
+    public void HideItemTooltip(PlayerInventorySlotUI slot)
+    {
+        if (ItemTooltip != null)
+            ItemTooltip.Hide();
     }
 }

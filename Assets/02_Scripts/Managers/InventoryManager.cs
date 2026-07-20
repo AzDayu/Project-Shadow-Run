@@ -16,6 +16,12 @@ public class InventoryManager : MonoBehaviour
 
     private readonly List<ItemModel> _itemList = new();
 
+    private ItemModel _equippedHead;
+    private ItemModel _equippedBody;
+    public ItemModel EquippedHead => _equippedHead;
+    public ItemModel EquippedBody => _equippedBody;
+    public event Action OnEquipmentChanged;
+
     public IReadOnlyList<ItemModel> ItemList => _itemList;
     public event Action OnInventoryChanged;
 
@@ -115,7 +121,12 @@ public class InventoryManager : MonoBehaviour
             remainCount -= removeCount;
 
             if (stack.CurrentStackCount <= 0)
+            {
                 _itemList.RemoveAt(i);
+
+                UnregisterItemFromQuickSlots(stack);
+                UnregisterItemFromEquipmentSlots(stack);
+            }
 
             if (remainCount <= 0)
             {
@@ -160,6 +171,21 @@ public class InventoryManager : MonoBehaviour
         return _itemList[index];
     }
 
+    public ItemModel GetEquippedItem(EquipmentSlotType slotType)
+    {
+        switch (slotType)
+        {
+            case EquipmentSlotType.Head:
+                return _equippedHead;
+
+            case EquipmentSlotType.Body:
+                return _equippedBody;
+
+            default:
+                return null;
+        }
+    }
+
     public bool TryUseItem(int slotIndex)
     {
         ItemModel stack = GetItemModel(slotIndex);
@@ -177,6 +203,9 @@ public class InventoryManager : MonoBehaviour
             case "Consumable":
                 return TryUseConsumable(stack);
 
+            case "Equipment":
+                return TryEquipItem(stack);
+
             default:
                 Debug.LogWarning($"사용할 수 없는 아이템 타입입니다. Item: {DataManager.Instance.GetItemData(stack.ItemId).Name}, Type: {itemType}");
                 return false;
@@ -186,9 +215,6 @@ public class InventoryManager : MonoBehaviour
     public bool TryDropItem(int slotIndex, int count = 1)
     {
         ItemModel itemModel = GetItemModel(slotIndex);
-
-        if (itemModel == null)
-            return false;
 
         if (!IsValidStack(itemModel))
             return false;
@@ -201,16 +227,26 @@ public class InventoryManager : MonoBehaviour
 
         bool wasRegistered = IsRegisteredInQuickSlot(itemModel);
 
+        bool wasEquipped = IsEquippedItem(itemModel);
+
         itemModel.CurrentStackCount -= count;
 
         if (itemModel.CurrentStackCount <= 0)
         {
-            bool removed = _itemList.Remove(itemModel);
+            _itemList.Remove(itemModel);
+
             UnregisterItemFromQuickSlots(itemModel);
+            UnregisterItemFromEquipmentSlots(itemModel);
         }
-        else if (wasRegistered)
-            OnQuickSlotChanged?.Invoke();
-        
+        else
+        {
+            if (wasRegistered)
+                OnQuickSlotChanged?.Invoke();
+
+            if (wasEquipped)
+                OnEquipmentChanged?.Invoke();
+        }
+
         OnInventoryChanged?.Invoke();
         return true;
     }
@@ -249,7 +285,6 @@ public class InventoryManager : MonoBehaviour
 
             _quickSlotList[i] = null;
 
-            // 현재 선택된 아이템을 옮긴 경우 선택 위치도 따라간다.
             if (_selectedQuickSlotIndex == i)
             {
                 _selectedQuickSlotIndex = quickSlotIndex;
@@ -273,8 +308,32 @@ public class InventoryManager : MonoBehaviour
 
     public bool TryRegisterQuickSlot(int inventorySlotIndex)
     {
-        return TryRegisterQuickSlot(inventorySlotIndex, 0);
+        ItemModel itemModel = GetItemModel(inventorySlotIndex);
+
+        if (!IsValidStack(itemModel))
+            return false;
+
+        if (!CanRegisterQuickSlot(itemModel))
+            return false;
+
+        for (int i = 0; i < _quickSlotList.Length; i++)
+        {
+            if (!IsSameItemModel(_quickSlotList[i], itemModel))
+                continue;
+            return true;
+        }
+
+        for (int i = 0; i < _quickSlotList.Length; i++)
+        {
+            if (IsValidStack(_quickSlotList[i]))
+                continue;
+
+            return TryRegisterQuickSlot(inventorySlotIndex, i);
+        }
+
+        return false;
     }
+    
 
     private bool TryUseConsumable(ItemModel stack)
     {
@@ -289,6 +348,125 @@ public class InventoryManager : MonoBehaviour
         return removed;
     }
 
+    public bool TryEquipItem(int inventorySlotIndex)
+    {
+        ItemModel itemModel = GetItemModel(inventorySlotIndex);
+        return TryEquipItem(itemModel);
+    }
+
+    public bool TryEquipItem(int inventorySlotIndex, EquipmentSlotType targetSlotType)
+    {
+        ItemModel itemModel = GetItemModel(inventorySlotIndex);
+
+        if (!IsValidStack(itemModel))
+            return false;
+
+        EquipmentSlotType itemSlotType = GetEquipmentSlotType(itemModel);
+
+        if (itemSlotType != targetSlotType)
+        {
+            Debug.LogWarning(
+                $"장비 부위가 맞지 않습니다. " +
+                $"ItemId: {itemModel.ItemId}, " +
+                $"ItemSlot: {itemSlotType}, " +
+                $"TargetSlot: {targetSlotType}"
+            );
+            return false;
+        }
+
+        return TryEquipItem(itemModel);
+    }
+
+    private bool TryEquipItem(ItemModel itemModel)
+    {
+        if (!IsValidStack(itemModel))
+            return false;
+
+        if (!_itemList.Contains(itemModel))
+            return false;
+
+        if (!CanEquipItem(itemModel))
+        {
+            Debug.LogWarning($"장착할 수 없는 아이템입니다. ItemId: {itemModel.ItemId}");
+            return false;
+        }
+
+        if (itemModel.CurrentStackCount != 1)
+        {
+            Debug.LogWarning($"장비 아이템의 수량은 1이어야 합니다. ItemId: {itemModel.ItemId}, Count: {itemModel.CurrentStackCount}");
+            return false;
+        }
+
+        EquipmentSlotType slotType = GetEquipmentSlotType(itemModel);
+
+        switch (slotType)
+        {
+            case EquipmentSlotType.Head:
+                EquipItem(ref _equippedHead, itemModel);
+                break;
+
+            case EquipmentSlotType.Body:
+                EquipItem(ref _equippedBody, itemModel);
+                break;
+
+            default:
+                Debug.LogWarning($"장비 슬롯을 판별할 수 없는 아이템입니다. ItemId: {itemModel.ItemId}");
+                return false;
+        }
+
+        OnEquipmentChanged?.Invoke();
+
+        Debug.Log($"장비 장착 완료: {DataManager.Instance.GetItemData(itemModel.ItemId).Name}");
+        return true;
+    }
+
+    public bool TryUnequipHead()
+    {
+        return TryUnequipItem(EquipmentSlotType.Head);
+    }
+
+    public bool TryUnequipBody()
+    {
+        return TryUnequipItem(EquipmentSlotType.Body);
+    }
+
+    public bool TryUnequipItem(EquipmentSlotType slotType)
+    {
+        switch (slotType)
+        {
+            case EquipmentSlotType.Head:
+                return TryUnequipSlot(ref _equippedHead);
+
+            case EquipmentSlotType.Body:
+                return TryUnequipSlot(ref _equippedBody);
+
+            default:
+                return false;
+        }
+    }
+
+    private bool TryUnequipSlot(ref ItemModel equippedItem)
+    {
+        if (!IsValidStack(equippedItem))
+            return false;
+
+        ItemModel itemToUnequip = equippedItem;
+        equippedItem = null;
+
+        OnEquipmentChanged?.Invoke();
+
+        Debug.Log(
+            $"장비 해제 완료: " +
+            $"{DataManager.Instance.GetItemData(itemToUnequip.ItemId).Name}"
+        );
+
+        return true;
+    }
+
+    private void EquipItem(ref ItemModel equipmentSlot, ItemModel itemToEquip)
+    {
+        equipmentSlot = itemToEquip;
+    }
 
     private bool CanRegisterQuickSlot(ItemModel item)
     {
@@ -299,6 +477,29 @@ public class InventoryManager : MonoBehaviour
             DataManager.Instance.GetItemData(item.ItemId).ItemType == "Consumable";
     }
 
+    private bool CanEquipItem(ItemModel item)
+    {
+        if (item == null)
+            return false;
+
+        ItemData itemData = DataManager.Instance.GetItemData(item.ItemId);
+        return itemData != null && itemData.ItemType == "Equipment";
+    }
+
+    private EquipmentSlotType GetEquipmentSlotType(ItemModel item)
+    {
+        if (item == null || string.IsNullOrEmpty(item.ItemId))
+            return EquipmentSlotType.None;
+
+        if (item.ItemId.Contains("Equip_Helmet"))
+            return EquipmentSlotType.Head;
+
+        if (item.ItemId.Contains("Equip_Armor"))
+            return EquipmentSlotType.Body;
+
+        return EquipmentSlotType.None;
+    }
+
     private bool IsValidStack(ItemModel stack)
     {
         return stack != null && stack.CurrentStackCount > 0;
@@ -307,22 +508,22 @@ public class InventoryManager : MonoBehaviour
     public bool TrySelectQuickSlot(int quickSlotIndex)
     {
         if (quickSlotIndex < 0 || quickSlotIndex >= _quickSlotList.Length)
-        {
-            Debug.LogWarning($"잘못된 퀵슬롯 선택입니다. Index: {quickSlotIndex}");
             return false;
-        }
 
         ItemModel stack = _quickSlotList[quickSlotIndex];
 
         if (!IsValidStack(stack))
-        {
-            Debug.LogWarning($"비어있는 퀵슬롯입니다. Index: {quickSlotIndex}");
             return false;
+
+        if (_selectedQuickSlotIndex == quickSlotIndex)
+        {
+            _selectedQuickSlotIndex = -1;
         }
-
-        _selectedQuickSlotIndex = quickSlotIndex;
-
-        Debug.Log($"퀵슬롯 선택: {quickSlotIndex}, Item: {DataManager.Instance.GetItemData(stack.ItemId).Name}");
+        else
+        {
+            _selectedQuickSlotIndex = quickSlotIndex;
+            Debug.Log($"퀵슬롯 선택: {quickSlotIndex}, Item: {DataManager.Instance.GetItemData(stack.ItemId).Name}");
+        }
 
         OnSelectedQuickSlotChanged?.Invoke();
 
@@ -343,7 +544,7 @@ public class InventoryManager : MonoBehaviour
         {
             case "Weapon":
                 Debug.Log($"선택 무기 사용 요청: {DataManager.Instance.GetItemData(stack.ItemId).Name}");
-                // TODO: WeaponManager 없이 갈 거면 나중에 여기서 장착/발사 요청 연결
+                // TODO: 장착/발사 요청 연결
                 return true;
 
             case "Consumable":
@@ -439,8 +640,7 @@ public class InventoryManager : MonoBehaviour
         if (first == null || second == null)
             return false;
 
-        if (string.IsNullOrWhiteSpace(first.InstanceId) ||
-            string.IsNullOrWhiteSpace(second.InstanceId))
+        if (string.IsNullOrWhiteSpace(first.InstanceId) || string.IsNullOrWhiteSpace(second.InstanceId))
             return false;
 
         return first.InstanceId == second.InstanceId;
@@ -455,6 +655,31 @@ public class InventoryManager : MonoBehaviour
         }
 
         return false;
+    }
+
+    private bool IsEquippedItem(ItemModel itemModel)
+    {
+        return IsSameItemModel(_equippedHead, itemModel) || IsSameItemModel(_equippedBody, itemModel);
+    }
+
+    private void UnregisterItemFromEquipmentSlots(ItemModel itemModel)
+    {
+        bool equipmentChanged = false;
+
+        if (IsSameItemModel(_equippedHead, itemModel))
+        {
+            _equippedHead = null;
+            equipmentChanged = true;
+        }
+
+        if (IsSameItemModel(_equippedBody, itemModel))
+        {
+            _equippedBody = null;
+            equipmentChanged = true;
+        }
+
+        if (equipmentChanged)
+            OnEquipmentChanged?.Invoke();
     }
 
     private void UnregisterItemFromQuickSlots(ItemModel itemModel)
@@ -483,4 +708,48 @@ public class InventoryManager : MonoBehaviour
         if (selectedQuickSlotChanged)
             OnSelectedQuickSlotChanged?.Invoke();
     }
+
+    public bool TryUnregisterQuickSlot(int quickSlotIndex)
+    {
+        if (quickSlotIndex < 0 || quickSlotIndex >= _quickSlotList.Length)
+            return false;
+
+        ItemModel itemModel = _quickSlotList[quickSlotIndex];
+
+        if (!IsValidStack(itemModel))
+            return false;
+
+        _quickSlotList[quickSlotIndex] = null;
+
+        bool selectedSlotUnregistered = (_selectedQuickSlotIndex == quickSlotIndex);
+
+        if (selectedSlotUnregistered)
+            _selectedQuickSlotIndex = -1;
+
+        OnQuickSlotChanged?.Invoke();
+
+        if (selectedSlotUnregistered)
+            OnSelectedQuickSlotChanged?.Invoke();
+
+        return true;
+    }
+
+    public WeaponType ReturnWeaponTypeFromQuickSlotID()
+    {
+        if (SelectedQuickSlotIndex > -1)
+        {
+            switch (_quickSlotList[SelectedQuickSlotIndex].ItemId)
+            {
+                case string value when value.Contains("Weapon_AR"):
+                    return WeaponType.Rifle;
+                case string value when value.Contains("Weapon_Pistol"):
+                    return WeaponType.Pistol;
+                default:
+                    return WeaponType.None;
+            }
+        }
+
+        return WeaponType.None;
+    }
+
 }
