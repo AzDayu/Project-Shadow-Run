@@ -479,6 +479,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: ManagerContainer
       objectReference: {fileID: 0}
+    - target: {fileID: 6356982039236863043, guid: 3e4884067e8ed774ea388194dfca4676, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8296197908547747577, guid: 3e4884067e8ed774ea388194dfca4676, type: 3}
       propertyPath: _inGameWorkspacePrefab
       value: 

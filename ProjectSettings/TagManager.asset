@@ -14,9 +14,7 @@ TagManager:
   - Ground
   - Enemy
   - Weapon
-  - Tile
-  - 
-  - 
+  - CoverWall
   - 
   - 
   - 
