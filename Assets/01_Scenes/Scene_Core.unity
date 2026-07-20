@@ -244,16 +244,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InventoryDebugTester
   AddOnStart: 1
   TestItems:
-  - ItemId: Item_Medical_Kit_01
+  - ItemId: Item_Loot_Screwdriver
+    Count: 3
+  - ItemId: Item_Loot_Tablet
     Count: 1
   - ItemId: Item_Weapon_AR_01
     Count: 1
-  - ItemId: Item_Weapon_AR_02
-    Count: 1
-  - ItemId: Item_Weapon_SMG_02
-    Count: 1
-  - ItemId: Item_Loot_Watch
-    Count: 1
+  - ItemId: Item_Ammo_556
+    Count: 8
 --- !u!1 &383023749
 GameObject:
   m_ObjectHideFlags: 0

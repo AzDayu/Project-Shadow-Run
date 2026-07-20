@@ -4,9 +4,15 @@ using System.Linq;
 using UnityEngine;
 using Newtonsoft.Json;
 
+
 public class DataManager : MonoBehaviour
 {
     public static DataManager Instance { get; private set; }
+
+    private JsonSerializerSettings _settings = new JsonSerializerSettings
+    {
+        TypeNameHandling = TypeNameHandling.Auto
+    };
 
     private void Awake()
     {
@@ -42,22 +48,35 @@ public class DataManager : MonoBehaviour
     private Dictionary<string, T> LoadData<T>(string tableName) where T : BaseData
     {
         string resourcePath = $"Data/{tableName}";
-        TextAsset textAsset = Resources.Load<TextAsset>(resourcePath);
+        TextAsset jsonAsset = Resources.Load<TextAsset>(resourcePath);
 
-        if (textAsset == null)
+        if (jsonAsset == null)
         {
-            Debug.LogError($"[Error] 리소스를 찾을 수 없습니다: Resources/{resourcePath}");
+            Debug.LogError($"[DataManager] {tableName} JSON 파일을 찾을 수 없습니다.");
             return new Dictionary<string, T>();
         }
 
         try
         {
-            List<T> dataList = JsonConvert.DeserializeObject<List<T>>(textAsset.text);
+            List<T> dataList = JsonConvert.DeserializeObject<List<T>>(jsonAsset.text, _settings);
 
             if (dataList != null)
             {
-                Debug.Log($"{typeof(T).Name} 데이터를 {dataList.Count}개 로드했습니다.");
-                return dataList.ToDictionary(item => item.Id.ToString());
+                Debug.Log($"[DataManager] {tableName} 데이터를 {dataList.Count}개 로드했습니다.");
+                Dictionary<string, T> dic = new Dictionary<string, T>();
+                foreach (var item in dataList)
+                {
+                    string key = item.Id.ToString();
+                    if (!dic.ContainsKey(key))
+                    {
+                        dic.Add(key, item);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"[DataManager] 중복된 ID 발견! 덮어쓰기를 무시합니다: {key}");
+                    }
+                }
+                return dic;
             }
         }
         catch (Exception ex)

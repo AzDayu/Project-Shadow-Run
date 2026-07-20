@@ -30,6 +30,8 @@ public class InventoryDebugTester : MonoBehaviour
     [ContextMenu("Add Test Items")]
     public void AddTestItems()
     {
+        Debug.Log($"현재 DataManager에 로드된 아이템 총 개수: {DataManager.Instance._itemDataDic.Count}개");
+
         if (!Application.isPlaying)
         {
             Debug.LogWarning("테스트 아이템 추가는 Play Mode에서 실행해야 합니다.");
