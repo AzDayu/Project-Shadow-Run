@@ -559,6 +559,11 @@ public class InventoryManager : MonoBehaviour
 
     public bool TryAddWeapon(WeaponData weaponData)
     {
+        return TryAddWeapon(weaponData, GetInstanceID().ToString());
+    }
+
+    public bool TryAddWeapon(WeaponData weaponData, string instanceId)
+    {
         if (weaponData == null)
             return false;
 
@@ -568,11 +573,15 @@ public class InventoryManager : MonoBehaviour
         if (_itemList.Count >= MaxSlotCount)
             return false;
 
+        if (string.IsNullOrWhiteSpace(instanceId))
+        {
+            Debug.LogWarning("무기 InstanceId가 없습니다.");
+            return false;
+        }
+
         ItemModel weaponStack = new ItemModel
         {
-            // TODO : 임시 ID 부여 나중에는 불러오는 Weapon의 데이터를 넣어야함. 
-            //       현재로써는 그냥 임시 ID 부여
-            InstanceId = "11111111",
+            InstanceId = instanceId,
             ItemId = weaponData.Id,
             CurrentStackCount = 1
         };
@@ -751,5 +760,4 @@ public class InventoryManager : MonoBehaviour
 
         return WeaponType.None;
     }
-
 }
