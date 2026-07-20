@@ -50,7 +50,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 473cc5093880c0a4183437367793be49, type: 3}
       propertyPath: m_Name
-      value: tripo_convert_b3ec037f-54e7-4184-82a9-9ed29bff3f3f
+      value: Loot_WaterFilter
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 473cc5093880c0a4183437367793be49, type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

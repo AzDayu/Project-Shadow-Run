@@ -50,7 +50,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 7d9cd6f9ce6bf454289fbaecb2753586, type: 3}
       propertyPath: m_Name
-      value: tripo_convert_c944e780-ed8f-4749-81d5-a27814ae42e1
+      value: Ammo_9mm
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 7d9cd6f9ce6bf454289fbaecb2753586, type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

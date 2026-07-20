@@ -50,7 +50,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 7b8a3f1406ff3974087cf3cd7c3a8503, type: 3}
       propertyPath: m_Name
-      value: tripo_convert_bfeb13b0-c290-4aa8-a2f0-d37162346c6d
+      value: Loot_Screwdriver
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 7b8a3f1406ff3974087cf3cd7c3a8503, type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

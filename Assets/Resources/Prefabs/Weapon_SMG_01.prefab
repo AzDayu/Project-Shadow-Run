@@ -50,7 +50,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: a42696ab4d5a33b42a3669532157b344, type: 3}
       propertyPath: m_Name
-      value: tripo_convert_219b03a0-db6d-45b5-8996-e9f0efc5e96b
+      value: Weapon_SMG_01
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: a42696ab4d5a33b42a3669532157b344, type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

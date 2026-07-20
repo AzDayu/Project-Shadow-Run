@@ -8,6 +8,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -8896694686868719287, guid: a2725637e78469e4d84ba0e7af93df8c, type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a2725637e78469e4d84ba0e7af93df8c, type: 3}
       propertyPath: m_LocalPosition.x
       value: 957.5515
@@ -48,9 +52,21 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -272220568905939283, guid: a2725637e78469e4d84ba0e7af93df8c, type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: a2725637e78469e4d84ba0e7af93df8c, type: 3}
       propertyPath: m_Name
-      value: tripo_convert_13ae5131-6172-4bb9-ba3f-a0d9af9f8b3a
+      value: Loot_Fuse
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: a2725637e78469e4d84ba0e7af93df8c, type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 6590886543155736627, guid: a2725637e78469e4d84ba0e7af93df8c, type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

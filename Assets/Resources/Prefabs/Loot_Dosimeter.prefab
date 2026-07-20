@@ -50,7 +50,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: e540f8fd55c765e4abba511fe994b7fe, type: 3}
       propertyPath: m_Name
-      value: tripo_convert_3ca86bbb-43fb-4377-b44b-af3fb54049fe
+      value: Loot_Dosimeter
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: e540f8fd55c765e4abba511fe994b7fe, type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

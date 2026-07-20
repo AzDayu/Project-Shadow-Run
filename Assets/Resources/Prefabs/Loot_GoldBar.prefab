@@ -50,7 +50,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 42eae137a2de61e44bd221553348607f, type: 3}
       propertyPath: m_Name
-      value: tripo_convert_e99551bc-6df5-42c3-8ff0-807fefc0a76f
+      value: Loot_GoldBar
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 42eae137a2de61e44bd221553348607f, type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

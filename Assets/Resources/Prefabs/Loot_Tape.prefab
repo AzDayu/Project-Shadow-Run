@@ -50,7 +50,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: b7291aecb861f7e41b8a5132b4d3bfc0, type: 3}
       propertyPath: m_Name
-      value: tripo_convert_330bb5b7-0de5-49d5-801f-9cce2c2ee3d1
+      value: Loot_Tape
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: b7291aecb861f7e41b8a5132b4d3bfc0, type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

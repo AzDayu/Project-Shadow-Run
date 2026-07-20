@@ -50,7 +50,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: f7f7ab547e291914a9e50b171ee75806, type: 3}
       propertyPath: m_Name
-      value: tripo_convert_40f2a1d8-f9c7-447b-b0fa-f1ab208a7307
+      value: Loot_RFIDReader
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: f7f7ab547e291914a9e50b171ee75806, type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

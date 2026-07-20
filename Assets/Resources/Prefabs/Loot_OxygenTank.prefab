@@ -50,7 +50,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: ec2af6030d5b6cf4ab4e5a7da7cfece1, type: 3}
       propertyPath: m_Name
-      value: tripo_convert_76ff0193-1600-4199-8f5b-1f35db522679
+      value: Loot_OxygenTank
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ec2af6030d5b6cf4ab4e5a7da7cfece1, type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

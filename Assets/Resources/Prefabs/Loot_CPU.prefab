@@ -52,6 +52,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Loot_CPU
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 0d3585828623c2d45ab5cbfb3f1e5826, type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

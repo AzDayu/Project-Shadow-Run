@@ -50,7 +50,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 81070bc7edc9b6f44800b54fd946cee3, type: 3}
       propertyPath: m_Name
-      value: tripo_convert_f7da3e1d-47d7-404d-8d5d-2df21adf24aa
+      value: Loot_Sample
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 81070bc7edc9b6f44800b54fd946cee3, type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -15,8 +15,8 @@ TagManager:
   - Enemy
   - Weapon
   - CoverWall
-  - 
-  - 
+  - Tile
+  - Item
   - 
   - 
   - 
