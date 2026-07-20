@@ -4,22 +4,34 @@ using UnityEngine;
 public class TakeMedicine : MonoBehaviour
 {
     [SerializeField] private int healAmount; // 초당 회복량
-    [SerializeField] private float healRate; // 회복 지속 시간
-    [SerializeField] private int healDelay;  // 적용 대기 시간
+    [SerializeField] private uint healDuration; // 회복 지속 시간
 
     private Coroutine _healingCoroutine;
-
     private PlayerStatusModel _playerStatus;
+    private float _tickInterval = 0.2f; // 회복 틱 간격 
+    private WaitForSeconds _waitTick; // GC 방지용 캐시 변수
 
-    /// <summary>
-    /// 외부에서 모델을 주입해 연동
-    /// </summary>
+    private void Awake()
+    {
+        // _waitTick 캐시 생성으로 메모리 파편화 방지
+        _waitTick = new WaitForSeconds(_tickInterval);
+    }
+    
     public void Setup( PlayerStatusModel playerStatus )
     {
         _playerStatus = playerStatus;
     }
 
-    public void StartHealing( int amount, float rate, int delay )
+    private void OnDisable( )
+    {
+        if (_healingCoroutine != null)
+        {
+            StopCoroutine(_healingCoroutine);
+            _healingCoroutine = null;
+        }
+    }
+
+    public void StartHealing( int amount, uint duration )
     {
         // Null 예외 방지 안전장치
         if (_playerStatus == null)
@@ -28,11 +40,27 @@ public class TakeMedicine : MonoBehaviour
             return;
         }
 
-        healAmount = amount;
-        healRate = rate;
-        healDelay = delay;
+        // 지속 시간이 0인 경우 코루틴 없이 즉시 회복 후 종료
+        if (duration <= 0)
+        {
+            _playerStatus.RecoverHP(amount);
+            Debug.Log($"[즉시 회복] 현재 체력: {_playerStatus.CurrentHP}");
 
-        // 기존 실행 중 코루틴 중지
+            // 실행 중인 _healingCoroutine 중지 
+            /*
+            if (_healingCoroutine != null)
+            {
+                StopCoroutine(_healingCoroutine);
+                _healingCoroutine = null;
+            }
+            */
+            return; 
+        }
+
+        healAmount = amount;
+        healDuration = duration;
+
+        // 기존 실행 코루틴 중지
         if (_healingCoroutine != null)
         {
             StopCoroutine(_healingCoroutine);
@@ -43,22 +71,28 @@ public class TakeMedicine : MonoBehaviour
 
     private IEnumerator RecoveryRoutine( )
     {
-        // 설정한 대기 시간만큼 대기
-        yield return new WaitForSeconds(healDelay);
+        // 총 실행할 틱(Tick) 횟수 계산 
+        int totalTicks = Mathf.RoundToInt(healDuration / _tickInterval);
 
-        float _elapsed = 0f; // 경과 시간 체크용 변수
+        // 한 틱당 들어가야 할 소수점 단위의 실질적 힐량
+        float hpPerTick = healAmount * _tickInterval;
+        // 소수점 단위의 힐량을 누적할 변수
+        int tickCount = 0;
 
-        // 지속 시간(healRate)이 경과할 때까지 1초마다 반복
-        while (_elapsed < healRate)
+        // 정확한 횟수만큼 루프를 돌려 렉이 걸려도 힐 횟수가 무조건 보장됩니다.
+        while (tickCount < totalTicks)
         {
-            // PlayerStatusModel.cs의 회복 함수 호출
-            _playerStatus.RecoverHP(healAmount); // 즉시 회복 
-            _elapsed = _elapsed + 1f;            // 시간 누적 1초 간격
+            _playerStatus.RecoverHP(hpPerTick);
 
-            Debug.Log($"[회복 중] 현재 체력: {_playerStatus.CurrentHP} | 남은 지속 시간: {healRate - _elapsed}초");
+            tickCount++;
 
-            yield return new WaitForSeconds(1f); // 회복 후 1초 간격
-        }
+            float remainingTime = (float)healDuration - ( tickCount * _tickInterval );
+            Debug.Log($"[회복 중] 현재 체력: {_playerStatus.CurrentHP} | 남은 지속 시간: {Mathf.Max(0f, remainingTime):F1}초");
+
+            // 설정한 틱 간격만큼 대기
+            yield return _waitTick;
+        }     
+
         _healingCoroutine = null;
     }
 
