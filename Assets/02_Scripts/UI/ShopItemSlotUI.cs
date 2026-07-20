@@ -41,6 +41,8 @@ public class ShopItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler,
 
     private void UpdateSlotUI()
     {
+        if (DataManager.Instance == null) return;
+
         if (Text_ItemPrice == null || Image_ItemIcon == null) return;
 
         if (_slotVm.IsSlotEmpty == true)
@@ -53,13 +55,13 @@ public class ShopItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler,
 
         Image_ItemIcon.enabled = true;
 
-        var itemData = GameDataManager.Instance.GetItemDataById(_slotVm.ItemDataId);
+        var itemData = DataManager.Instance.GetItemData(_slotVm.ItemDataId);
         if (itemData != null)
         {
             GameUtil.LoadAndSetSpriteImage(Image_ItemIcon, itemData.IconPath).Forget();
         }
 
-        Text_ItemPrice.text = $"{_slotVm.ItemSellingPrice} Credit";
+        Text_ItemPrice.text = $"{_slotVm.ItemSellingPrice} C";
 
         if (_slotVm.ItemStackCount <= 1)
         {
@@ -69,6 +71,17 @@ public class ShopItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler,
         {
             Text_StackCount.text = _slotVm.ItemStackCount.ToString();
         }
+    }
+
+    public void UpdatePriceDisplay(int unitPrice, int count)
+    {
+        int totalPrice = unitPrice * count;
+        Text_ItemPrice.text = $"{totalPrice} C"; 
+    }
+
+    public void UpdateDefaultPrice(int unitPrice)
+    {
+        Text_ItemPrice.text = $"{unitPrice} C";
     }
 
     public void OnPointerClick(PointerEventData eventData)

@@ -5,8 +5,10 @@ using UnityEngine;
 public class StashViewModel : ViewModelBase
 {
     public int _maxStashSlot = 30;
+    public int _maxInventorySlot = 30;
 
     public StashItemSlotViewModel[] StashSlots { get; set; }
+    public StashItemSlotViewModel[] InventorySlots { get; set; }
 
     public StashViewModel()
     {
@@ -17,6 +19,17 @@ public class StashViewModel : ViewModelBase
             {
                 SlotIndex = i,
                 SlotType = ShopItemSlotType.Stash, 
+                IsSlotEmpty = true
+            };
+        }
+
+        InventorySlots = new StashItemSlotViewModel[_maxInventorySlot];
+        for (int i = 0; i < _maxInventorySlot; i++)
+        {
+            InventorySlots[i] = new StashItemSlotViewModel
+            {
+                SlotIndex = i,
+                SlotType = ShopItemSlotType.Inventory, 
                 IsSlotEmpty = true
             };
         }

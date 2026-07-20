@@ -104,3 +104,10 @@ public class WeaponModel : ItemModel
     public float CurrentDurability;         // 현재 내구도
     public List<ItemModel> AttachedParts;   // 장착된 파츠들
 }
+
+[System.Serializable]
+public class ShopItemData : BaseData 
+{
+    public string ItemId;        
+    public int StockCount;       
+}

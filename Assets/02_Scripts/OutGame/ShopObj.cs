@@ -74,8 +74,8 @@ public class ShopObj : MonoBehaviour
 
     private void CloseShop()
     {
+        NetworkManager.Inst.ShopService.SyncDataOnClose();
         UIManager.Instance.CloseUI(UIRootType.ContentUI, UIType.ShopUI);
-
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
     }

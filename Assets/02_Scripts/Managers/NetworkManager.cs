@@ -30,9 +30,14 @@ public class NetworkManager : MonoBehaviour
         PlayerModel playerData = SaveManager.Instance.LoadPlayerData();
 
         var stashVm = StashService.GetStashViewModel();
-
         stashVm.CurPlayerCredit = playerData.CurrentCredit;
 
-        StashService.LoadStashData(playerData.StashItems);
+        ShopService.GetShopViewModel().CurPlayerCredit = playerData.CurrentCredit;
+        stashVm.CurPlayerCredit = playerData.CurrentCredit;
+
+        //if (InventoryManager.Instance != null)
+        //{
+        //    InventoryManager.Instance.SyncInventoryFromUI(playerData.InventoryItems);
+        //}
     }
 }

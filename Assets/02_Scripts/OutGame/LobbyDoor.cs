@@ -53,7 +53,7 @@ public class LobbyDoor : MonoBehaviour
     {
         yield return new WaitForSeconds(_waitTime);
 
-        Debug.Log($"[{targetObject.name}] 탈출 성공! 로비(InGame) 공간으로 전환합니다.");
+        Debug.Log($"[{targetObject.name}] InGame 공간으로 전환합니다.");
 
         if (GameManager.Instance != null)
         {

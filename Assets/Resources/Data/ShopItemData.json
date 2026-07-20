@@ -1,0 +1,17 @@
+[
+  {
+    "Id": "Shop_001",
+    "ItemId": "Item_Medical_Kit_01",
+    "StockCount": 99
+  },
+  {
+    "Id": "Shop_002",
+    "ItemId": "Item_Ammo_556",
+    "StockCount": 999
+  },
+  {
+    "Id": "Shop_003",
+    "ItemId": "Item_Weapon_AR_01",
+    "StockCount": 3
+  }
+]

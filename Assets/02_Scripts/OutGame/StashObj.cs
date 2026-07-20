@@ -53,6 +53,8 @@ public class StashObj : MonoBehaviour
 
     private void OpenStash()
     {
+        NetworkManager.Inst.StashService.InitStashAndInventoryData();
+
         UIManager.Instance.OpenContentUI(UIType.StashUI);
         var stashUI = UIManager.Instance.GetOpenedUI(UIRootType.ContentUI, UIType.StashUI) as StashUI;
 
@@ -71,6 +73,8 @@ public class StashObj : MonoBehaviour
 
     private void CloseStash()
     {
+        NetworkManager.Inst.StashService.SyncDataOnClose();
+
         UIManager.Instance.CloseUI(UIRootType.ContentUI, UIType.StashUI);
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
