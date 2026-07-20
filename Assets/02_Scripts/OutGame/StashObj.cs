@@ -2,6 +2,7 @@
 
 public class StashObj : MonoBehaviour
 {
+
     private KeyCode _interactKey = KeyCode.E;
 
     private bool _isPlayerInside = false;
@@ -62,6 +63,7 @@ public class StashObj : MonoBehaviour
         {
             var stashVm = NetworkManager.Inst.StashService.GetStashViewModel();
             Debug.Log("ViewModel 바인딩 성공!");
+
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
         }
@@ -74,8 +76,8 @@ public class StashObj : MonoBehaviour
     private void CloseStash()
     {
         NetworkManager.Inst.StashService.SyncDataOnClose();
-
         UIManager.Instance.CloseUI(UIRootType.ContentUI, UIType.StashUI);
+
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
     }

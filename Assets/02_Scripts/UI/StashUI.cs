@@ -156,13 +156,16 @@ public class StashUI : UIBase
 
     private void HandleLeftClick(StashItemSlotViewModel clickedSlot)
     {
+        bool isCtrlInput = ((Input.GetKey(KeyCode.LeftControl)) || (Input.GetKey(KeyCode.RightControl)));
+        bool isShiftInput = (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
+
         if (_heldStackCount == 0)
         {
-            if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+            if (isCtrlInput)
             {
                 PickupOne(clickedSlot);
             }
-            else if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+            else if (isShiftInput)
             {
                 PickupHalf(clickedSlot);
             }
@@ -173,15 +176,11 @@ public class StashUI : UIBase
         }
         else
         {
-            if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+            if ((isCtrlInput == true) && (clickedSlot.ItemDataId == _dragSlotVm.ItemDataId))
             {
-                // 다른 아이템에 복사되는 버그 방지 조건
-                if (clickedSlot.ItemDataId == _dragSlotVm.ItemDataId)
-                {
-                    PickupOne(clickedSlot);
-                }
+                PickupOne(clickedSlot);
             }
-            else if (clickedSlot.IsSlotEmpty)
+            else if (clickedSlot.IsSlotEmpty == true)
             {
                 PlaceAll(clickedSlot);
             }
@@ -204,7 +203,7 @@ public class StashUI : UIBase
         }
         else
         {
-            if (clickedSlot.IsSlotEmpty || clickedSlot.ItemDataId == _dragSlotVm.ItemDataId)
+            if ((clickedSlot.IsSlotEmpty == true) || (clickedSlot.ItemDataId == _dragSlotVm.ItemDataId))
             {
                 PlaceOne(clickedSlot);
             }
@@ -217,7 +216,10 @@ public class StashUI : UIBase
 
     private void PickupOne(StashItemSlotViewModel slotVm)
     {
-        if (slotVm == null || slotVm.IsSlotEmpty) return;
+        if (slotVm == null || slotVm.IsSlotEmpty)
+        {
+            return;
+        }
 
         if (_heldStackCount == 0)
         {
@@ -241,6 +243,7 @@ public class StashUI : UIBase
 
     private void PlaceOne(StashItemSlotViewModel targetSlot)
     {
+
         if (targetSlot.IsSlotEmpty)
         {
             targetSlot.ItemDataId = _dragSlotVm.ItemDataId;
@@ -289,6 +292,11 @@ public class StashUI : UIBase
 
     private void PickupAll(StashItemSlotViewModel slotVm)
     {
+        if (slotVm == null || slotVm.IsSlotEmpty)
+        {
+            return;
+        }
+
         _heldStackCount = slotVm.ItemStackCount;
         _originSlotVm = slotVm;
 
