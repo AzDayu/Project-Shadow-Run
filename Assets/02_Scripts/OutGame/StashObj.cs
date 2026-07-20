@@ -2,6 +2,7 @@
 
 public class StashObj : MonoBehaviour
 {
+    private PlayerInputHandler InputHandler;
 
     private KeyCode _interactKey = KeyCode.E;
 
@@ -36,6 +37,7 @@ public class StashObj : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             _isPlayerInside = true;
+            InputHandler = other.GetComponent<PlayerInputHandler>();
             Debug.Log("StashObj: 플레이어가 창고 범위에 진입했습니다.");
         }
     }
@@ -64,6 +66,7 @@ public class StashObj : MonoBehaviour
             var stashVm = NetworkManager.Inst.StashService.GetStashViewModel();
             Debug.Log("ViewModel 바인딩 성공!");
 
+            InputHandler.SetGameplayInputBlocked(true);
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
         }
@@ -78,6 +81,7 @@ public class StashObj : MonoBehaviour
         NetworkManager.Inst.StashService.SyncDataOnClose();
         UIManager.Instance.CloseUI(UIRootType.ContentUI, UIType.StashUI);
 
+        InputHandler.SetGameplayInputBlocked(false);
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
     }

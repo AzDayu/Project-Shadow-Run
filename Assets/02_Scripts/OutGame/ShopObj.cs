@@ -37,7 +37,7 @@ public class ShopObj : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             _isPlayerInside = true;
-            //_playerController = other.GetComponent<PlayerController>(); 
+            InputHandler = other.GetComponent<PlayerInputHandler>();
             Debug.Log("ShopObj: 플레이어가 상점 범위에 진입했습니다.");
         }
     }
