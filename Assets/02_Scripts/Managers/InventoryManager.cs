@@ -184,7 +184,7 @@ public class InventoryManager : MonoBehaviour
             default:
                 return null;
         }
-    }
+    }    
 
     public bool TryUseItem(int slotIndex)
     {
@@ -333,19 +333,45 @@ public class InventoryManager : MonoBehaviour
 
         return false;
     }
-    
 
-    private bool TryUseConsumable(ItemModel stack)
+    private InterfaceUseItem _itemUse;
+    public void SetItemUser( InterfaceUseItem user )
     {
-        Debug.Log($"소모품 사용 요청: {DataManager.Instance.GetItemData(stack.ItemId).Name}");
+        _itemUse = user;
+    }
+    private bool TryUseConsumable( ItemModel stack )
+    {
+        if (_itemUse == null)
+        {
+            Debug.LogWarning("InterfaceUseItem is null");
+            return false;
+        }
 
-        // TODO: UseItemType / UseItemParameterList 기준으로 효과 적용
-        bool removed = TryRemoveItem(stack.ItemId, 1);
+        ItemData rawData = DataManager.Instance.GetItemData(stack.ItemId);
+        UseableItem consumable = rawData as UseableItem;
 
-        if (removed)
-            OnQuickSlotChanged?.Invoke();
+        if (consumable == null)
+        {
+            Debug.LogWarning($"소모품 데이터를 찾을 수 없습니다. ItemId: {stack.ItemId}");
+            return false;
+        }
 
-        return removed;
+        // 파라미터 파싱
+        consumable.ParseUseItemParameters();
+
+        // 등록된 _itemUser에게 효과 적용 요청
+        if (_itemUse.TryUseItem(consumable))
+        {
+            bool removed = TryRemoveItem(stack.ItemId, 1);
+
+            if (removed)
+            {
+                OnQuickSlotChanged?.Invoke();
+            }
+
+            return removed;
+        }
+        return false;
     }
 
     public bool TryEquipItem(int inventorySlotIndex)
