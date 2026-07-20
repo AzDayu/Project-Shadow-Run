@@ -120,7 +120,7 @@ public class ShopUI : UIBase
 
     public void CloseShopUI()
     {
-        //NetworkManager.Inst.ShopService.SyncDataOnClose();
+        NetworkManager.Inst.ShopService.SyncDataOnClose();
         UIManager.Instance.CloseContentUI(UIType.ShopUI);
 
         //if (ShopItemPopup != null)
