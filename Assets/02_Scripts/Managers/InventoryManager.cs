@@ -1,4 +1,5 @@
-﻿using System;
+﻿using JetBrains.Annotations;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,6 +9,9 @@ public class InventoryManager : MonoBehaviour
 
     [SerializeField] private int MaxSlotCount = 30;
     [SerializeField] private int QuickSlotCount = 3;
+
+    public int PlayerCredit { get; private set; }
+    public event Action OnCreditChanged;
 
     private readonly ItemModel[] _quickSlotList = new ItemModel[3];
     public IReadOnlyList<ItemModel> QuickSlotList => _quickSlotList;

@@ -93,7 +93,7 @@ MonoBehaviour:
       type: {class: ItemModel, ns: , asm: Assembly-CSharp}
       data:
         InstanceId: 
-        ItemId: 
+        ItemId: Item_Weapon_AR_02
         CurrentStackCount: 1
 --- !u!65 &8321922343961017501
 BoxCollider:

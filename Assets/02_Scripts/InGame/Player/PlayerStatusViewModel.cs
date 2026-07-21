@@ -1,7 +1,7 @@
 ﻿
 public class PlayerStatusViewModel : ViewModelBase
 {
-    private  PlayerStatusModel _model;
+    private PlayerModel _model;
 
     public float MaxHP => _model.MaxHP;
     public float CurrentHP => _model.CurrentHP;
@@ -31,12 +31,13 @@ public class PlayerStatusViewModel : ViewModelBase
         }
     }
 
-    public void InitPlayerViewModel(PlayerStatusModel model)
+    public void InitPlayerViewModel(PlayerModel model)
     {
         _model = model;
-
+        /*
         _model.HealthChanged += OnHealthChanged;
         _model.StaminaChanged += OnStaminaChanged;
+        */
     }
 
     private void OnHealthChanged(float currentHP)

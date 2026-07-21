@@ -6,6 +6,9 @@ using UnityEngine.UI;
 
 public class PlayerInventoryPopUpUI : UIBase
 {
+    [Header("Player Credit")]
+    [SerializeField] private TMP_Text TextHaveCreditCount;
+
     [Header("Slot")]
     [SerializeField] private Transform SlotParent;
 
@@ -53,6 +56,7 @@ public class PlayerInventoryPopUpUI : UIBase
             InventoryManager.Instance.OnInventoryChanged += RefreshInventory;
 
         RefreshInventory();
+        RefreshPlayerCredit();
 
         CloseContextMenu();
     }
@@ -133,6 +137,22 @@ public class PlayerInventoryPopUpUI : UIBase
         }
 
         RefreshSelectedSlot();
+    }
+
+    private void RefreshPlayerCredit()
+    {
+        if (TextHaveCreditCount == null)
+            return;
+
+        if(InventoryManager.Instance == null)
+        {
+            TextHaveCreditCount.text = "인벤토리 매니저 없음";
+            return;
+        }
+
+        int playerCredit = InventoryManager.Instance.PlayerCredit;
+
+        TextHaveCreditCount.text = $"{playerCredit:N0}";
     }
 
     private void RefreshSelectedSlot()
