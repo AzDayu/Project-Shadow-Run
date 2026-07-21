@@ -872,7 +872,7 @@ GameObject:
   - component: {fileID: 4949027153401011217}
   - component: {fileID: 8729870323377909782}
   - component: {fileID: 1837842116280284617}
-  m_Layer: 9
+  m_Layer: 10
   m_Name: Tiie_Exit_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

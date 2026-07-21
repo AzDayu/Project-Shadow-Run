@@ -1,4 +1,4 @@
-//using Cysharp.Threading.Tasks;
+﻿//using Cysharp.Threading.Tasks;
 //using NUnit.Framework;
 //using System.Collections.Generic;
 //using UnityEngine;
@@ -63,7 +63,7 @@ public class TilesetManager : MonoBehaviour
 
     public async UniTask<GameObject> GetRandomTilePrefabAsync(string type)
     {
-        List<TileData> candidates = GameDataManager.Instance.GetTileDataListByType(type);
+        List<TileData> candidates = DataManager.Instance.GetTileDataListByType(type);
 
         if (candidates == null || candidates.Count == 0)
         {
