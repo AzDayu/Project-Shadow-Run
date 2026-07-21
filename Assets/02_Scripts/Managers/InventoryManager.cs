@@ -184,7 +184,7 @@ public class InventoryManager : MonoBehaviour
             default:
                 return null;
         }
-    }    
+    }
 
     public bool TryUseItem(int slotIndex)
     {
@@ -334,44 +334,62 @@ public class InventoryManager : MonoBehaviour
         return false;
     }
 
-    private InterfaceUseItem _itemUse;
-    public void SetItemUser( InterfaceUseItem user )
+    /*private bool TryUseConsumable( ItemModel stack )
     {
-        _itemUse = user;
-    }
+        Debug.Log($"소모품 사용 요청: {DataManager.Instance.GetItemData(stack.ItemId).Name}");
+
+        // TODO: UseItemType / UseItemParameterList 기준으로 효과 적용
+        bool removed = TryRemoveItem(stack.ItemId, 1);
+
+        if (removed)
+            OnQuickSlotChanged?.Invoke();
+
+        return removed;
+    }*/
+
+    public event Action<string, float> OnConsumableUsed;
     private bool TryUseConsumable( ItemModel stack )
     {
-        if (_itemUse == null)
+        if (!IsValidStack(stack))
         {
-            Debug.LogWarning("InterfaceUseItem is null");
             return false;
         }
 
-        ItemData rawData = DataManager.Instance.GetItemData(stack.ItemId);
-        UseableItem consumable = rawData as UseableItem;
-
-        if (consumable == null)
+        ItemData itemData = DataManager.Instance.GetItemData(stack.ItemId);
+        if (itemData == null)
         {
-            Debug.LogWarning($"소모품 데이터를 찾을 수 없습니다. ItemId: {stack.ItemId}");
             return false;
         }
 
-        // 파라미터 파싱
-        consumable.ParseUseItemParameters();
+        Debug.Log("소모품 사용 요청: " + itemData.Name);
 
-        // 등록된 _itemUser에게 효과 적용 요청
-        if (_itemUse.TryUseItem(consumable))
+        // 파라미터 파싱 및 수치 추출
+        itemData.ParseUseItemParameters();
+
+        float value = 0f;
+        if (itemData.UseItemParameters != null && itemData.UseItemParameters.Length > 0)
         {
-            bool removed = TryRemoveItem(stack.ItemId, 1);
+            float.TryParse(itemData.UseItemParameters[0], out value);
+        }
 
-            if (removed)
+        // 효과 적용 이벤트 방송 (구독하고 있는 PlayerStatus가 수신)
+        if (OnConsumableUsed != null)
+        {
+            OnConsumableUsed(itemData.UseItemType, value);
+        }
+
+        // 인벤토리 수량 차감
+        bool removed = TryRemoveItem(stack.ItemId, 1);
+
+        if (removed)
+        {
+            if (OnQuickSlotChanged != null)
             {
-                OnQuickSlotChanged?.Invoke();
+                OnQuickSlotChanged();
             }
-
-            return removed;
         }
-        return false;
+
+        return removed;
     }
 
     public bool TryEquipItem(int inventorySlotIndex)
