@@ -12,6 +12,9 @@ public class PlayerHUDView : UIBase
     [Header("Stamina")]
     [SerializeField] private Slider StaminaSlider;
 
+    [Header("Item Info")]
+    [SerializeField] private ItemInfoUI ItemInfo;
+
     private PlayerStatusViewModel _viewModel;
 
     public void BindViewModel(PlayerStatusViewModel viewModel)
@@ -21,6 +24,17 @@ public class PlayerHUDView : UIBase
         _viewModel.PropertyChanged += OnPropertyChanged;
 
         _viewModel.InvokeOnceOnInit();
+    }
+
+    public void BindItemInfoUI(PlayerItemInteractor itemInteractor)
+    {
+        if (ItemInfo == null)
+        {
+            Debug.LogWarning("HudUI에 ItemInfoUI가 연결되지 않았습니다.");
+            return;
+        }
+
+        ItemInfo.BindItemInteractor(itemInteractor);
     }
 
     private void OnPropertyChanged(object sender, PropertyChangedEventArgs eventChangeProperty)

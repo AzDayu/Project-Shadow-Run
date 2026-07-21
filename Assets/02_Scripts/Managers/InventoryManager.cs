@@ -1,4 +1,5 @@
-﻿using System;
+﻿using JetBrains.Annotations;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,6 +9,9 @@ public class InventoryManager : MonoBehaviour
 
     [SerializeField] private int MaxSlotCount = 30;
     [SerializeField] private int QuickSlotCount = 3;
+
+    public int PlayerCredit { get; private set; }
+    public event Action OnCreditChanged;
 
     private readonly ItemModel[] _quickSlotList = new ItemModel[3];
     public IReadOnlyList<ItemModel> QuickSlotList => _quickSlotList;
@@ -559,27 +563,58 @@ public class InventoryManager : MonoBehaviour
 
     public bool TryAddWeapon(WeaponData weaponData)
     {
+        return TryAddWeapon(weaponData, GetInstanceID().ToString());
+    }
+
+    public bool TryAddWeapon(WeaponData weaponData, string instanceId)
+    {
         if (weaponData == null)
             return false;
 
         if (weaponData.ItemType != "Weapon")
             return false;
 
+        if (string.IsNullOrWhiteSpace(instanceId))
+        {
+            Debug.LogWarning("무기 InstanceId가 없습니다.");
+            return false;
+        }
+
+        WeaponModel weaponModel = new WeaponModel
+        {
+            InstanceId = instanceId,
+            ItemId = weaponData.Id,
+            CurrentStackCount = 1,
+            CurrentAmmo = weaponData.MagazineSize,
+            CurrentDurability = weaponData.MaxDurability,
+            AttachedParts = new List<ItemModel>()
+        };
+
+        return TryAddWeapon(weaponModel);
+    }
+
+    public bool TryAddWeapon(WeaponModel weaponModel)
+    {
+        if (weaponModel == null)
+            return false;
+
+        if (string.IsNullOrWhiteSpace(weaponModel.InstanceId))
+            return false;
+
+        if (weaponModel.CurrentStackCount != 1)
+            return false;
+
+        ItemData itemData = DataManager.Instance.GetItemData(weaponModel.ItemId);
+
+        if (itemData is not WeaponData)
+            return false;
+
         if (_itemList.Count >= MaxSlotCount)
             return false;
 
-        ItemModel weaponStack = new ItemModel
-        {
-            // TODO : 임시 ID 부여 나중에는 불러오는 Weapon의 데이터를 넣어야함. 
-            //       현재로써는 그냥 임시 ID 부여
-            InstanceId = "11111111",
-            ItemId = weaponData.Id,
-            CurrentStackCount = 1
-        };
+        _itemList.Add(weaponModel);
 
-        _itemList.Add(weaponStack);
-
-        TryRegisterWeaponToEmptyQuickSlot(weaponStack);
+        TryRegisterWeaponToEmptyQuickSlot(weaponModel);
 
         OnInventoryChanged?.Invoke();
 
@@ -751,5 +786,4 @@ public class InventoryManager : MonoBehaviour
 
         return WeaponType.None;
     }
-
 }
