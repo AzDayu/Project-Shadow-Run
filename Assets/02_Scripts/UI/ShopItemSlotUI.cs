@@ -63,7 +63,11 @@ public class ShopItemSlotUI : UIBase, IPointerEnterHandler, IPointerExitHandler,
 
         Text_ItemPrice.text = $"{_slotVm.ItemSellingPrice} C";
 
-        if (_slotVm.ItemStackCount <= 1)
+        if (_slotVm.ItemStackCount == -1)
+        {
+            Text_StackCount.text = "∞"; 
+        }
+        else if (_slotVm.ItemStackCount <= 1)
         {
             Text_StackCount.text = "";
         }

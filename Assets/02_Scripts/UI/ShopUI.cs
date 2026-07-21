@@ -153,6 +153,18 @@ public class ShopUI : UIBase
     {
         bool isCtrlInput = ((Input.GetKey(KeyCode.LeftControl)) || (Input.GetKey(KeyCode.RightControl)));
         bool isShiftInput = (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
+        bool isShopToShop = ((_heldStackCount > 0) && (_originSlotVm.SlotType == ShopItemSlotType.Shop) && (clickedSlot.SlotType == ShopItemSlotType.Shop));
+
+        if (isShopToShop == true) 
+        {
+            bool isPickingUpMore = isCtrlInput && (clickedSlot.ItemDataId == _dragSlotVm.ItemDataId);
+
+            if (isPickingUpMore == false)
+            {
+                RestoreItemToOrigin();
+                return;
+            }
+        }
 
         if (_heldStackCount == 0)
         {
@@ -192,6 +204,13 @@ public class ShopUI : UIBase
 
     private void HandleRightClick(ShopItemSlotViewModel clickedSlot)
     {
+        bool isShopToShop = ((_heldStackCount > 0) && (_originSlotVm.SlotType == ShopItemSlotType.Shop) && (clickedSlot.SlotType == ShopItemSlotType.Shop));
+
+        if (isShopToShop)
+        {
+            return;
+        }
+
         if (_heldStackCount == 0)
         {
             return;
@@ -215,9 +234,7 @@ public class ShopUI : UIBase
         if (_heldStackCount == 0)
         {
             _originSlotVm = slotVm;
-
             DragSlotUI.gameObject.SetActive(true);
-
             _dragSlotVm.ItemDataId = slotVm.ItemDataId;
             _dragSlotVm.ItemSellingPrice = slotVm.ItemSellingPrice;
             _dragSlotVm.IsSlotEmpty = false;
@@ -225,11 +242,15 @@ public class ShopUI : UIBase
 
         _heldStackCount++;
         _dragSlotVm.ItemStackCount = _heldStackCount;
-        slotVm.ItemStackCount--;
 
-        if (slotVm.ItemStackCount == 0)
+        if (slotVm.ItemStackCount != -1)
         {
-            ClearSlotData(slotVm);
+            slotVm.ItemStackCount--;
+
+            if (slotVm.ItemStackCount == 0)
+            {
+                ClearSlotData(slotVm);
+            }
         }
     }
 
@@ -321,7 +342,17 @@ public class ShopUI : UIBase
             return;
         }
 
-        int halfAmount = Mathf.CeilToInt(slotVm.ItemStackCount / 2.0f);
+        int halfAmount = 0;
+        if (slotVm.ItemStackCount == -1)
+        {
+            var itemData = DataManager.Instance.GetItemData(slotVm.ItemDataId);
+            halfAmount = Mathf.CeilToInt(itemData.MaxStackCount / 2.0f);
+        }
+        else
+        {
+            halfAmount = Mathf.CeilToInt(slotVm.ItemStackCount / 2.0f);
+        }
+
         _heldStackCount = halfAmount;
         _originSlotVm = slotVm;
 
@@ -332,11 +363,14 @@ public class ShopUI : UIBase
         _dragSlotVm.ItemStackCount = _heldStackCount;
         _dragSlotVm.IsSlotEmpty = false;
 
-        slotVm.ItemStackCount -= halfAmount;
-
-        if (slotVm.ItemStackCount == 0)
+        if (slotVm.ItemStackCount != -1)
         {
-            ClearSlotData(slotVm);
+            slotVm.ItemStackCount -= halfAmount;
+
+            if (slotVm.ItemStackCount <= 0)
+            {
+                ClearSlotData(slotVm);
+            }
         }
     }
 
@@ -347,7 +381,16 @@ public class ShopUI : UIBase
             return;
         }
 
-        _heldStackCount = slotVm.ItemStackCount;
+        if (slotVm.ItemStackCount == -1)
+        {
+            var itemData = DataManager.Instance.GetItemData(slotVm.ItemDataId);
+            _heldStackCount = itemData.MaxStackCount;
+        }
+        else
+        {
+            _heldStackCount = slotVm.ItemStackCount;
+        }
+
         _originSlotVm = slotVm;
 
         DragSlotUI.gameObject.SetActive(true);
@@ -358,7 +401,10 @@ public class ShopUI : UIBase
         _dragSlotVm.ItemStackCount = _heldStackCount;
         _dragSlotVm.IsSlotEmpty = false;
 
-        ClearSlotData(slotVm);
+        if (slotVm.ItemStackCount != -1)
+        {
+            ClearSlotData(slotVm);
+        }
     }
 
     private void PlaceAll(ShopItemSlotViewModel targetSlot)
@@ -446,7 +492,11 @@ public class ShopUI : UIBase
         if (_originSlotVm == null) return;
 
         _originSlotVm.IsSlotEmpty = false;
-        _originSlotVm.ItemStackCount += _heldStackCount;
+
+        if (_originSlotVm.ItemStackCount != -1)
+        {
+            _originSlotVm.ItemStackCount += _heldStackCount;
+        }
 
         _originSlotVm.ItemDataId = _dragSlotVm.ItemDataId;
         _originSlotVm.ItemSellingPrice = _dragSlotVm.ItemSellingPrice;
@@ -462,7 +512,6 @@ public class ShopUI : UIBase
             return; 
         }
 
-        // 기존 인벤/창고 스왑 로직
         string tempId = targetSlot.ItemDataId;
         string tempUniqueId = targetSlot.ItemUniqueId;
         int tempCount = targetSlot.ItemStackCount;
