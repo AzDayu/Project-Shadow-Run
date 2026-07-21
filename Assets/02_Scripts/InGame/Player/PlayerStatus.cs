@@ -8,7 +8,7 @@ public class PlayerStatus : MonoBehaviour
     [SerializeField] private float MaxHP = 100f;
     [SerializeField] private float MaxStamina = 100f;
 
-    public PlayerModel Model { get; private set; }
+    public PlayerModel Model { get; set; }
     public PlayerStatusViewModel ViewModel { get; private set; }
 
     private void Awake()

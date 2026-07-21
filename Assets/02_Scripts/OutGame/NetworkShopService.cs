@@ -41,8 +41,6 @@ public class NetworkShopService
 
         var inventoryItems = InventoryManager.Instance.ItemList;
         LoadPlayerItemsToShopZone(new List<ItemModel>(inventoryItems), vm.InventoryItemSlotList);
-        //LoadPlayerItemsToShopZone(playerData.InventoryItems, vm.InventoryItemSlotList);
-
         LoadPlayerItemsToShopZone(playerData.StashItems, vm.StashItemSlotList);
     }
 
@@ -55,26 +53,6 @@ public class NetworkShopService
         // 1. 변동된 크레딧 갱신
         playerData.CurrentCredit = vm.CurPlayerCredit;
 
-        // 2. 뷰모델 데이터 -> ItemModel 리스트로 변환 (인벤토리)
-        List<ItemModel> newInventory = new List<ItemModel>();
-        foreach (var slot in vm.InventoryItemSlotList)
-        {
-            if (!slot.IsSlotEmpty)
-            {
-                newInventory.Add(new ItemModel
-                {
-                    InstanceId = slot.ItemUniqueId,
-                    ItemId = slot.ItemDataId,
-                    CurrentStackCount = slot.ItemStackCount
-                });
-            }
-        }
-
-        // InventoryManager에 변경된 인벤토리 데이터 덮어쓰기
-        //playerData.InventoryItems = newInventory;
-        //InventoryManager.Instance.SyncInventoryFromUI(newInventory);
-
-        // 3. 뷰모델 데이터 -> ItemModel 리스트로 변환 (창고)
         List<ItemModel> newStash = new List<ItemModel>();
         foreach (var slot in vm.StashItemSlotList)
         {

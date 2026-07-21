@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using NUnit.Framework.Interfaces;
+using System.Collections.Generic;
 using System.ComponentModel;
 using TMPro;
 using UnityEngine;
@@ -37,13 +38,46 @@ public class ShopUI : UIBase
     {
         Button_CloseSelf.onClick.RemoveAllListeners();
         Button_CloseSelf.onClick.AddListener(OnClick_CloseButton);
+
+        if (InventoryManager.Instance != null)
+        {
+            InventoryManager.Instance.OnInventoryChanged += RefreshInventoryUI;
+        }
     }
 
-    private void OnDestroy()
+    private void OnDisable()
     {
         if (_shopVm != null)
         {
             _shopVm.PropertyChanged -= OnPropertyChanged_View;
+            InventoryManager.Instance.OnInventoryChanged -= RefreshInventoryUI;
+        }
+    }
+
+    private void RefreshInventoryUI()
+    {
+        if (_shopVm == null || InventoryManager.Instance == null) return;
+
+        var inventoryItems = InventoryManager.Instance.ItemList;
+        var slotVms = _shopVm.InventoryItemSlotList;
+
+        for (int i = 0; i < slotVms.Count; i++)
+        {
+            if (i < inventoryItems.Count)
+            {
+                var item = inventoryItems[i];
+                var itemData = DataManager.Instance.GetItemData(item.ItemId);
+
+                slotVms[i].ItemUniqueId = item.InstanceId;
+                slotVms[i].ItemDataId = item.ItemId;
+                slotVms[i].ItemStackCount = item.CurrentStackCount;
+                slotVms[i].ItemSellingPrice = itemData != null ? itemData.SellingPrice : 0;
+                slotVms[i].IsSlotEmpty = false;
+            }
+            else
+            {
+                ClearSlotData(slotVms[i]);
+            }
         }
     }
 
@@ -226,24 +260,45 @@ public class ShopUI : UIBase
 
     private void PickupOne(ShopItemSlotViewModel slotVm)
     {
-        if(slotVm == null || slotVm.IsSlotEmpty)
+        if (slotVm == null || slotVm.IsSlotEmpty)
         {
             return;
+        }
+
+        var itemData = DataManager.Instance.GetItemData(slotVm.ItemDataId);
+
+        if (_heldStackCount >= itemData.MaxStackCount)
+        {
+            Debug.LogWarning($"최대 소지 개수({itemData.MaxStackCount}개)를 초과할 수 없습니다.");
+            return;
+        }
+
+        string backupDataId = slotVm.ItemDataId;
+        string backupUniqueId = slotVm.ItemUniqueId;
+        int backupPrice = slotVm.ItemSellingPrice;
+
+        if (slotVm.SlotType == ShopItemSlotType.Inventory)
+        {
+            if (InventoryManager.Instance.TryRemoveItem(backupDataId, 1) == false)
+            {
+                return;
+            }
         }
 
         if (_heldStackCount == 0)
         {
             _originSlotVm = slotVm;
             DragSlotUI.gameObject.SetActive(true);
-            _dragSlotVm.ItemDataId = slotVm.ItemDataId;
-            _dragSlotVm.ItemSellingPrice = slotVm.ItemSellingPrice;
+            _dragSlotVm.ItemDataId = backupDataId;
+            _dragSlotVm.ItemUniqueId = backupUniqueId;
+            _dragSlotVm.ItemSellingPrice = backupPrice;
             _dragSlotVm.IsSlotEmpty = false;
         }
 
         _heldStackCount++;
         _dragSlotVm.ItemStackCount = _heldStackCount;
 
-        if (slotVm.ItemStackCount != -1)
+        if ((slotVm.ItemStackCount != -1) && (slotVm.SlotType != ShopItemSlotType.Inventory))
         {
             slotVm.ItemStackCount--;
 
@@ -251,86 +306,6 @@ public class ShopUI : UIBase
             {
                 ClearSlotData(slotVm);
             }
-        }
-    }
-
-    private void PlaceOne(ShopItemSlotViewModel targetSlot)
-    {
-        // ==========================================
-        // 1. 상점 -> 유저 구역 (1개 구매)
-        // ==========================================
-        if ((_originSlotVm.SlotType == ShopItemSlotType.Shop) && (targetSlot.SlotType != ShopItemSlotType.Shop))
-        {
-            int price = _dragSlotVm.ItemSellingPrice; // 1개 가격
-            if (_shopVm.CurPlayerCredit >= price)
-            {
-                _shopVm.CurPlayerCredit -= price;
-                Debug.Log($"[{_dragSlotVm.ItemDataId}] 1개 구매 완료! (-{price} C)");
-
-                if (targetSlot.IsSlotEmpty)
-                {
-                    targetSlot.ItemUniqueId = System.Guid.NewGuid().ToString();
-                }
-            }
-            else
-            {
-                Debug.LogWarning("크레딧이 부족합니다!");
-                return; // 돈이 없으면 놓기 취소 (마우스에 든 채로 유지됨)
-            }
-        }
-        // ==========================================
-        // 2. 유저 구역 -> 상점 (1개 판매)
-        // ==========================================
-        else if ((_originSlotVm.SlotType != ShopItemSlotType.Shop) && (targetSlot.SlotType == ShopItemSlotType.Shop))
-        {
-            int earnCredit = _dragSlotVm.ItemSellingPrice;
-            _shopVm.CurPlayerCredit += earnCredit;
-            Debug.Log($"[{_dragSlotVm.ItemDataId}] 1개 판매 완료! (+{earnCredit} C)");
-
-            // 판매된 1개만 마우스에서 깎아내고 슬롯에는 추가하지 않음 (증발시킴)
-            _heldStackCount--;
-
-            if (_heldStackCount == 0)
-            {
-                ClearCursorItem();
-            }
-            else
-            {
-                _dragSlotVm.ItemStackCount = _heldStackCount;
-            }
-
-            return;
-        }
-        // ==========================================
-        // 3. 단순 이동
-        // ==========================================
-        else
-        {
-            if (targetSlot.IsSlotEmpty == true)
-            {
-                targetSlot.ItemUniqueId = _dragSlotVm.ItemUniqueId;
-            }
-        }
-
-        // 공통 데이터 덮어쓰기 (빈 슬롯일 경우)
-        if (targetSlot.IsSlotEmpty == true)
-        {
-            targetSlot.ItemDataId = _dragSlotVm.ItemDataId;
-            targetSlot.ItemSellingPrice = _dragSlotVm.ItemSellingPrice;
-            targetSlot.ItemStackCount = 0;
-            targetSlot.IsSlotEmpty = false;
-        }
-
-        targetSlot.ItemStackCount++;
-        _heldStackCount--;
-
-        if (_heldStackCount == 0)
-        {
-            ClearCursorItem();
-        }
-        else
-        {
-            _dragSlotVm.ItemStackCount = _heldStackCount;
         }
     }
 
@@ -342,7 +317,12 @@ public class ShopUI : UIBase
             return;
         }
 
+        string backupDataId = slotVm.ItemDataId;
+        string backupUniqueId = slotVm.ItemUniqueId;
+        int backupPrice = slotVm.ItemSellingPrice;
+
         int halfAmount = 0;
+
         if (slotVm.ItemStackCount == -1)
         {
             var itemData = DataManager.Instance.GetItemData(slotVm.ItemDataId);
@@ -353,17 +333,24 @@ public class ShopUI : UIBase
             halfAmount = Mathf.CeilToInt(slotVm.ItemStackCount / 2.0f);
         }
 
+        if (slotVm.SlotType == ShopItemSlotType.Inventory)
+        {
+            if (InventoryManager.Instance.TryRemoveItem(backupDataId, halfAmount) == false)
+            {
+                return;
+            }
+        }
+
         _heldStackCount = halfAmount;
         _originSlotVm = slotVm;
-
         DragSlotUI.gameObject.SetActive(true);
-        _dragSlotVm.ItemDataId = slotVm.ItemDataId;
-        _dragSlotVm.ItemUniqueId = slotVm.ItemUniqueId;
-        _dragSlotVm.ItemSellingPrice = slotVm.ItemSellingPrice;
+        _dragSlotVm.ItemDataId = backupDataId;
+        _dragSlotVm.ItemUniqueId = backupUniqueId;
+        _dragSlotVm.ItemSellingPrice = backupPrice;
         _dragSlotVm.ItemStackCount = _heldStackCount;
         _dragSlotVm.IsSlotEmpty = false;
 
-        if (slotVm.ItemStackCount != -1)
+        if ((slotVm.ItemStackCount != -1) && (slotVm.SlotType != ShopItemSlotType.Inventory))
         {
             slotVm.ItemStackCount -= halfAmount;
 
@@ -376,140 +363,278 @@ public class ShopUI : UIBase
 
     private void PickupAll(ShopItemSlotViewModel slotVm)
     {
-        if(slotVm == null || slotVm.IsSlotEmpty)
+        if (slotVm == null || slotVm.IsSlotEmpty)
         {
             return;
         }
 
-        if (slotVm.ItemStackCount == -1)
+        string backupDataId = slotVm.ItemDataId;
+        string backupUniqueId = slotVm.ItemUniqueId;
+        int backupPrice = slotVm.ItemSellingPrice;
+
+        var itemData = DataManager.Instance.GetItemData(slotVm.ItemDataId);
+
+        int pickupAmount = slotVm.ItemStackCount == -1 ? itemData.MaxStackCount : slotVm.ItemStackCount;
+
+        if (pickupAmount > itemData.MaxStackCount)
         {
-            var itemData = DataManager.Instance.GetItemData(slotVm.ItemDataId);
-            _heldStackCount = itemData.MaxStackCount;
-        }
-        else
-        {
-            _heldStackCount = slotVm.ItemStackCount;
+            pickupAmount = itemData.MaxStackCount;
         }
 
+        if (slotVm.SlotType == ShopItemSlotType.Inventory)
+        {
+            if (InventoryManager.Instance.TryRemoveItem(backupDataId, pickupAmount) == false)
+            {
+                return;
+            }
+        }
+
+        _heldStackCount = pickupAmount;
         _originSlotVm = slotVm;
-
         DragSlotUI.gameObject.SetActive(true);
-
-        _dragSlotVm.ItemDataId = slotVm.ItemDataId;
-        _dragSlotVm.ItemUniqueId = slotVm.ItemUniqueId;
-        _dragSlotVm.ItemSellingPrice = slotVm.ItemSellingPrice;
+        _dragSlotVm.ItemDataId = backupDataId;
+        _dragSlotVm.ItemUniqueId = backupUniqueId;
+        _dragSlotVm.ItemSellingPrice = backupPrice;
         _dragSlotVm.ItemStackCount = _heldStackCount;
         _dragSlotVm.IsSlotEmpty = false;
 
-        if (slotVm.ItemStackCount != -1)
+        if ((slotVm.ItemStackCount != -1) && (slotVm.SlotType != ShopItemSlotType.Inventory))
         {
-            ClearSlotData(slotVm);
+            slotVm.ItemStackCount -= pickupAmount;
+
+            if (slotVm.ItemStackCount <= 0)
+            {
+                ClearSlotData(slotVm);
+            }
+        }
+    }
+
+    private void DropAllIntoInventory()
+    {
+        var itemData = DataManager.Instance.GetItemData(_dragSlotVm.ItemDataId);
+
+        if (_originSlotVm.SlotType == ShopItemSlotType.Shop)
+        {
+            int maxAffordable = _shopVm.CurPlayerCredit / itemData.SellingPrice;
+            if (maxAffordable == 0)
+            {
+                Debug.LogWarning("크레딧이 부족합니다!");
+                RestoreItemToOrigin(); return;
+            }
+            int tryCount = Mathf.Min(_heldStackCount, maxAffordable);
+            int remain = InventoryManager.Instance.TryAddItem(itemData, tryCount);
+            int added = tryCount - remain;
+
+            _shopVm.CurPlayerCredit -= added * itemData.SellingPrice;
+            _heldStackCount -= added;
+        }
+        else 
+        {
+            int remain = InventoryManager.Instance.TryAddItem(itemData, _heldStackCount);
+            _heldStackCount = remain;
+        }
+
+        if (_heldStackCount > 0)
+        {
+            RestoreItemToOrigin(); // 인벤토리가 꽉 차서 남은 건 원위치
+        }
+        else
+        {
+            ClearCursorItem();
         }
     }
 
     private void PlaceAll(ShopItemSlotViewModel targetSlot)
     {
-        // 1. 거래(구매) 시도 시 항상 DB에서 실시간 가격 조회
         var itemData = DataManager.Instance.GetItemData(_dragSlotVm.ItemDataId);
-        if (itemData == null) 
-        { 
-            Debug.LogError("아이템 데이터 없음!"); RestoreItemToOrigin(); return; 
+
+        // 타겟이 인벤토리인 경우
+        if (targetSlot.SlotType == ShopItemSlotType.Inventory)
+        {
+            DropAllIntoInventory(); return;
         }
 
-        // ==========================================
-        // 구매 로직
-        // ==========================================
-        if (_originSlotVm.SlotType == ShopItemSlotType.Shop && targetSlot.SlotType != ShopItemSlotType.Shop)
+        // 타겟이 상점인 경우 (판매)
+        if (targetSlot.SlotType == ShopItemSlotType.Shop)
         {
-            int totalPrice = itemData.SellingPrice * _heldStackCount; 
-
-            if (_shopVm.CurPlayerCredit >= totalPrice)
+            if (_originSlotVm.SlotType != ShopItemSlotType.Shop)
             {
-                _shopVm.CurPlayerCredit -= totalPrice;
-                targetSlot.ItemUniqueId = System.Guid.NewGuid().ToString();
+                _shopVm.CurPlayerCredit += itemData.SellingPrice * _heldStackCount;
             }
-            else
+            ClearCursorItem(); return;
+        }
+
+        // 타겟이 창고인 경우: 상점에서 가져온 물건이면 돈 계산
+        if (_originSlotVm.SlotType == ShopItemSlotType.Shop)
+        {
+            int maxAffordable = _shopVm.CurPlayerCredit / itemData.SellingPrice;
+
+            if (maxAffordable == 0)
             {
                 Debug.LogWarning("크레딧이 부족합니다!");
-                RestoreItemToOrigin(); 
-                return;
+                RestoreItemToOrigin(); return;
             }
-        }
-        // ==========================================
-        // 판매 로직
-        // ==========================================
-        else if ((_originSlotVm.SlotType != ShopItemSlotType.Shop) && (targetSlot.SlotType == ShopItemSlotType.Shop))
-        {
-            int earnCredit = itemData.SellingPrice * _heldStackCount;
-            _shopVm.CurPlayerCredit += earnCredit;
-            ClearCursorItem();
+
+            int buyCount = Mathf.Min(_heldStackCount, maxAffordable);
+            _shopVm.CurPlayerCredit -= buyCount * itemData.SellingPrice; 
+
+            targetSlot.ItemDataId = _dragSlotVm.ItemDataId;
+            targetSlot.ItemSellingPrice = itemData.SellingPrice;
+            targetSlot.ItemStackCount = buyCount;
+            targetSlot.IsSlotEmpty = false;
+
+            _heldStackCount -= buyCount;
+            if (_heldStackCount > 0) RestoreItemToOrigin(); // 돈 부족해서 못 산 나머지는 마우스/상점으로 원위치
+            else ClearCursorItem();
+
             return;
         }
 
-        // 공통: 슬롯 데이터 적용
+        // 인벤토리/창고 -> 창고 단순 이동일 경우
         targetSlot.ItemDataId = _dragSlotVm.ItemDataId;
         targetSlot.ItemSellingPrice = itemData.SellingPrice;
         targetSlot.ItemStackCount = _heldStackCount;
         targetSlot.IsSlotEmpty = false;
-
         ClearCursorItem();
+    }
+
+    private void PlaceOne(ShopItemSlotViewModel targetSlot)
+    {
+        var itemData = DataManager.Instance.GetItemData(_dragSlotVm.ItemDataId);
+
+        if (targetSlot.SlotType == ShopItemSlotType.Inventory)
+        {
+            if (_originSlotVm.SlotType == ShopItemSlotType.Shop)
+            {
+                if (_shopVm.CurPlayerCredit >= itemData.SellingPrice)
+                {
+                    int remain = InventoryManager.Instance.TryAddItem(itemData, 1);
+                    if (remain == 0)
+                    {
+                        _shopVm.CurPlayerCredit -= itemData.SellingPrice;
+                        _heldStackCount--;
+                    }
+                }
+                else { Debug.LogWarning("크레딧이 부족합니다!"); }
+            }
+            else
+            {
+                int remain = InventoryManager.Instance.TryAddItem(itemData, 1);
+                if (remain == 0) _heldStackCount--;
+            }
+
+            if (_heldStackCount == 0) ClearCursorItem();
+            else _dragSlotVm.ItemStackCount = _heldStackCount;
+            return;
+        }
+
+        if (!targetSlot.IsSlotEmpty && targetSlot.ItemStackCount >= itemData.MaxStackCount)
+        {
+            return; 
+        }
+
+        if (_originSlotVm.SlotType == ShopItemSlotType.Shop)
+        {
+            if (_shopVm.CurPlayerCredit < itemData.SellingPrice)
+            {
+                Debug.LogWarning("크레딧이 부족합니다!");
+                return;
+            }
+            _shopVm.CurPlayerCredit -= itemData.SellingPrice;
+        }
+
+        if (targetSlot.IsSlotEmpty)
+        {
+            targetSlot.ItemDataId = _dragSlotVm.ItemDataId;
+            targetSlot.ItemSellingPrice = itemData.SellingPrice;
+            targetSlot.ItemStackCount = 0;
+            targetSlot.IsSlotEmpty = false;
+        }
+
+        targetSlot.ItemStackCount++;
+        _heldStackCount--;
+
+        if (_heldStackCount == 0) ClearCursorItem();
+        else _dragSlotVm.ItemStackCount = _heldStackCount;
     }
 
     private void MergeAll(ShopItemSlotViewModel targetSlot)
     {
-        // 1. 상점 -> 유저 구역 (합치면서 구매)
-        if ((_originSlotVm.SlotType == ShopItemSlotType.Shop) && (targetSlot.SlotType != ShopItemSlotType.Shop))
+        if (targetSlot.SlotType == ShopItemSlotType.Inventory)
         {
-            int totalPrice = _dragSlotVm.ItemSellingPrice * _heldStackCount;
-            if (_shopVm.CurPlayerCredit >= totalPrice)
-            {
-                _shopVm.CurPlayerCredit -= totalPrice;
-                Debug.Log($"[{_dragSlotVm.ItemDataId}] 합치기 구매 완료! (-{totalPrice} C)");
-            }
-            else
-            {
-                Debug.LogWarning("크레딧이 부족합니다!");
-                RestoreItemToOrigin();
-                return;
-            }
-        }
-        // 2. 유저 구역 -> 상점 (합치면서 판매)
-        else if ((_originSlotVm.SlotType != ShopItemSlotType.Shop) && (targetSlot.SlotType == ShopItemSlotType.Shop))
-        {
-            int earnCredit = _dragSlotVm.ItemSellingPrice * _heldStackCount;
-            _shopVm.CurPlayerCredit += earnCredit;
-            Debug.Log($"[{_dragSlotVm.ItemDataId}] 전체 판매 완료! (+{earnCredit} C)");
-            ClearCursorItem();
+            DropAllIntoInventory(); 
             return;
         }
 
-        targetSlot.ItemStackCount += _heldStackCount;
-        ClearCursorItem();
+        var itemData = DataManager.Instance.GetItemData(_dragSlotVm.ItemDataId);
+
+        int maxCanAdd = itemData.MaxStackCount - targetSlot.ItemStackCount;
+
+        if (maxCanAdd <= 0)
+        {
+            return;
+        }
+
+        int amountToAdd = Mathf.Min(_heldStackCount, maxCanAdd);
+
+        if (_originSlotVm.SlotType == ShopItemSlotType.Shop)
+        {
+            int maxAffordable = _shopVm.CurPlayerCredit / itemData.SellingPrice;
+            if (maxAffordable == 0)
+            {
+                Debug.LogWarning("크레딧이 부족합니다!");
+                return;
+            }
+
+            amountToAdd = Mathf.Min(amountToAdd, maxAffordable);
+            _shopVm.CurPlayerCredit -= amountToAdd * itemData.SellingPrice;
+        }
+
+        targetSlot.ItemStackCount += amountToAdd;
+        _heldStackCount -= amountToAdd;
+
+        if (_heldStackCount <= 0)
+        {
+            ClearCursorItem();
+        }
+        else
+        {
+            _dragSlotVm.ItemStackCount = _heldStackCount;
+        }
     }
 
     private void RestoreItemToOrigin()
     {
         if (_originSlotVm == null) return;
 
-        _originSlotVm.IsSlotEmpty = false;
-
-        if (_originSlotVm.ItemStackCount != -1)
+        if (_originSlotVm.SlotType == ShopItemSlotType.Inventory)
         {
-            _originSlotVm.ItemStackCount += _heldStackCount;
+            var itemData = DataManager.Instance.GetItemData(_dragSlotVm.ItemDataId);
+            InventoryManager.Instance.TryAddItem(itemData, _heldStackCount);
         }
-
-        _originSlotVm.ItemDataId = _dragSlotVm.ItemDataId;
-        _originSlotVm.ItemSellingPrice = _dragSlotVm.ItemSellingPrice;
+        else
+        {
+            _originSlotVm.IsSlotEmpty = false;
+            if (_originSlotVm.ItemStackCount != -1) _originSlotVm.ItemStackCount += _heldStackCount;
+            _originSlotVm.ItemDataId = _dragSlotVm.ItemDataId;
+            _originSlotVm.ItemSellingPrice = _dragSlotVm.ItemSellingPrice;
+        }
 
         ClearCursorItem();
     }
 
     private void SwapItems(ShopItemSlotViewModel targetSlot)
     {
-        if ((_originSlotVm.SlotType == ShopItemSlotType.Shop) || (targetSlot.SlotType == ShopItemSlotType.Shop))
+        if (_originSlotVm.SlotType == ShopItemSlotType.Shop || targetSlot.SlotType == ShopItemSlotType.Shop)
         {
-            Debug.LogWarning("상점 물품과는 위치를 스왑(맞바꾸기) 할 수 없습니다!");
-            return; 
+            Debug.LogWarning("상점 물품과는 위치를 스왑(맞바꾸기) 할 수 없습니다!"); return;
+        }
+
+        // 인벤토리 매니저는 빈칸을 찾아 차례대로 채우는 구조이므로 맞바꾸기 로직 지원 불가
+        if (targetSlot.SlotType == ShopItemSlotType.Inventory || _originSlotVm.SlotType == ShopItemSlotType.Inventory)
+        {
+            Debug.LogWarning("인벤토리는 자동 정렬되므로 맞바꾸기(스왑)를 지원하지 않습니다. 빈 공간을 이용해 주세요.");
+            RestoreItemToOrigin(); return;
         }
 
         string tempId = targetSlot.ItemDataId;
@@ -527,6 +652,7 @@ public class ShopUI : UIBase
         _heldStackCount = tempCount;
         _dragSlotVm.ItemStackCount = _heldStackCount;
         _dragSlotVm.ItemSellingPrice = tempPrice;
+        _originSlotVm = targetSlot;
         _originSlotVm = targetSlot;
     }
 
