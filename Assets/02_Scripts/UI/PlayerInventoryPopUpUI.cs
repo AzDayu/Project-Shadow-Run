@@ -53,7 +53,10 @@ public class PlayerInventoryPopUpUI : UIBase
     private void OnEnable()
     {
         if (InventoryManager.Instance != null)
+        {
             InventoryManager.Instance.OnInventoryChanged += RefreshInventory;
+            InventoryManager.Instance.OnCreditChanged += RefreshPlayerCredit;
+        }
 
         RefreshInventory();
         RefreshPlayerCredit();
@@ -64,7 +67,10 @@ public class PlayerInventoryPopUpUI : UIBase
     private void OnDisable()
     {
         if (InventoryManager.Instance != null)
+        {
             InventoryManager.Instance.OnInventoryChanged -= RefreshInventory;
+            InventoryManager.Instance.OnCreditChanged -= RefreshPlayerCredit;
+        }
 
         CloseContextMenu();
     }
@@ -117,13 +123,7 @@ public class PlayerInventoryPopUpUI : UIBase
 
     private void RefreshInventory()
     {
-        if (InventoryManager.Instance == null)
-        {
-            Debug.LogError("[Inventory UI] InventoryManager.Instance가 없습니다.");
-            return;
-        }
-
-        IReadOnlyList<ItemModel> itemModels = InventoryManager.Instance.ItemList;
+        IReadOnlyList<ItemModel> itemModels = PlayerStatus.Instance.Model.InventoryItems;
 
         for (int i = 0; i < _slotUIList.Count; i++)
         {
@@ -144,13 +144,7 @@ public class PlayerInventoryPopUpUI : UIBase
         if (TextHaveCreditCount == null)
             return;
 
-        if(InventoryManager.Instance == null)
-        {
-            TextHaveCreditCount.text = "인벤토리 매니저 없음";
-            return;
-        }
-
-        int playerCredit = InventoryManager.Instance.PlayerCredit;
+        int playerCredit = PlayerStatus.Instance.Model.CurrentCredit;
 
         TextHaveCreditCount.text = $"{playerCredit:N0}";
     }

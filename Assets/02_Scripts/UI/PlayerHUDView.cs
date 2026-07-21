@@ -46,6 +46,7 @@ public class PlayerHUDView : UIBase
                 break;
 
             case nameof(PlayerStatusViewModel.CurrentHP):
+                UpdateHPText();
                 break;
 
             case nameof(PlayerStatusViewModel.MaxHP):
