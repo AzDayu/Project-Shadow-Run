@@ -467,6 +467,37 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 2.0312696, y: 10.248369, z: 0.3073845}
   m_Center: {x: 5.0031548, y: 3.88288, z: 18.003366}
+--- !u!1 &4957934631411267269
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1492200343514669436}
+  m_Layer: 10
+  m_Name: Light
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1492200343514669436
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4957934631411267269}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0.00000035762784, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8147277507239402533}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5629444672202800770
 GameObject:
   m_ObjectHideFlags: 0
@@ -872,7 +903,7 @@ GameObject:
   - component: {fileID: 4949027153401011217}
   - component: {fileID: 8729870323377909782}
   - component: {fileID: 1837842116280284617}
-  m_Layer: 9
+  m_Layer: 10
   m_Name: Tiie_Exit_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -898,6 +929,7 @@ Transform:
   - {fileID: 3457289852654817774}
   - {fileID: 7317556241146418035}
   - {fileID: 89297748788815697}
+  - {fileID: 1492200343514669436}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &4949027153401011217
