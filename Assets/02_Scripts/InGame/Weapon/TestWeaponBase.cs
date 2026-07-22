@@ -5,9 +5,12 @@ public interface IDamageable
 {
     void TakeDamage(float damage);//DamageInfo구조체를 만들어 전달하면 더 많은 정보를 전달할수 있음
 }
-public interface IWeaponOwner
+public interface IBattleAgent
 {
+    BattleAgentTeamType Team { get; }
+    Transform Transform { get; }
     void UseWeapon();//무기를 사용할때 공격자를 전달할수있음
+
 }
 
 public class TestWeaponBase : MonoBehaviour
