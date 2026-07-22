@@ -350,9 +350,8 @@ public class InventoryManager : MonoBehaviour
 
         return false;
     }
-    
 
-    private bool TryUseConsumable(ItemModel stack)
+    /*private bool TryUseConsumable( ItemModel stack )
     {
         Debug.Log($"소모품 사용 요청: {DataManager.Instance.GetItemData(stack.ItemId).Name}");
 
@@ -361,6 +360,51 @@ public class InventoryManager : MonoBehaviour
 
         if (removed)
             OnQuickSlotChanged?.Invoke();
+
+        return removed;
+    }*/
+
+    public event Action<string, float> OnConsumableUsed;
+    private bool TryUseConsumable( ItemModel stack )
+    {
+        if (!IsValidStack(stack))
+        {
+            return false;
+        }
+
+        ItemData itemData = DataManager.Instance.GetItemData(stack.ItemId);
+        if (itemData == null)
+        {
+            return false;
+        }
+
+        Debug.Log("소모품 사용 요청: " + itemData.Name);
+
+        // 파라미터 파싱 및 수치 추출
+        itemData.ParseUseItemParameters();
+
+        float value = 0f;
+        if (itemData.UseItemParameters != null && itemData.UseItemParameters.Length > 0)
+        {
+            float.TryParse(itemData.UseItemParameters[0], out value);
+        }
+
+        // 효과 적용 이벤트 방송 (구독하고 있는 PlayerStatus가 수신)
+        if (OnConsumableUsed != null)
+        {
+            OnConsumableUsed(itemData.UseItemType, value);
+        }
+
+        // 인벤토리 수량 차감
+        bool removed = TryRemoveItem(stack.ItemId, 1);
+
+        if (removed)
+        {
+            if (OnQuickSlotChanged != null)
+            {
+                OnQuickSlotChanged();
+            }
+        }
 
         return removed;
     }
