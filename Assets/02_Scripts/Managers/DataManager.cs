@@ -117,7 +117,7 @@ public class DataManager : MonoBehaviour
 
         if (jsonText == null)
         {
-            Debug.LogError("GameDataManager: TileData.json 파일을 찾을 수 없습니다! Resources/Data 폴더를 확인하세요.");
+            Debug.LogError("DataManager: TileData.json 파일을 찾을 수 없습니다! Resources/Data 폴더를 확인하세요.");
             return;
         }
 
@@ -131,7 +131,7 @@ public class DataManager : MonoBehaviour
             }
         }
 
-        Debug.Log($"GameDataManager: JSON 데이터 파싱 성공! 총 {_tileDataDict.Count}개의 타일 데이터를 로드했습니다.");
+        Debug.Log($"DataManager: JSON 데이터 파싱 성공! 총 {_tileDataDict.Count}개의 타일 데이터를 로드했습니다.");
     }
 
     public TileData GetTileDataById(string tileId) // 김동혁 - 타일 ID에 따른 데이터 반환 메서드
@@ -141,7 +141,7 @@ public class DataManager : MonoBehaviour
             return data;
         }
 
-        Debug.LogError($"GameDataManager: ID {tileId}에 해당하는 타일 데이터가 없습니다!");
+        Debug.LogError($"DataManager: ID {tileId}에 해당하는 타일 데이터가 없습니다!");
         return null;
     }
 
@@ -155,7 +155,7 @@ public class DataManager : MonoBehaviour
 
         if (result.Count == 0)
         {
-            Debug.LogWarning($"GameDataManager: {tileType} 타입에 해당하는 타일 데이터가 없습니다!");
+            Debug.LogWarning($"DataManager: {tileType} 타입에 해당하는 타일 데이터가 없습니다!");
         }
         return result;
     }
