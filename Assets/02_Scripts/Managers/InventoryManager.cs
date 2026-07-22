@@ -180,6 +180,24 @@ public class InventoryManager : MonoBehaviour
         return false;
     }
 
+    public int GetItemCount(string itemId)
+    {
+        if (string.IsNullOrEmpty(itemId))
+            return 0;
+
+        int totalCount = 0;
+
+        foreach (ItemModel stack in InventoryItems)
+        {
+            if (stack.ItemId != itemId)
+                continue;
+
+            totalCount += stack.CurrentStackCount;
+        }
+
+        return totalCount;
+    }
+
     public ItemModel GetItemModel(int index)
     {
         if (index < 0 || index >= InventoryItems.Count)
@@ -638,7 +656,7 @@ public class InventoryManager : MonoBehaviour
             InstanceId = instanceId,
             ItemId = weaponData.Id,
             CurrentStackCount = 1,
-            CurrentAmmo = weaponData.MagazineSize,
+            CurrentAmmo = 0,
             CurrentDurability = weaponData.MaxDurability,
             AttachedParts = new List<ItemModel>()
         };
