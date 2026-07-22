@@ -34,7 +34,6 @@ public class NetworkShopService
         }
 
         // 2. 고정으로 보여줄 기초 힐템 ID 목록 세팅 
-        // (실제 기획 데이터에 있는 힐템 ID로 변경해주세요. 예: "Consumable_Bandage")
         List<string> fixedItemIds = new List<string> { "Item_Medical_Bandage", "Item_Food_Water" };
 
         foreach (var fixedId in fixedItemIds)
@@ -86,12 +85,15 @@ public class NetworkShopService
         }
 
         // 6. 플레이어 재화 및 인벤토리/창고 연동 (기존 로직 유지)
-        PlayerModel playerData = SaveManager.Instance.LoadPlayerData();
-        vm.CurPlayerCredit = playerData.CurrentCredit;
+        PlayerModel activePlayerData = PlayerStatus.Instance.Model;
+
+        vm.CurPlayerCredit = activePlayerData.CurrentCredit;
 
         var inventoryItems = InventoryManager.Instance.ItemList;
         LoadPlayerItemsToShopZone(new List<ItemModel>(inventoryItems), vm.InventoryItemSlotList);
-        LoadPlayerItemsToShopZone(playerData.StashItems, vm.StashItemSlotList);
+        
+        if (activePlayerData.StashItems == null) activePlayerData.StashItems = new List<ItemModel>();
+        LoadPlayerItemsToShopZone(activePlayerData.StashItems, vm.StashItemSlotList);
     }
 
     // 리스트를 무작위로 섞어주는 유틸리티 메서드
@@ -106,14 +108,18 @@ public class NetworkShopService
         }
     }
 
-    // 이하 상점UI내에서 일어난 데이터 변동을 UI가 닫히며 저장하고 동기화 시키는 메서드. 인벤토리에 데이터를 덮어씌우는 메서드(SyncInventoryFromUI) 추가 요청할 것.
     public void SyncDataOnClose()
     {
         var vm = GetShopViewModel();
-        PlayerModel playerData = SaveManager.Instance.LoadPlayerData();
 
-        // 1. 변동된 크레딧 갱신
-        playerData.CurrentCredit = vm.CurPlayerCredit;
+        if (PlayerStatus.Instance == null || PlayerStatus.Instance.Model == null)
+        {
+            return;
+        }
+
+        PlayerModel activePlayerData = PlayerStatus.Instance.Model;
+
+        activePlayerData.CurrentCredit = vm.CurPlayerCredit;
 
         List<ItemModel> newStash = new List<ItemModel>();
         foreach (var slot in vm.StashItemSlotList)
@@ -129,8 +135,11 @@ public class NetworkShopService
             }
         }
 
-        playerData.StashItems = newStash;
-        SaveManager.Instance.SavePlayerData(playerData);
+        activePlayerData.StashItems = newStash;
+
+        if (SaveManager.Instance == null) return;
+
+        SaveManager.Instance.SavePlayerData(activePlayerData);
     }
 
     private void SetShopItemSlot(ShopItemSlotViewModel slot, string dataId, int count)
@@ -163,7 +172,19 @@ public class NetworkShopService
         }
     }
 
-    //플레이어가 상점에서 아이템을 구매할 때 사용되는 함수
+    public void RefreshStashData()
+    {
+        var vm = GetShopViewModel();
+        PlayerModel activePlayerData = PlayerStatus.Instance.Model;
+
+        if (activePlayerData.StashItems == null)
+        {
+            activePlayerData.StashItems = new List<ItemModel>();
+        }
+
+        LoadPlayerItemsToShopZone(activePlayerData.StashItems, vm.StashItemSlotList);
+    }
+
     public void RequestBuyItem(int shopSlotIndex)
     {
         var vm = GetShopViewModel();
@@ -202,7 +223,6 @@ public class NetworkShopService
 
     }
 
-    //플레이어가 상점에 아이템을 판매할 때 사용되는 함수
     public void RequestSellItem(ShopItemSlotType fromZone, int slotIndex)
     {
         //var vm = GetShopViewModel();

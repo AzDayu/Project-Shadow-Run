@@ -42,14 +42,40 @@ public class ShopUI : UIBase
         {
             InventoryManager.Instance.OnInventoryChanged += RefreshInventoryUI;
         }
+
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.ClosePopupUI(UIType.ShopItemPopupUI);
+        }
+
+        if (NetworkManager.Inst != null && NetworkManager.Inst.ShopService != null)
+        {
+            NetworkManager.Inst.ShopService.RefreshStashData();
+        }
+
     }
 
     private void OnDisable()
     {
         if (_shopVm != null)
         {
+            _shopVm.HoveredItemId = null;
             _shopVm.PropertyChanged -= OnPropertyChanged_View;
+        }
+
+        if (InventoryManager.Instance != null)
+        {
             InventoryManager.Instance.OnInventoryChanged -= RefreshInventoryUI;
+        }
+
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.ClosePopupUI(UIType.ShopItemPopupUI);
+        }
+
+        if (NetworkManager.Inst != null && NetworkManager.Inst.StashService != null)
+        {
+            NetworkManager.Inst.ShopService.SyncDataOnClose();
         }
     }
 
@@ -158,10 +184,7 @@ public class ShopUI : UIBase
 
     public void CloseShopUI()
     {
-        NetworkManager.Inst.ShopService.SyncDataOnClose();
         UIManager.Instance.CloseContentUI(UIType.ShopUI);
-
-        UIManager.Instance.ClosePopupUI(UIType.ShopItemPopupUI);
     }
 
     // ==========================================
@@ -481,6 +504,7 @@ public class ShopUI : UIBase
             _shopVm.CurPlayerCredit -= buyCount * itemData.SellingPrice; 
 
             targetSlot.ItemDataId = _dragSlotVm.ItemDataId;
+            targetSlot.ItemUniqueId = System.Guid.NewGuid().ToString();
             targetSlot.ItemSellingPrice = itemData.SellingPrice;
             targetSlot.ItemStackCount = buyCount;
             targetSlot.IsSlotEmpty = false;
@@ -494,6 +518,7 @@ public class ShopUI : UIBase
 
         // 인벤토리/창고 -> 창고 단순 이동일 경우
         targetSlot.ItemDataId = _dragSlotVm.ItemDataId;
+        targetSlot.ItemUniqueId = _dragSlotVm.ItemUniqueId;
         targetSlot.ItemSellingPrice = itemData.SellingPrice;
         targetSlot.ItemStackCount = _heldStackCount;
         targetSlot.IsSlotEmpty = false;
@@ -548,6 +573,7 @@ public class ShopUI : UIBase
         if (targetSlot.IsSlotEmpty)
         {
             targetSlot.ItemDataId = _dragSlotVm.ItemDataId;
+            targetSlot.ItemUniqueId = (_originSlotVm.SlotType == ShopItemSlotType.Shop) ? System.Guid.NewGuid().ToString() : _dragSlotVm.ItemUniqueId;
             targetSlot.ItemSellingPrice = itemData.SellingPrice;
             targetSlot.ItemStackCount = 0;
             targetSlot.IsSlotEmpty = false;

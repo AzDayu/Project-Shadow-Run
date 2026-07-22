@@ -36,18 +36,33 @@ public class StashUI : UIBase
             InventoryManager.Instance.OnInventoryChanged += RefreshInventoryUI;
             RefreshInventoryUI();
         }
+
+        if (NetworkManager.Inst != null && NetworkManager.Inst.StashService != null)
+        {
+            NetworkManager.Inst.StashService.InitStashAndInventoryData();
+        }
     }
 
     private void OnDisable()
     {
         if (_stashVm != null)
         {
+            _stashVm.HoveredItemId = null;
             _stashVm.PropertyChanged -= OnPropChanged_View;
         }
 
         if (InventoryManager.Instance != null)
         {
             InventoryManager.Instance.OnInventoryChanged -= RefreshInventoryUI;
+        }
+
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.ClosePopupUI(UIType.ShopItemPopupUI);
+        }
+        if (NetworkManager.Inst != null && NetworkManager.Inst.StashService != null)
+        {
+            NetworkManager.Inst.StashService.SyncDataOnClose();
         }
     }
 
@@ -153,10 +168,7 @@ public class StashUI : UIBase
 
     public void CloseStashUI()
     {
-        NetworkManager.Inst.StashService.SyncDataOnClose();
         UIManager.Instance.CloseContentUI(UIType.StashUI);
-
-        UIManager.Instance.ClosePopupUI(UIType.ShopItemPopupUI);
     }
 
     private void OnSlotHoverEnter(string dataId)
