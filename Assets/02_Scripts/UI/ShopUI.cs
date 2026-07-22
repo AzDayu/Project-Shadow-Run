@@ -98,7 +98,7 @@ public class ShopUI : UIBase
                 }
                 break;
             case nameof(ShopViewModel.HoveredItemId):
-                if (_shopVm.HoveredItemId != null)
+                if (_shopVm.HoveredItemId != null && _heldStackCount == 0)
                 {
                     var popupUI = UIManager.Instance.OpenPopupUI(UIType.ShopItemPopupUI) as ShopItemPopupUI;
 
@@ -181,6 +181,7 @@ public class ShopUI : UIBase
         if (_heldStackCount > 0)
         {
             DragSlotUI.UpdatePriceDisplay(_dragSlotVm.ItemSellingPrice, _heldStackCount);
+            UIManager.Instance.ClosePopupUI(UIType.ShopItemPopupUI);
         }
     }
 

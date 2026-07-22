@@ -130,7 +130,7 @@ public class StashUI : UIBase
                 Text_CurPlayerCredit.text = $"Player Credit : {_stashVm.CurPlayerCredit}";
                 break;
             case nameof(StashViewModel.HoveredItemId):
-                if (_stashVm.HoveredItemId != null)
+                if (_stashVm.HoveredItemId != null && _heldStackCount == 0)
                 {
                     var popupUI = UIManager.Instance.OpenPopupUI(UIType.ShopItemPopupUI) as ShopItemPopupUI;
                     if (popupUI != null)
@@ -178,6 +178,12 @@ public class StashUI : UIBase
         else if (button == PointerEventData.InputButton.Right)
         {
             HandleRightClick(clickedSlotVm);
+        }
+
+        if (_heldStackCount > 0)
+        {
+            // 아이템을 하나라도 집었다면 팝업을 즉시 꺼서 마우스 커서를 가리지 않게 합니다.
+            UIManager.Instance.ClosePopupUI(UIType.ShopItemPopupUI);
         }
     }
 

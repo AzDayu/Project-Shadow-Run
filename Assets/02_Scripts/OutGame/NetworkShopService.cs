@@ -58,7 +58,7 @@ public class NetworkShopService
 
             // [핵심 필터링] ItemData.cs의 string ItemType을 기준으로 비교
             // 기획 엑셀에 적으신 무기(Weapon), 소모품(Consumable) 등의 정확한 텍스트를 적어주세요.
-            if (item.ItemType == "Weapon" || item.ItemType == "Consumable")
+            if (item.ItemType != "Material")
             {
                 // 만약 Consumable 중에 잡템이 섞여있다면 아래처럼 UseItemType 등을 추가로 검사할 수 있습니다.
                 // if (item.ItemType == "Consumable" && item.UseItemType != "Heal") continue;
