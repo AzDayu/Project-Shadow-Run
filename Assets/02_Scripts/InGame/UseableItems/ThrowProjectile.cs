@@ -5,9 +5,20 @@ public class ThrowProjectile : MonoBehaviour, IQuickSlotConsumeHandler
     [SerializeField] private Transform _throwPoint;      // 투척 시작 위치 (카메라 앞/플레이어 손)
     [SerializeField] private float _defaultThrowForce = 15f; // 기본 투척력
 
-    public bool CanHandleType( string useItemType )
+    public bool CanHandleType( ItemData itemData )
     {
-        return useItemType == "Grenade" || useItemType == "Dagger";
+        if (itemData == null)
+        {
+            return false;
+        }
+
+        // ItemType이 Throwable이면서 UseItemType이 맞는 경우만 처리
+        bool isThrowable = itemData.ItemType == "Throwable";
+        bool isValidUseType = itemData.UseItemType == "Explosion" ||
+                             itemData.UseItemType == "EMP" ||
+                             itemData.UseItemType == "Smoke";
+
+        return isThrowable && isValidUseType;
     }
 
     public void UseItem( ItemData itemData )
@@ -49,14 +60,5 @@ public class ThrowProjectile : MonoBehaviour, IQuickSlotConsumeHandler
             activeGrenade.InitGrenade(itemData, throwDirection, _defaultThrowForce);
         }
 
-        // 추후 구현할 HitDagger 대응 예시
-        /*
-        HitDagger dagger = spawnedObject.GetComponent<HitDagger>();
-        if (dagger != null)
-        {
-            dagger.InitDagger(itemData, throwDirection, _defaultThrowForce);
-            return;
-        }
-        */
     }
 }

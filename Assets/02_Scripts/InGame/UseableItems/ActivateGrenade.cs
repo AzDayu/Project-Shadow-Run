@@ -19,9 +19,7 @@ public class ActivateGrenade : MonoBehaviour
 
     private IEnumerator ExplodeRoutine( ItemData itemData )
     {
-        int damage = itemData.HpVariation;        // [2] 데미지 (피해량)
-        float fuseTime = itemData.Duration;       // [3] 폭발 지연 시간 (신관 타이머)
-        float radius = itemData.EffectRange;      // [4] 폭발 범위 (반경)
+        itemData.TryGetParameter("Fuse", out float fuseTime);
 
         //  신관 타이머 대기
         if (fuseTime > 0f)
@@ -30,7 +28,27 @@ public class ActivateGrenade : MonoBehaviour
         }
 
         //  폭발 처리
-        ProcessExplosion(damage, radius);
+        // UseItemType에 따른 분기 처리
+        if (itemData.UseItemType == "Explosion")
+        {
+            itemData.TryGetParameter("Damage", out float damage);
+            itemData.TryGetParameter("Radius", out float radius);
+            ProcessExplosion(damage, radius);
+        }
+        else if (itemData.UseItemType == "EMP")
+        {
+            itemData.TryGetParameter("Duration", out float duration);
+            itemData.TryGetParameter("Radius", out float radius);
+            // TODO: EMP 효과 처리
+        }
+        else if (itemData.UseItemType == "Smoke")
+        {
+            itemData.TryGetParameter("Duration", out float duration);
+            itemData.TryGetParameter("Radius", out float radius);
+            // TODO: 연막 효과 처리
+        }
+
+        Destroy(gameObject);
     }
 
     private void ProcessExplosion( float damage, float radius )
@@ -38,7 +56,8 @@ public class ActivateGrenade : MonoBehaviour
         // 폭발 이펙트 생성
         if (_explosionEffect != null)
         {
-            Instantiate(_explosionEffect, transform.position, Quaternion.identity);
+            GameObject effect = Instantiate(_explosionEffect, transform.position, Quaternion.identity);
+            Destroy(effect, 3f); // 3초 후 자동 삭제
         }
 
         // 구체(Sphere) 범위 안의 모든 콜라이더 감지
@@ -52,8 +71,7 @@ public class ActivateGrenade : MonoBehaviour
             // if (enemy != null) { enemy.TakeDamage(damage); }
         }
 
-        // 수류탄 오브젝트 삭제
-        Destroy(gameObject);
+        
     }
 }
     
