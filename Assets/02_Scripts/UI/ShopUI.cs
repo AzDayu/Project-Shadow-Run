@@ -17,7 +17,6 @@ public class ShopUI : UIBase
 {
     [SerializeField] private TMP_Text Text_CurPlayerCredit;
     [SerializeField] private Button Button_CloseSelf;
-    [SerializeField] private ShopItemPopupUI ShopItemPopup;
 
     [SerializeField] private ShopItemSlotUI Prefab_ShopItemSlotUI;
     [SerializeField] private Transform Transform_ShopContent;
@@ -101,11 +100,16 @@ public class ShopUI : UIBase
             case nameof(ShopViewModel.HoveredItemId):
                 if (_shopVm.HoveredItemId != null)
                 {
-                    //ShopItemPopup.SetItemData(_shopVm.HoveredItemId);
+                    var popupUI = UIManager.Instance.OpenPopupUI(UIType.ShopItemPopupUI) as ShopItemPopupUI;
+
+                    if (popupUI != null)
+                    {
+                        popupUI.SetItemData(_shopVm.HoveredItemId);
+                    }
                 }
                 else
                 {
-                    //ShopItemPopup.HidePopup();
+                    UIManager.Instance.ClosePopupUI(UIType.ShopItemPopupUI);
                 }
                 break;
         }
@@ -157,10 +161,7 @@ public class ShopUI : UIBase
         NetworkManager.Inst.ShopService.SyncDataOnClose();
         UIManager.Instance.CloseContentUI(UIType.ShopUI);
 
-        //if (ShopItemPopup != null)
-        //{
-        //    ShopItemPopup.HidePopup();
-        //}
+        UIManager.Instance.ClosePopupUI(UIType.ShopItemPopupUI);
     }
 
     // ==========================================

@@ -9,7 +9,6 @@ public class StashUI : UIBase
 {
     [SerializeField] private TMP_Text Text_CurPlayerCredit;
     [SerializeField] private Button Button_CloseSelf;
-    [SerializeField] private ShopItemPopupUI ShopItemPopup;
 
     [SerializeField] private StashItemSlotUI Prefab_StashItemSlotUI;
     [SerializeField] private Transform Transform_InventoryContent;
@@ -133,11 +132,15 @@ public class StashUI : UIBase
             case nameof(StashViewModel.HoveredItemId):
                 if (_stashVm.HoveredItemId != null)
                 {
-                    ShopItemPopup.SetItemData(_stashVm.HoveredItemId);
+                    var popupUI = UIManager.Instance.OpenPopupUI(UIType.ShopItemPopupUI) as ShopItemPopupUI;
+                    if (popupUI != null)
+                    {
+                        popupUI.SetItemData(_stashVm.HoveredItemId);
+                    }
                 }
                 else
                 {
-                    ShopItemPopup.HidePopup();
+                    UIManager.Instance.ClosePopupUI(UIType.ShopItemPopupUI);
                 }
                 break;
         }
@@ -153,10 +156,7 @@ public class StashUI : UIBase
         NetworkManager.Inst.StashService.SyncDataOnClose();
         UIManager.Instance.CloseContentUI(UIType.StashUI);
 
-        if (ShopItemPopup != null)
-        {
-            ShopItemPopup.HidePopup();
-        }
+        UIManager.Instance.ClosePopupUI(UIType.ShopItemPopupUI);
     }
 
     private void OnSlotHoverEnter(string dataId)
