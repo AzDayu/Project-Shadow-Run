@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using Cysharp.Threading.Tasks; // 비동기 처리를 위한 네임스페이스 추가
 
@@ -8,6 +8,7 @@ public class TileGenerator : MonoBehaviour
     [SerializeField] private int _maxRoomCount = 50;
     [SerializeField] private GameObject _startRoomPrefab; // 시작 방은 기존처럼 인스펙터 할당 유지
     [SerializeField] private string _normalRoomType = "Normal"; // 배열 대신 데이터 테이블 검색용 타입 문자열로 변경
+    [SerializeField] private GameObject _endRoomPrefab;
 
     [Header("Physics Settings")]
     [SerializeField] private LayerMask _tileLayerMask;
@@ -56,11 +57,23 @@ public class TileGenerator : MonoBehaviour
         // 2. 맵 생성 메인 루프 (Layer 1)
         int totalAttempts = 0;
 
-        while (_currentRoomCount < _maxRoomCount && totalAttempts < _maxRetryCount)
+        while (_currentRoomCount < _maxRoomCount-1 && totalAttempts < _maxRetryCount)
         {
             totalAttempts++;
             bool success = await TryConnectRandomRoomAsync();
             if (success) _currentRoomCount++;
+        }
+
+        bool endRoomSuccess = TryConnectEndRoom();
+
+        if (endRoomSuccess)
+        {
+            _currentRoomCount++;
+            Debug.Log($"[SUCCESS] 끝 지점(인스펙터 프리팹) 배치 성공! 최종 방 개수: {_currentRoomCount}");
+        }
+        else
+        {
+            Debug.LogError($"[CRITICAL] 끝 지점 배치 실패! 공간 부족으로 인한 겹침 현상이거나 소켓이 부족합니다.");
         }
 
         // 결과 리포트
@@ -108,6 +121,35 @@ public class TileGenerator : MonoBehaviour
         return ProcessRoomPlacement(nextRoom, socketA);
     }
 
+    // ============================== 끝 지점(End Room) 생성 ==============================
+    private bool TryConnectEndRoom()
+    {
+        // 1. 열린 소켓이 없거나 프리팹이 안 잠겨있으면 예외 처리
+        if (_globalOpenSockets.Count == 0) return false;
+
+        if (_endRoomPrefab == null)
+        {
+            Debug.LogError("[CRITICAL] TileGenerator: 끝 지점 프리팹(_endRoomPrefab)이 인스펙터에 할당되지 않았습니다!");
+            return false;
+        }
+
+        // 2. 무작위 기준 소켓 A 선정
+        int randomIndex = Random.Range(0, _globalOpenSockets.Count);
+        TileSocket socketA = _globalOpenSockets[randomIndex];
+
+        // 3. 인스펙터에 등록된 프리팹을 GameObjectManager를 통해 바로 스폰 (비동기 대기 없음)
+        GameObject endRoomObj = GameObjectManager.Instance.SpawnObject(_endRoomPrefab, Vector3.zero, Quaternion.identity);
+        TileController endRoom = endRoomObj.GetComponent<TileController>();
+
+        if (endRoom == null)
+        {
+            Destroy(endRoomObj); // 유효하지 않은 프리팹 즉시 폐기
+            return false;
+        }
+
+        // 4. 물리 검사 및 최종 배치 처리 수행 (기존 Layer 3 로직 그대로 재활용)
+        return ProcessRoomPlacement(endRoom, socketA);
+    }
 
     // ============================== 물리 검사 및 사후 처리 (Layer 3) ==============================
     private bool ProcessRoomPlacement(TileController nextRoom, TileSocket socketA)
