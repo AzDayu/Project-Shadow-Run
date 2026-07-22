@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.Rendering.DebugUI;
 
 public enum WeaponPartsType
 {
@@ -53,17 +54,68 @@ public class ItemData : BaseData
     public string IconPath;
     public string PrefabPath;
 
-    public string UseItemType;
+    public string UseItemType;              // [0] 아이템 타입
     public string UseItemParameterList;
     public string[] UseItemParameters;
 
-    public void ParseUseItemParameters()
+    public float PreUseDelay;               // [1] 사용 준비 시간 (초)
+    public int   HpVariation;               // [2] 체력 변화량
+    public float Duration;                  // [3] 지속 및 대기 시간    
+    public float EffectRange;               // [4] 범위 (폭발 등)
+
+    public void ParseUseItemParameters( )
     {
-        if (UseItemParameterList == null || UseItemParameterList == "")
+        /*if (UseItemParameterList == null || UseItemParameterList == "")
             UseItemParameters = Array.Empty<string>();
         else
-            UseItemParameters = UseItemParameterList.Split(',');
+            UseItemParameters = UseItemParameterList.Split(',');*/
+
+        UseItemType = null;
+        PreUseDelay = 0f;
+        HpVariation = 0;
+        Duration = 0f;
+        EffectRange = 0f;
+        if (string.IsNullOrWhiteSpace(UseItemParameterList))
+        {
+            UseItemParameters = Array.Empty<string>();
+
+            return;
+        }
+
+        UseItemParameters = UseItemParameterList.Split(',');
+
+        // 사용 아이템 타입 (string)
+        if (UseItemParameters.Length > 0)
+        {
+            UseItemType = UseItemParameters[0].Trim();
+        }
+
+        // 사용 준비 시간 (float)
+        if (UseItemParameters.Length > 1)
+        {
+            float.TryParse(UseItemParameters[1], out PreUseDelay);
+        }
+
+        // 데미지 / 회복량 (int)
+        if (UseItemParameters.Length > 2)
+        {
+            int.TryParse(UseItemParameters[2], out HpVariation);
+        }
+
+        // 지속 및 대기 시간 (float)
+        if (UseItemParameters.Length > 3)
+        {
+            float.TryParse(UseItemParameters[3], out Duration);
+        }
+
+        // 아이템 효과 범위 (float)
+        if (UseItemParameters.Length > 4)
+        {
+            float.TryParse(UseItemParameters[4], out EffectRange);
+
+        }
     }
+
 }
 
 
@@ -103,21 +155,6 @@ public class WeaponModel : ItemModel
     public int CurrentAmmo;                 // 현재 장전된 총알 수
     public float CurrentDurability;         // 현재 내구도
     public List<ItemModel> AttachedParts;   // 장착된 파츠들
-}
-
-public interface InterfaceUseItem
-{
-    bool TryUseItem( UseableItem itemData );
-}
-
-[System.Serializable]
-public class UseableItem : ItemData
-{
-    public float HpPerVariation; // 초당 HP 변화량( Damage, Heal )
-    public float ReUseCoolTime; // 재사용 쿨타임
-    public float UseDelay; // 사용 대기 시간
-    public float Duration; // 사용 지속 시간
-
 }
 
 [System.Serializable]
