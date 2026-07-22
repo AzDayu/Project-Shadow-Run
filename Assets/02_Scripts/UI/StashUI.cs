@@ -9,9 +9,9 @@ public class StashUI : UIBase
 {
     [SerializeField] private TMP_Text Text_CurPlayerCredit;
     [SerializeField] private Button Button_CloseSelf;
-    [SerializeField] private ShopItemPopupUI ShopItemPopup; 
+    [SerializeField] private ShopItemPopupUI ShopItemPopup;
 
-    [SerializeField] private StashItemSlotUI Prefab_StashItemSlotUI; 
+    [SerializeField] private StashItemSlotUI Prefab_StashItemSlotUI;
     [SerializeField] private Transform Transform_InventoryContent;
     [SerializeField] private Transform Transform_StashContent;
 
@@ -20,7 +20,6 @@ public class StashUI : UIBase
     private StashItemSlotViewModel _originSlotVm;
     private StashItemSlotViewModel _dragSlotVm;
     private int _heldStackCount = 0;
-
 
     private List<StashItemSlotUI> _stashSlotUIList = new List<StashItemSlotUI>();
     private List<StashItemSlotUI> _invenSlotUIList = new List<StashItemSlotUI>();
@@ -32,6 +31,12 @@ public class StashUI : UIBase
         Button_CloseSelf.onClick.RemoveAllListeners();
         Button_CloseSelf.onClick.AddListener(OnClick_CloseButton);
         BindViewModel();
+
+        if (InventoryManager.Instance != null)
+        {
+            InventoryManager.Instance.OnInventoryChanged += RefreshInventoryUI;
+            RefreshInventoryUI();
+        }
     }
 
     private void OnDisable()
@@ -40,13 +45,42 @@ public class StashUI : UIBase
         {
             _stashVm.PropertyChanged -= OnPropChanged_View;
         }
+
+        if (InventoryManager.Instance != null)
+        {
+            InventoryManager.Instance.OnInventoryChanged -= RefreshInventoryUI;
+        }
     }
 
     private void Update()
     {
-        if (!_dragSlotVm.IsSlotEmpty)
+        if (_dragSlotVm != null && !_dragSlotVm.IsSlotEmpty)
         {
             DragSlotUI.transform.position = Input.mousePosition;
+        }
+    }
+
+    private void RefreshInventoryUI()
+    {
+        if (_stashVm == null || InventoryManager.Instance == null) return;
+
+        var inventoryItems = InventoryManager.Instance.ItemList;
+        var slotVms = _stashVm.InventorySlots;
+
+        for (int i = 0; i < slotVms.Length; i++)
+        {
+            if (i < inventoryItems.Count)
+            {
+                var item = inventoryItems[i];
+                slotVms[i].ItemUniqueId = item.InstanceId;
+                slotVms[i].ItemDataId = item.ItemId;
+                slotVms[i].ItemStackCount = item.CurrentStackCount;
+                slotVms[i].IsSlotEmpty = false;
+            }
+            else
+            {
+                ClearSlotData(slotVms[i]);
+            }
         }
     }
 
@@ -60,7 +94,6 @@ public class StashUI : UIBase
         if (_dragSlotVm == null)
         {
             _dragSlotVm = new StashItemSlotViewModel { IsSlotEmpty = true };
-            // 마우스 커서 슬롯은 호버나 클릭 이벤트가 필요 없으므로 null을 넘김.
             DragSlotUI.Bind(_dragSlotVm, null, null, null);
         }
 
@@ -69,22 +102,19 @@ public class StashUI : UIBase
 
     private void InitStashSlotUIs()
     {
-        // 이미 슬롯 UI를 생성했다면 바인딩만 다시 해주거나 스킵.
         if (_stashSlotUIList.Count == 0)
         {
             foreach (var slotVm in _stashVm.StashSlots)
             {
                 var slotUI = Instantiate(Prefab_StashItemSlotUI, Transform_StashContent);
-
                 slotUI.Bind(slotVm, OnSlotHoverEnter, OnSlotHoverExit, OnSlotClicked);
-
                 _stashSlotUIList.Add(slotUI);
             }
         }
 
         if (_invenSlotUIList.Count == 0)
         {
-            foreach (var slotVm in _stashVm.InventorySlots) 
+            foreach (var slotVm in _stashVm.InventorySlots)
             {
                 var slotUI = Instantiate(Prefab_StashItemSlotUI, Transform_InventoryContent);
                 slotUI.Bind(slotVm, OnSlotHoverEnter, OnSlotHoverExit, OnSlotClicked);
@@ -98,9 +128,7 @@ public class StashUI : UIBase
         switch (e.PropertyName)
         {
             case nameof(StashViewModel.CurPlayerCredit):
-                {
-                    Text_CurPlayerCredit.text = $"Player Credit : {_stashVm.CurPlayerCredit}";
-                }
+                Text_CurPlayerCredit.text = $"Player Credit : {_stashVm.CurPlayerCredit}";
                 break;
             case nameof(StashViewModel.HoveredItemId):
                 if (_stashVm.HoveredItemId != null)
@@ -123,7 +151,6 @@ public class StashUI : UIBase
     public void CloseStashUI()
     {
         NetworkManager.Inst.StashService.SyncDataOnClose();
-
         UIManager.Instance.CloseContentUI(UIType.StashUI);
 
         if (ShopItemPopup != null)
@@ -156,7 +183,7 @@ public class StashUI : UIBase
 
     private void HandleLeftClick(StashItemSlotViewModel clickedSlot)
     {
-        bool isCtrlInput = ((Input.GetKey(KeyCode.LeftControl)) || (Input.GetKey(KeyCode.RightControl)));
+        bool isCtrlInput = (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl));
         bool isShiftInput = (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
 
         if (_heldStackCount == 0)
@@ -176,11 +203,11 @@ public class StashUI : UIBase
         }
         else
         {
-            if ((isCtrlInput == true) && (clickedSlot.ItemDataId == _dragSlotVm.ItemDataId))
+            if (isCtrlInput && (clickedSlot.ItemDataId == _dragSlotVm.ItemDataId))
             {
                 PickupOne(clickedSlot);
             }
-            else if (clickedSlot.IsSlotEmpty == true)
+            else if (clickedSlot.IsSlotEmpty)
             {
                 PlaceAll(clickedSlot);
             }
@@ -197,52 +224,157 @@ public class StashUI : UIBase
 
     private void HandleRightClick(StashItemSlotViewModel clickedSlot)
     {
-        if (_heldStackCount == 0)
+        if (_heldStackCount == 0) return;
+
+        if (clickedSlot.IsSlotEmpty || clickedSlot.ItemDataId == _dragSlotVm.ItemDataId)
         {
-            return;
-        }
-        else
-        {
-            if ((clickedSlot.IsSlotEmpty == true) || (clickedSlot.ItemDataId == _dragSlotVm.ItemDataId))
-            {
-                PlaceOne(clickedSlot);
-            }
+            PlaceOne(clickedSlot);
         }
     }
 
     // ==========================================
-    // 아래는 위 조작을 수행하는 헬퍼 메서드들입니다.
+    // 헬퍼 메서드 (데이터 백업 및 MaxStackCount 검증 포함)
     // ==========================================
 
     private void PickupOne(StashItemSlotViewModel slotVm)
     {
-        if (slotVm == null || slotVm.IsSlotEmpty)
+        if (slotVm == null || slotVm.IsSlotEmpty) return;
+
+        var itemData = DataManager.Instance.GetItemData(slotVm.ItemDataId);
+        if (_heldStackCount >= itemData.MaxStackCount) return;
+
+        // ⭐ 1. 이벤트 순서 문제 예방을 위한 슬롯 데이터 사전 백업
+        string backupDataId = slotVm.ItemDataId;
+        string backupUniqueId = slotVm.ItemUniqueId;
+
+        // ⭐ 2. 인벤토리 출신일 경우 먼저 매니저에서 삭제
+        if (slotVm.SlotType == ShopItemSlotType.Inventory)
         {
-            return;
+            if (!InventoryManager.Instance.TryRemoveItem(backupDataId, 1)) return;
         }
 
+        // ⭐ 3. 커서에 백업 데이터 세팅
         if (_heldStackCount == 0)
         {
             _originSlotVm = slotVm;
             DragSlotUI.gameObject.SetActive(true);
-
-            _dragSlotVm.ItemDataId = slotVm.ItemDataId;
-            _dragSlotVm.ItemUniqueId = slotVm.ItemUniqueId;
+            _dragSlotVm.ItemDataId = backupDataId;
+            _dragSlotVm.ItemUniqueId = backupUniqueId;
             _dragSlotVm.IsSlotEmpty = false;
         }
 
         _heldStackCount++;
-        _dragSlotVm.ItemStackCount = _heldStackCount; // 드래그 슬롯 UI 실시간 갱신
-        slotVm.ItemStackCount--;
+        _dragSlotVm.ItemStackCount = _heldStackCount;
 
-        if (slotVm.ItemStackCount == 0)
+        if (slotVm.SlotType != ShopItemSlotType.Inventory)
         {
-            ClearSlotData(slotVm);
+            slotVm.ItemStackCount--;
+            if (slotVm.ItemStackCount == 0) ClearSlotData(slotVm);
         }
+    }
+
+    private void PickupHalf(StashItemSlotViewModel slotVm)
+    {
+        if (slotVm == null || slotVm.IsSlotEmpty) return;
+
+        string backupDataId = slotVm.ItemDataId;
+        string backupUniqueId = slotVm.ItemUniqueId;
+
+        int halfAmount = Mathf.CeilToInt(slotVm.ItemStackCount / 2.0f);
+
+        if (slotVm.SlotType == ShopItemSlotType.Inventory)
+        {
+            if (!InventoryManager.Instance.TryRemoveItem(backupDataId, halfAmount)) return;
+        }
+
+        _heldStackCount = halfAmount;
+        _originSlotVm = slotVm;
+
+        DragSlotUI.gameObject.SetActive(true);
+        _dragSlotVm.ItemDataId = backupDataId;
+        _dragSlotVm.ItemUniqueId = backupUniqueId;
+        _dragSlotVm.ItemStackCount = _heldStackCount;
+        _dragSlotVm.IsSlotEmpty = false;
+
+        if (slotVm.SlotType != ShopItemSlotType.Inventory)
+        {
+            slotVm.ItemStackCount -= halfAmount;
+            if (slotVm.ItemStackCount == 0) ClearSlotData(slotVm);
+        }
+    }
+
+    private void PickupAll(StashItemSlotViewModel slotVm)
+    {
+        if (slotVm == null || slotVm.IsSlotEmpty) return;
+
+        string backupDataId = slotVm.ItemDataId;
+        string backupUniqueId = slotVm.ItemUniqueId;
+
+        var itemData = DataManager.Instance.GetItemData(backupDataId);
+        int pickupAmount = Mathf.Min(slotVm.ItemStackCount, itemData.MaxStackCount);
+
+        if (slotVm.SlotType == ShopItemSlotType.Inventory)
+        {
+            if (!InventoryManager.Instance.TryRemoveItem(backupDataId, pickupAmount)) return;
+        }
+
+        _heldStackCount = pickupAmount;
+        _originSlotVm = slotVm;
+
+        DragSlotUI.gameObject.SetActive(true);
+        _dragSlotVm.ItemDataId = backupDataId;
+        _dragSlotVm.ItemUniqueId = backupUniqueId;
+        _dragSlotVm.ItemStackCount = _heldStackCount;
+        _dragSlotVm.IsSlotEmpty = false;
+
+        if (slotVm.SlotType != ShopItemSlotType.Inventory)
+        {
+            slotVm.ItemStackCount -= pickupAmount;
+            if (slotVm.ItemStackCount <= 0) ClearSlotData(slotVm);
+        }
+    }
+
+    private void DropAllIntoInventory()
+    {
+        var itemData = DataManager.Instance.GetItemData(_dragSlotVm.ItemDataId);
+        int remain = InventoryManager.Instance.TryAddItem(itemData, _heldStackCount);
+        _heldStackCount = remain;
+
+        if (_heldStackCount > 0) RestoreItemToOrigin();
+        else ClearCursorItem();
+    }
+
+    private void PlaceAll(StashItemSlotViewModel targetSlot)
+    {
+        if (targetSlot.SlotType == ShopItemSlotType.Inventory)
+        {
+            DropAllIntoInventory();
+            return;
+        }
+
+        targetSlot.ItemDataId = _dragSlotVm.ItemDataId;
+        targetSlot.ItemUniqueId = _dragSlotVm.ItemUniqueId;
+        targetSlot.ItemStackCount = _heldStackCount;
+        targetSlot.IsSlotEmpty = false;
+
+        ClearCursorItem();
     }
 
     private void PlaceOne(StashItemSlotViewModel targetSlot)
     {
+        var itemData = DataManager.Instance.GetItemData(_dragSlotVm.ItemDataId);
+
+        if (targetSlot.SlotType == ShopItemSlotType.Inventory)
+        {
+            int remain = InventoryManager.Instance.TryAddItem(itemData, 1);
+            if (remain == 0) _heldStackCount--;
+
+            if (_heldStackCount == 0) ClearCursorItem();
+            else _dragSlotVm.ItemStackCount = _heldStackCount;
+            return;
+        }
+
+        if (!targetSlot.IsSlotEmpty && targetSlot.ItemStackCount >= itemData.MaxStackCount) return;
 
         if (targetSlot.IsSlotEmpty)
         {
@@ -255,80 +387,60 @@ public class StashUI : UIBase
         targetSlot.ItemStackCount++;
         _heldStackCount--;
 
-        if (_heldStackCount == 0)
-        {
-            ClearCursorItem();
-        }
-        else
-        {
-            _dragSlotVm.ItemStackCount = _heldStackCount;
-        }
-    }
-
-    private void PickupHalf(StashItemSlotViewModel slotVm)
-    {
-        if (slotVm == null || slotVm.IsSlotEmpty)
-        {
-            return;
-        }
-
-        int halfAmount = Mathf.CeilToInt(slotVm.ItemStackCount / 2.0f);
-        _heldStackCount = halfAmount;
-        _originSlotVm = slotVm;
-
-        DragSlotUI.gameObject.SetActive(true);
-        _dragSlotVm.ItemDataId = slotVm.ItemDataId;
-        _dragSlotVm.ItemUniqueId = slotVm.ItemUniqueId;
-        _dragSlotVm.ItemStackCount = _heldStackCount;
-        _dragSlotVm.IsSlotEmpty = false;
-
-        slotVm.ItemStackCount -= halfAmount;
-
-        if (slotVm.ItemStackCount == 0)
-        {
-            ClearSlotData(slotVm);
-        }
-    }
-
-    private void PickupAll(StashItemSlotViewModel slotVm)
-    {
-        if (slotVm == null || slotVm.IsSlotEmpty)
-        {
-            return;
-        }
-
-        _heldStackCount = slotVm.ItemStackCount;
-        _originSlotVm = slotVm;
-
-        DragSlotUI.gameObject.SetActive(true);
-        _dragSlotVm.ItemDataId = slotVm.ItemDataId;
-        _dragSlotVm.ItemUniqueId = slotVm.ItemUniqueId;
-        _dragSlotVm.ItemStackCount = _heldStackCount;
-        _dragSlotVm.IsSlotEmpty = false;
-
-        ClearSlotData(slotVm);
-    }
-
-    private void PlaceAll(StashItemSlotViewModel targetSlot)
-    {
-        targetSlot.ItemDataId = _dragSlotVm.ItemDataId;
-        targetSlot.ItemUniqueId = _dragSlotVm.ItemUniqueId;
-        targetSlot.ItemStackCount = _heldStackCount;
-        targetSlot.IsSlotEmpty = false;
-
-        ClearCursorItem();
+        if (_heldStackCount == 0) ClearCursorItem();
+        else _dragSlotVm.ItemStackCount = _heldStackCount;
     }
 
     private void MergeAll(StashItemSlotViewModel targetSlot)
     {
-        // TODO: 향후 GameDataManager를 통해 ItemData의 MaxStackSize를 가져와 한계치까지만 합치고 남은 건 마우스에 남기는 로직을 추가할 수 있음.
+        if (targetSlot.SlotType == ShopItemSlotType.Inventory)
+        {
+            DropAllIntoInventory();
+            return;
+        }
 
-        targetSlot.ItemStackCount += _heldStackCount;
+        var itemData = DataManager.Instance.GetItemData(_dragSlotVm.ItemDataId);
+        int maxCanAdd = itemData.MaxStackCount - targetSlot.ItemStackCount;
+
+        if (maxCanAdd <= 0) return;
+
+        int amountToAdd = Mathf.Min(_heldStackCount, maxCanAdd);
+        targetSlot.ItemStackCount += amountToAdd;
+        _heldStackCount -= amountToAdd;
+
+        if (_heldStackCount <= 0) ClearCursorItem();
+        else _dragSlotVm.ItemStackCount = _heldStackCount;
+    }
+
+    private void RestoreItemToOrigin()
+    {
+        if (_originSlotVm == null) return;
+
+        if (_originSlotVm.SlotType == ShopItemSlotType.Inventory)
+        {
+            var itemData = DataManager.Instance.GetItemData(_dragSlotVm.ItemDataId);
+            InventoryManager.Instance.TryAddItem(itemData, _heldStackCount);
+        }
+        else
+        {
+            _originSlotVm.IsSlotEmpty = false;
+            _originSlotVm.ItemStackCount += _heldStackCount;
+            _originSlotVm.ItemDataId = _dragSlotVm.ItemDataId;
+            _originSlotVm.ItemUniqueId = _dragSlotVm.ItemUniqueId;
+        }
+
         ClearCursorItem();
     }
 
     private void SwapItems(StashItemSlotViewModel targetSlot)
     {
+        if (targetSlot.SlotType == ShopItemSlotType.Inventory || _originSlotVm.SlotType == ShopItemSlotType.Inventory)
+        {
+            Debug.LogWarning("인벤토리는 자동 정렬되므로 맞바꾸기(스왑)를 지원하지 않습니다. 빈 공간을 이용해 주세요.");
+            RestoreItemToOrigin();
+            return;
+        }
+
         string tempId = targetSlot.ItemDataId;
         string tempUniqueId = targetSlot.ItemUniqueId;
         int tempCount = targetSlot.ItemStackCount;
@@ -344,8 +456,6 @@ public class StashUI : UIBase
 
         _originSlotVm = targetSlot;
     }
-
-    
 
     private void ClearCursorItem()
     {
