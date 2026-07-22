@@ -27,13 +27,14 @@ public class EnemyStateMachine : MonoBehaviour
     public IState CurrentState { get; private set; }
 
     [SerializeField] private string _currentStatusName;
-    public LayerMask _playerLayerMask;
+    public LayerMask _battleAgentLayerMask;
     public LayerMask _sightLayerMask;
     public LayerMask _shootLayerMask;
     public LayerMask _coverWallLayerMask;
     // 다른 상태 클래스들이 공통으로 쓸 유니티 컴포넌트들을 미리 캐싱
     [HideInInspector] public NavMeshAgent _agent;
-    [HideInInspector] public Transform _targetPlayer;
+    [HideInInspector] public Transform _targetTransform;
+    public IBattleAgent _targetBattleAgent;
     [HideInInspector] public Vector3 _lastDetectPosition; // 플레이어를 마지막으로 목격한 위치
 
     public CoverWallInfo _currentCoverWallInfo;//현재 엄폐중인 위치
@@ -132,5 +133,15 @@ public class EnemyStateMachine : MonoBehaviour
                 _renderer.material.color = Color.white;
                 break;
         }
+    }
+    public void SetTarget(IBattleAgent target)
+    {
+        _targetBattleAgent = target;
+        _targetTransform = target?.Transform;
+    }
+    public void ClearTarget()
+    {
+        _targetBattleAgent = null;
+        _targetTransform = null;
     }
 }

@@ -1,17 +1,26 @@
 ﻿using UnityEngine;
-using UnityEngine.AI; 
+public enum BattleAgentTeamType 
+{
+    None,
+    Player,
+    TeamA,
+    TeamB
+}
 
-public class EnemyBase : MonoBehaviour,IDamageable,IWeaponOwner
+public class EnemyBase : MonoBehaviour,IDamageable,IBattleAgent
 {
     public TestWeaponBase CurrentWeapon { get; private set; }
     [SerializeField] Transform _weaponSpawnPo;
     [SerializeField] TestWeaponBase _testWeapon;
-    public float HP { get; private set; }
+    [SerializeField] BattleAgentTeamType _battleAgentTeamType;
+    public float Hp { get; private set; } = 100;
     public bool IsDead { get; private set; } = false;
 
     public float FrontDetectDistance = 20f; //추후에 데이터에서 받아와 사용
     public float SideDetectDistance = 10f;
     public float BackDetectDistance = 3f;
+    public BattleAgentTeamType Team { get => _battleAgentTeamType; }
+    public Transform Transform { get => this.transform; }
 
     //public EnemyData Data { get; private set; }
     public void Awake()
@@ -31,7 +40,13 @@ public class EnemyBase : MonoBehaviour,IDamageable,IWeaponOwner
         weapon.transform.localRotation = Quaternion.identity;
     }
 
-    public void TakeDamage(float damage) { }
+    public void TakeDamage(float damage) 
+    {
+        float newHp = Hp - damage;
+        Hp = (newHp>=0) ? newHp : 0;
+        Debug.Log($"{damage}피해 입음, 남은 체력 {Hp}");
+
+    }
     public void UseWeapon() { }
     public void Initialize(EnemyData enemyData) { }
 }
