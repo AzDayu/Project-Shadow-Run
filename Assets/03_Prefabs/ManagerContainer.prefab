@@ -170,7 +170,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InventoryManager
   MaxSlotCount: 30
-  QuickSlotCount: 3
 --- !u!1 &8174889483311024203
 GameObject:
   m_ObjectHideFlags: 0
@@ -371,41 +370,18 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5846289688886183844, guid: e42d5e3b67625e44f8c44b297312b106, type: 3}
+      propertyPath: _endRoomPrefab
+      value: 
+      objectReference: {fileID: 9014001945128448928, guid: 3a8ac2dcc30d8624cadbc2b122b07c98, type: 3}
     m_RemovedComponents:
     - {fileID: 4703267894559630166, guid: e42d5e3b67625e44f8c44b297312b106, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 2222013477537672222, guid: e42d5e3b67625e44f8c44b297312b106, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1590359383124907803}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e42d5e3b67625e44f8c44b297312b106, type: 3}
 --- !u!4 &2231570145779190680 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3718663483968559709, guid: e42d5e3b67625e44f8c44b297312b106, type: 3}
   m_PrefabInstance: {fileID: 3270591370424783301}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &3725977698521316827 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2222013477537672222, guid: e42d5e3b67625e44f8c44b297312b106, type: 3}
-  m_PrefabInstance: {fileID: 3270591370424783301}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1590359383124907803
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3725977698521316827}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 97a2541182b5106479e7975dcda52f70, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TileGenerator
-  _maxRoomCount: 50
-  _startRoomPrefab: {fileID: 9014001945128448928, guid: b046b459750fb3d41bf17dd89367381a, type: 3}
-  _normalRoomType: Normal
-  _tileLayerMask:
-    serializedVersion: 2
-    m_Bits: 1024
-  _maxRetryCount: 50
