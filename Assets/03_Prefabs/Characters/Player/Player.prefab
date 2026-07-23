@@ -808,13 +808,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2715803626088946171}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.038900495, y: 0.77547514, z: 0.048009243, w: 0.6283472}
+  m_LocalRotation: {x: 0.7071068, y: 0.7071068, z: -0, w: 0}
   m_LocalPosition: {x: -0.001, y: -0.0015, z: -0.0018}
   m_LocalScale: {x: 0.016987184, y: 0.016987188, z: 0.016987184}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5543339661906903829}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 180, y: 0, z: -90}
 --- !u!1 &2920798048420617295
 GameObject:
   m_ObjectHideFlags: 0
@@ -971,6 +971,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1987298468190572923}
   - {fileID: 1167773315994925661}
   - {fileID: 7743853574539376894}
   - {fileID: 9157479522447258995}
@@ -1457,6 +1458,37 @@ Transform:
   m_Children:
   - {fileID: 2699892522720093645}
   m_Father: {fileID: 1183933363830663578}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &5195192417968463600
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1987298468190572923}
+  m_Layer: 0
+  m_Name: PlayerLeftGrip
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1987298468190572923
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5195192417968463600}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 142528274534119899}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5392241161336838784
 GameObject:
@@ -2072,8 +2104,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e0d975c03d17b64b823402fc3779405, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCameraRecoil
-  PlayerSight: {fileID: 5242166127282976409}
-  RecoilTarget: {fileID: 0}
   VerticalRecoilAngle: 1.5
   HorizontalRecoilAngle: 0.5
   KickSpeed: 25
@@ -2249,9 +2279,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerWeaponController
   PlayerWeaponSocket: {fileID: 7995536942549607209}
-  MainCamera: {fileID: 0}
-  InputHandler: {fileID: 2594667027422455901}
-  AnimeController: {fileID: 4765270145573547274}
   AimLayerMask:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -2415,7 +2442,7 @@ Transform:
   m_GameObject: {fileID: 8658268323331540238}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
-  m_LocalPosition: {x: 0, y: -0.3, z: 0.3}
+  m_LocalPosition: {x: -0.01, y: -0.45, z: 0.55}
   m_LocalScale: {x: 3, y: 3, z: 3}
   m_ConstrainProportionsScale: 0
   m_Children:
