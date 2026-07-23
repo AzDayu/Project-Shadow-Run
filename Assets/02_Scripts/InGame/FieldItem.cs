@@ -29,7 +29,7 @@ public class FieldItem : MonoBehaviour
             InstanceId = gameObject.GetInstanceID().ToString(),
             ItemId = _itemModel.ItemId,
             CurrentStackCount = Mathf.Max(1, _itemModel.CurrentStackCount),
-            CurrentAmmo = weaponData.MagazineSize,
+            CurrentAmmo = 0,
             CurrentDurability = weaponData.MaxDurability,
             AttachedParts = new System.Collections.Generic.List<ItemModel>()
         };

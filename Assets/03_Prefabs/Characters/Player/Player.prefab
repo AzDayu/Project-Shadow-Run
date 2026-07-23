@@ -1958,6 +1958,7 @@ GameObject:
   - component: {fileID: 4183498448615601335}
   - component: {fileID: 4968580984755581381}
   - component: {fileID: 6118797289068335299}
+  - component: {fileID: 8807692790497756050}
   m_Layer: 3
   m_Name: Player
   m_TagString: Player
@@ -2216,6 +2217,19 @@ MonoBehaviour:
   ItemLayerMask:
     serializedVersion: 2
     m_Bits: 2304
+--- !u!114 &8807692790497756050
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7834500494340706646}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de6b32a603bd42a4a87ace2a1f0fc1e3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerWeaponController
+  PlayerWeaponSocket: {fileID: 7995536942549607209}
 --- !u!1 &7918257139273063620
 GameObject:
   m_ObjectHideFlags: 0

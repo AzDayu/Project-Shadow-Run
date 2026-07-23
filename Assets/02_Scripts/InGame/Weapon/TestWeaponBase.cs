@@ -16,6 +16,7 @@ public interface IBattleAgent
 public class TestWeaponBase : MonoBehaviour
 {
     protected WeaponData _weaponData;
+    protected WeaponModel _weaponModel;
 
     protected WeaponStat _baseWeaponStat = new WeaponStat();
     protected WeaponStat _currentWeaponStat = new WeaponStat();
@@ -24,23 +25,74 @@ public class TestWeaponBase : MonoBehaviour
     public int MagazineSize => _currentWeaponStat.MagazineSize;
     public int RemainBullets => _remainBullets;
     public float AttackInterval => _currentWeaponStat.AttackInterval;
+    public float Accuracy => _currentWeaponStat.Accuracy;
     public float Range=>_currentWeaponStat.Range;
 
     protected Dictionary<WeaponPartsType, WeaponPartsData> _weaponPartsDic = new Dictionary<WeaponPartsType, WeaponPartsData>();
-    public void Awake()
+
+    // TODO[안우재](7/22) : Awake() 및 Initialize() 메서드는 호환성 문제로 무기 구축에 어느정도
+    //                      무기 구축에 어느정도 틀이 잡히면 삭제 또는 수정해야함.
+    //public void Awake()
+    //{
+    //    Initialize();
+    //}
+    //public virtual void Initialize()
+    //{
+    //    _baseWeaponStat.Damage = 10f;
+    //    _baseWeaponStat.AttackInterval = 1f;
+    //    _baseWeaponStat.MagazineSize = 10;
+    //    _baseWeaponStat.Accuracy = 100f;
+    //    _baseWeaponStat.Range = 10f;
+    //    _baseWeaponStat.ReloadTime = 5f;
+    //    _currentWeaponStat = _baseWeaponStat;
+    //    _remainBullets = 10;
+    //}
+
+    public virtual void Initialize(WeaponData weaponData, WeaponModel weaponModel)
     {
-        Initialize();
-    }
-    public virtual void Initialize()
-    {
-        _baseWeaponStat.Damage = 10f;
-        _baseWeaponStat.AttackInterval = 1f;
-        _baseWeaponStat.MagazineSize = 10;
-        _baseWeaponStat.Accuracy = 100f;
-        _baseWeaponStat.Range = 10f;
-        _baseWeaponStat.ReloadTime = 5f;
-        _currentWeaponStat = _baseWeaponStat;
-        _remainBullets = 10;
+        if (weaponData == null)
+        {
+            Debug.LogError("TestWeaponBase: WeaponData가 없습니다.");
+            return;
+        }
+
+        _weaponData = weaponData;
+        _weaponModel = weaponModel;
+        _baseWeaponStat.Damage = weaponData.Damage;
+        _baseWeaponStat.AttackInterval = weaponData.AttackInterval;
+        _baseWeaponStat.MagazineSize = weaponData.MagazineSize;
+        _baseWeaponStat.Accuracy = weaponData.Accuracy;
+        _baseWeaponStat.Range = weaponData.Range;
+        _baseWeaponStat.ReloadTime = weaponData.ReloadTime;
+
+        _weaponPartsDic.Clear();
+
+        if (weaponModel?.AttachedParts != null)
+        {
+            foreach (ItemModel partModel in weaponModel.AttachedParts)
+            {
+                if (partModel == null)
+                    continue;
+
+                ItemData itemData = DataManager.Instance.GetItemData(partModel.ItemId);
+
+                if (itemData is not WeaponPartsData weaponPartData)
+                    continue;
+
+                _weaponPartsDic[weaponPartData.PartsType] = weaponPartData;
+            }
+        }
+
+        CalculateCurrentWeaponStat();
+
+
+        if (weaponModel == null)
+            _remainBullets = 0;
+        else
+            _remainBullets = weaponModel.CurrentAmmo;
+
+        if (_weaponModel != null)
+            _weaponModel.CurrentAmmo = _remainBullets;
     }
 
     //public abstract bool CanFire { get; }
@@ -52,6 +104,9 @@ public class TestWeaponBase : MonoBehaviour
             return;
         }
         _remainBullets--;
+
+        if (_weaponModel != null)
+            _weaponModel.CurrentAmmo = _remainBullets;
 
         //Vector3 direction = (targetPosition - firePosition).normalized;
         if (Physics.Raycast(firePosition, direction.normalized, out RaycastHit hit, _currentWeaponStat.Range))
@@ -93,11 +148,19 @@ public class TestWeaponBase : MonoBehaviour
         if (newBulletAmonut >= _currentWeaponStat.MagazineSize)
         {
             _remainBullets = _currentWeaponStat.MagazineSize;
+
+            if (_weaponModel != null)
+                _weaponModel.CurrentAmmo = _remainBullets;
+
             return newBulletAmonut - _currentWeaponStat.MagazineSize;
         }
         else
         {
             _remainBullets = newBulletAmonut;
+
+            if (_weaponModel != null)
+                _weaponModel.CurrentAmmo = _remainBullets;
+
             return 0;
         }
 
