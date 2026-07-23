@@ -5,12 +5,21 @@ public class ActivateGrenade : MonoBehaviour
 {
     [SerializeField] private GameObject _explosionEffect; // 폭발 이펙트 프리팹 (선택)
 
+    private string _poolAddress;
+
     // 생성 직후 투척력 전달 및 폭발 코루틴 시작
     public void InitGrenade( ItemData itemData, Vector3 throwDirection, float throwForce )
     {
+        _poolAddress = itemData.PrefabPath;
+
+        StopAllCoroutines();
+
         Rigidbody rigidBody = GetComponent<Rigidbody>();
         if (rigidBody != null)
         {
+            // 재사용 시 이전 물리 속도 초기화
+            rigidBody.linearVelocity = Vector3.zero;
+            rigidBody.angularVelocity = Vector3.zero;
             rigidBody.AddForce(throwDirection * throwForce, ForceMode.Impulse);
         }
 
@@ -48,7 +57,7 @@ public class ActivateGrenade : MonoBehaviour
             // TODO: 연막 효과 처리
         }
 
-        Destroy(gameObject);
+        ObjectPoolManager.Instance.ReturnToPool(_poolAddress, gameObject);
     }
 
     private void ProcessExplosion( float damage, float radius )

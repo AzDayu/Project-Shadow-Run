@@ -32,16 +32,6 @@ public class ThrowProjectile : MonoBehaviour, IQuickSlotConsumeHandler
             return;
         }
 
-        // ItemData의 PrefabPath를 이용해 해당하는 프리팹 불러오기
-        GameObject prefab = Resources.Load<GameObject>(itemData.PrefabPath);
-        //!todo: 추후 오브젝트풀링을 사용
-        
-        if (prefab == null)
-        {
-            Debug.LogWarning("프리팹을 찾을 수 없습니다: " + itemData.PrefabPath);
-            return;
-        }
-
         // 투척 위치 계산
         Vector3 spawnPosition = transform.position;
         if (_throwPoint != null)
@@ -49,8 +39,17 @@ public class ThrowProjectile : MonoBehaviour, IQuickSlotConsumeHandler
             spawnPosition = _throwPoint.position;
         }
 
-        // 투척용 프리팹 생성
-        GameObject grenadeObject = Instantiate(prefab, spawnPosition, Quaternion.identity);
+        // 오브젝트 풀 매니저로 수류탄 프리팹 가져오기  
+        GameObject grenadeObject = ObjectPoolManager.Instance.GetFromPool(itemData.PrefabPath);
+
+        if (grenadeObject == null)
+        {
+            Debug.LogWarning("풀에서 프리팹을 가져올 수 없습니다: " + itemData.PrefabPath);
+            return;
+        }
+
+        grenadeObject.transform.position = spawnPosition;
+        grenadeObject.transform.rotation = Quaternion.identity;
 
         // 수류탄 생성 시 파라미터 데이터 및 투척 방향 전달
         ActivateGrenade activeGrenade = grenadeObject.GetComponent<ActivateGrenade>();
