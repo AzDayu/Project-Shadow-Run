@@ -22,76 +22,76 @@ public class NetworkShopService
         return shopVm;
     }
 
-    public void InitShopData()
+    public void RefreshShopInventory()
     {
         var vm = GetShopViewModel();
         int slotIndex = 0;
 
-        // 1. 기존 슬롯 초기화 (빈 슬롯으로 세팅)
         foreach (var slot in vm.ShopItemSlotList)
         {
             slot.IsSlotEmpty = true;
         }
 
-        // 2. 고정으로 보여줄 기초 힐템 ID 목록 세팅 
         List<string> fixedItemIds = new List<string> { "Item_Medical_Bandage", "Item_Food_Water" };
-
         foreach (var fixedId in fixedItemIds)
         {
-            if (slotIndex >= vm.ShopItemSlotList.Count) break;
+            if (slotIndex >= vm.ShopItemSlotList.Count)
+            {
+                break;
+            }
 
-            // 고정 아이템 추가 (재고는 5개로 임의 설정)
-            SetShopItemSlot(vm.ShopItemSlotList[slotIndex], fixedId, 5);
-            slotIndex++;
+            var itemData = DataManager.Instance.GetItemData(fixedId);
+            if(itemData != null)
+            {
+                SetShopItemSlot(vm.ShopItemSlotList[slotIndex], fixedId, itemData.MaxStackCount);
+                slotIndex++;
+            }
         }
 
-        // 3. 랜덤으로 등장할 후보군 ID 리스트 추출
         List<string> randomCandidateIds = new List<string>();
-
-        // DataManager에 있는 실제 전체 아이템 딕셔너리 순회
         foreach (var item in DataManager.Instance._itemDataDic.Values)
         {
-            // 이미 고정으로 들어간 아이템은 후보군에서 제외
-            // BaseData를 상속받았으므로 ID 접근이 item.Id 또는 item.ItemId 일 수 있습니다.
-            if (fixedItemIds.Contains(item.Id)) continue;
+            if(fixedItemIds.Contains(item.Id))
+            {
+                continue;
+            }
 
-            // [핵심 필터링] ItemData.cs의 string ItemType을 기준으로 비교
-            // 기획 엑셀에 적으신 무기(Weapon), 소모품(Consumable) 등의 정확한 텍스트를 적어주세요.
             if (item.ItemType != "Material")
             {
-                // 만약 Consumable 중에 잡템이 섞여있다면 아래처럼 UseItemType 등을 추가로 검사할 수 있습니다.
-                // if (item.ItemType == "Consumable" && item.UseItemType != "Heal") continue;
-
                 randomCandidateIds.Add(item.Id);
             }
         }
 
-        // 4. 추출된 후보군 리스트 무작위 섞기 (셔플)
         ShuffleList(randomCandidateIds);
 
-        // 5. 남은 상점 슬롯에 랜덤 아이템 채워넣기
-        int randomItemLimit = 5; // 상점에 띄울 랜덤 아이템의 최대 개수
+        int randomItemLimit = 5;
         int addedRandomCount = 0;
-
         foreach (var randomId in randomCandidateIds)
         {
-            // 상점 슬롯이 꽉 찼거나, 지정한 랜덤 개수를 다 채웠으면 종료
             if (slotIndex >= vm.ShopItemSlotList.Count || addedRandomCount >= randomItemLimit) break;
 
-            // 랜덤 아이템 추가 (재고는 1개로 세팅)
-            SetShopItemSlot(vm.ShopItemSlotList[slotIndex], randomId, 1);
-            slotIndex++;
-            addedRandomCount++;
+            var itemData = DataManager.Instance.GetItemData(randomId);
+            if (itemData != null)
+            {
+                SetShopItemSlot(vm.ShopItemSlotList[slotIndex], randomId, itemData.MaxStackCount);
+                slotIndex++;
+                addedRandomCount++;
+            }
         }
 
-        // 6. 플레이어 재화 및 인벤토리/창고 연동 (기존 로직 유지)
+        Debug.Log("NetworkShopService: 상점 판매 목록이 새로고침 되었습니다.");
+    }
+
+    public void SyncPlayerInventoryToShop()
+    {
+        var vm = GetShopViewModel();
         PlayerModel activePlayerData = PlayerStatus.Instance.Model;
 
         vm.CurPlayerCredit = activePlayerData.CurrentCredit;
 
         var inventoryItems = InventoryManager.Instance.ItemList;
         LoadPlayerItemsToShopZone(new List<ItemModel>(inventoryItems), vm.InventoryItemSlotList);
-        
+
         if (activePlayerData.StashItems == null) activePlayerData.StashItems = new List<ItemModel>();
         LoadPlayerItemsToShopZone(activePlayerData.StashItems, vm.StashItemSlotList);
     }
@@ -247,7 +247,6 @@ public class NetworkShopService
 
         var vm = GetShopViewModel();
 
-        // 크레딧 증가
         vm.CurPlayerCredit += itemData.SellingPrice * count;
 
         Debug.Log($"판매 성공! {itemData.Name} {count}개 판매 (획득: {itemData.SellingPrice * count} C)");
