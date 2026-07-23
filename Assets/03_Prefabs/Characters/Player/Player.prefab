@@ -2028,7 +2028,7 @@ MonoBehaviour:
   ProneCollider: {fileID: 7588999015336974005}
   Head: {fileID: 6414859238678251675}
   CrouchHeightRatio: 0.5
-  CrouchHeadHeightRatio: 0.6
+  CrouchHeadHeightRatio: 0.7
   ProneHeadHeightRatio: 0.25
   PostureChangeSpeed: 8
   CrouchSpeed: 3
@@ -2142,7 +2142,7 @@ CapsuleCollider:
   m_Radius: 0.5
   m_Height: 2
   m_Direction: 2
-  m_Center: {x: 0, y: 0, z: 0.5}
+  m_Center: {x: 0, y: 0, z: -0.5}
 --- !u!54 &6622171463591126358
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2230,6 +2230,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerWeaponController
   PlayerWeaponSocket: {fileID: 7995536942549607209}
+  MainCamera: {fileID: 0}
+  InputHandler: {fileID: 0}
+  AimLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  MaxSpreadAngle: 10
 --- !u!1 &7918257139273063620
 GameObject:
   m_ObjectHideFlags: 0
