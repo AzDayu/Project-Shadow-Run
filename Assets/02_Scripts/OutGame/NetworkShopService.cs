@@ -185,56 +185,71 @@ public class NetworkShopService
         LoadPlayerItemsToShopZone(activePlayerData.StashItems, vm.StashItemSlotList);
     }
 
-    public void RequestBuyItem(int shopSlotIndex)
+    public int RequestBuyItem(string itemDataId, int requestCount, ShopItemSlotType targetZoneType, ShopItemSlotViewModel targetSlot = null)
     {
+        if (requestCount <= 0) return 0;
+
+        var itemData = DataManager.Instance.GetItemData(itemDataId);
+        if(itemData == null) return 0;
+
         var vm = GetShopViewModel();
-        var targetSlot = vm.ShopItemSlotList[shopSlotIndex];
+        
+        int maxAffordable = (vm.CurPlayerCredit / itemData.SellingPrice);
 
-        if (targetSlot.IsSlotEmpty) return;
-
-        int price = targetSlot.ItemSellingPrice;
-
-        if (vm.CurPlayerCredit < price)
+        if (maxAffordable == 0)
         {
             Debug.LogError("크레딧이 부족합니다.");
-            return;
+            return 0;
         }
 
-        // 2. 인벤토리나 창고에 빈 공간이 있는지 찾기. 인벤토리, 창고 구현 후 주석 해제
-        //ShopItemSlotViewModel emptySlot = vm.InventorySlots.Find(s => s.IsEmpty);
-        //if (emptySlot == null)
-        //{
-        //    emptySlot = vm.StashItemSlotList.Find(s => s.IsSlotEmpty);
-        //}
+        int buyCount = Mathf.Min(requestCount, maxAffordable);
+        int actualAddedCount = 0;
 
-        //if (emptySlot == null)
-        //{
-        //    Debug.LogError("아이템을 넣을 공간이 없습니다.");
-        //    return;
-        //}
+        if (targetZoneType == ShopItemSlotType.Inventory)
+        {
+            int remain = InventoryManager.Instance.TryAddItem(itemData, buyCount);
+            actualAddedCount = buyCount - remain;
+        }
+        else if (targetZoneType == ShopItemSlotType.Stash && targetSlot != null)
+        {
+            if (targetSlot.IsSlotEmpty)
+            {
+                targetSlot.ItemDataId = itemDataId;
+                targetSlot.ItemUniqueId = System.Guid.NewGuid().ToString();
+                targetSlot.ItemSellingPrice = itemData.SellingPrice;
+                targetSlot.ItemStackCount = buyCount;
+                targetSlot.IsSlotEmpty = false;
+                actualAddedCount = buyCount;
+            }
+            else if (targetSlot.ItemDataId == itemDataId)
+            {
+                int maxCanAdd = itemData.MaxStackCount - targetSlot.ItemStackCount;
+                actualAddedCount = Mathf.Min(buyCount, maxCanAdd);
+                targetSlot.ItemStackCount += actualAddedCount;
+            }
+        }
 
-        // 3. 구매 처리
-        //vm.CurPlayerCredit -= price;
-        //long generatedUniqueId = System.DateTime.Now.Ticks; // 임시 유니크 ID 생성
+        if (actualAddedCount > 0)
+        {
+            vm.CurPlayerCredit -= actualAddedCount * itemData.SellingPrice;
+            Debug.Log($"구매 성공! {itemData.Name} {actualAddedCount}개 구매 완료.");
+        }
 
-        //emptySlot.SetItem(generatedUniqueId, targetSlot.ItemData, 1);
-
-        Debug.Log($"구매 성공!");
-
+        return actualAddedCount;
     }
 
-    public void RequestSellItem(ShopItemSlotType fromZone, int slotIndex)
+    public void RequestSellItem(string itemDataId, int count)
     {
-        //var vm = GetShopViewModel();
-        //List<ShopItemSlotViewModel> targetZone = (fromZone == ShopItemSlotType.Inventory) ? vm.InventorySlots : vm.StashSlots;
+        if (count <= 0) return;
 
-        //var slot = targetZone[slotIndex];
-        //if (slot.IsSlotEmpty) return;
+        var itemData = DataManager.Instance.GetItemData(itemDataId);
+        if (itemData == null) return;
 
-        //// 가격 지급 및 슬롯 초기화
-        //vm.CurPlayerCredit += slot.ItemData.SellingPrice;
-        //slot.Clear();
+        var vm = GetShopViewModel();
 
-        Debug.Log("아이템 판매 성공!");
+        // 크레딧 증가
+        vm.CurPlayerCredit += itemData.SellingPrice * count;
+
+        Debug.Log($"판매 성공! {itemData.Name} {count}개 판매 (획득: {itemData.SellingPrice * count} C)");
     }
 }

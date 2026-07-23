@@ -440,18 +440,8 @@ public class ShopUI : UIBase
 
         if (_originSlotVm.SlotType == ShopItemSlotType.Shop)
         {
-            int maxAffordable = _shopVm.CurPlayerCredit / itemData.SellingPrice;
-            if (maxAffordable == 0)
-            {
-                Debug.LogWarning("크레딧이 부족합니다!");
-                RestoreItemToOrigin(); return;
-            }
-            int tryCount = Mathf.Min(_heldStackCount, maxAffordable);
-            int remain = InventoryManager.Instance.TryAddItem(itemData, tryCount);
-            int added = tryCount - remain;
-
-            _shopVm.CurPlayerCredit -= added * itemData.SellingPrice;
-            _heldStackCount -= added;
+            int boughtCount = NetworkManager.Inst.ShopService.RequestBuyItem(_dragSlotVm.ItemDataId, _heldStackCount, ShopItemSlotType.Inventory);
+            _heldStackCount -= boughtCount;
         }
         else 
         {
@@ -476,40 +466,28 @@ public class ShopUI : UIBase
         // 타겟이 인벤토리인 경우
         if (targetSlot.SlotType == ShopItemSlotType.Inventory)
         {
-            DropAllIntoInventory(); return;
+            DropAllIntoInventory(); 
+            return;
         }
 
-        // 타겟이 상점인 경우 (판매)
         if (targetSlot.SlotType == ShopItemSlotType.Shop)
         {
             if (_originSlotVm.SlotType != ShopItemSlotType.Shop)
             {
-                _shopVm.CurPlayerCredit += itemData.SellingPrice * _heldStackCount;
+                // [수정] 서비스에 판매 위임
+                NetworkManager.Inst.ShopService.RequestSellItem(_dragSlotVm.ItemDataId, _heldStackCount);
             }
-            ClearCursorItem(); return;
+            ClearCursorItem();
+            return;
         }
 
         // 타겟이 창고인 경우: 상점에서 가져온 물건이면 돈 계산
         if (_originSlotVm.SlotType == ShopItemSlotType.Shop)
         {
-            int maxAffordable = _shopVm.CurPlayerCredit / itemData.SellingPrice;
+            // [수정] 서비스에 구매 위임
+            int boughtCount = NetworkManager.Inst.ShopService.RequestBuyItem(_dragSlotVm.ItemDataId, _heldStackCount, targetSlot.SlotType, targetSlot);
+            _heldStackCount -= boughtCount;
 
-            if (maxAffordable == 0)
-            {
-                Debug.LogWarning("크레딧이 부족합니다!");
-                RestoreItemToOrigin(); return;
-            }
-
-            int buyCount = Mathf.Min(_heldStackCount, maxAffordable);
-            _shopVm.CurPlayerCredit -= buyCount * itemData.SellingPrice; 
-
-            targetSlot.ItemDataId = _dragSlotVm.ItemDataId;
-            targetSlot.ItemUniqueId = System.Guid.NewGuid().ToString();
-            targetSlot.ItemSellingPrice = itemData.SellingPrice;
-            targetSlot.ItemStackCount = buyCount;
-            targetSlot.IsSlotEmpty = false;
-
-            _heldStackCount -= buyCount;
             if (_heldStackCount > 0) RestoreItemToOrigin(); // 돈 부족해서 못 산 나머지는 마우스/상점으로 원위치
             else ClearCursorItem();
 
@@ -533,16 +511,8 @@ public class ShopUI : UIBase
         {
             if (_originSlotVm.SlotType == ShopItemSlotType.Shop)
             {
-                if (_shopVm.CurPlayerCredit >= itemData.SellingPrice)
-                {
-                    int remain = InventoryManager.Instance.TryAddItem(itemData, 1);
-                    if (remain == 0)
-                    {
-                        _shopVm.CurPlayerCredit -= itemData.SellingPrice;
-                        _heldStackCount--;
-                    }
-                }
-                else { Debug.LogWarning("크레딧이 부족합니다!"); }
+                int boughtCount = NetworkManager.Inst.ShopService.RequestBuyItem(_dragSlotVm.ItemDataId, 1, ShopItemSlotType.Inventory);
+                _heldStackCount -= boughtCount;
             }
             else
             {
@@ -550,8 +520,31 @@ public class ShopUI : UIBase
                 if (remain == 0) _heldStackCount--;
             }
 
+            if (_heldStackCount == 0)
+            {
+                ClearCursorItem();
+            }
+            else
+            {
+                _dragSlotVm.ItemStackCount = _heldStackCount;
+            }
+            
+            return;
+        }
+
+        if (targetSlot.SlotType == ShopItemSlotType.Shop)
+        {
+            // 상점 물건을 상점에 다시 내려놓는 게 아니라면 판매 처리
+            if (_originSlotVm.SlotType != ShopItemSlotType.Shop)
+            {
+                NetworkManager.Inst.ShopService.RequestSellItem(_dragSlotVm.ItemDataId, 1);
+            }
+
+            _heldStackCount--;
+
             if (_heldStackCount == 0) ClearCursorItem();
             else _dragSlotVm.ItemStackCount = _heldStackCount;
+
             return;
         }
 
@@ -562,25 +555,23 @@ public class ShopUI : UIBase
 
         if (_originSlotVm.SlotType == ShopItemSlotType.Shop)
         {
-            if (_shopVm.CurPlayerCredit < itemData.SellingPrice)
-            {
-                Debug.LogWarning("크레딧이 부족합니다!");
-                return;
-            }
-            _shopVm.CurPlayerCredit -= itemData.SellingPrice;
+            int boughtCount = NetworkManager.Inst.ShopService.RequestBuyItem(_dragSlotVm.ItemDataId, 1, targetSlot.SlotType, targetSlot);
+            _heldStackCount -= boughtCount;
         }
-
-        if (targetSlot.IsSlotEmpty)
+        else
         {
-            targetSlot.ItemDataId = _dragSlotVm.ItemDataId;
-            targetSlot.ItemUniqueId = (_originSlotVm.SlotType == ShopItemSlotType.Shop) ? System.Guid.NewGuid().ToString() : _dragSlotVm.ItemUniqueId;
-            targetSlot.ItemSellingPrice = itemData.SellingPrice;
-            targetSlot.ItemStackCount = 0;
-            targetSlot.IsSlotEmpty = false;
-        }
+            if (targetSlot.IsSlotEmpty)
+            {
+                targetSlot.ItemDataId = _dragSlotVm.ItemDataId;
+                targetSlot.ItemUniqueId = _dragSlotVm.ItemUniqueId;
+                targetSlot.ItemSellingPrice = itemData.SellingPrice;
+                targetSlot.ItemStackCount = 0; 
+                targetSlot.IsSlotEmpty = false;
+            }
 
-        targetSlot.ItemStackCount++;
-        _heldStackCount--;
+            targetSlot.ItemStackCount++;
+            _heldStackCount--;
+        }
 
         if (_heldStackCount == 0) ClearCursorItem();
         else _dragSlotVm.ItemStackCount = _heldStackCount;
@@ -595,7 +586,6 @@ public class ShopUI : UIBase
         }
 
         var itemData = DataManager.Instance.GetItemData(_dragSlotVm.ItemDataId);
-
         int maxCanAdd = itemData.MaxStackCount - targetSlot.ItemStackCount;
 
         if (maxCanAdd <= 0)
@@ -607,19 +597,15 @@ public class ShopUI : UIBase
 
         if (_originSlotVm.SlotType == ShopItemSlotType.Shop)
         {
-            int maxAffordable = _shopVm.CurPlayerCredit / itemData.SellingPrice;
-            if (maxAffordable == 0)
-            {
-                Debug.LogWarning("크레딧이 부족합니다!");
-                return;
-            }
-
-            amountToAdd = Mathf.Min(amountToAdd, maxAffordable);
-            _shopVm.CurPlayerCredit -= amountToAdd * itemData.SellingPrice;
+            int boughtCount = NetworkManager.Inst.ShopService.RequestBuyItem(_dragSlotVm.ItemDataId, amountToAdd, targetSlot.SlotType, targetSlot);
+            _heldStackCount -= boughtCount;
         }
-
-        targetSlot.ItemStackCount += amountToAdd;
-        _heldStackCount -= amountToAdd;
+        else
+        {
+            // 단순 병합
+            targetSlot.ItemStackCount += amountToAdd;
+            _heldStackCount -= amountToAdd;
+        }
 
         if (_heldStackCount <= 0)
         {
