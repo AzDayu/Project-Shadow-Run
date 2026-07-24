@@ -137,41 +137,49 @@ public static class UIManagerExtension
         SetInventoryCursorState(false);
     }
 
-    public static void OpenPauseUI(this UIManager uiManager)
+    public static void TogglePauseUI(this UIManager uiManager, PlayerInputHandler inputHandler = null)
     {
-        var uiBase = uiManager.OpenUI(UIRootType.PopupUI, UIType.PauseUI);
-        if (uiBase == null)
+        if (uiManager.IsUIOpened(UIType.PauseUI))
         {
-            Debug.LogWarning("PauseUI가 생성되지 않았습니다.");
-            return;
+            uiManager.ClosePauseUI(inputHandler);
         }
+        else
+        {
+            uiManager.OpenPauseUI(inputHandler);
+        }
+    }
+
+    public static void OpenPauseUI(this UIManager uiManager, PlayerInputHandler inputHandler = null)
+    {
+        uiManager.OpenPopupUI(UIType.PauseUI);
 
         Time.timeScale = 0f;
-        SetCursorStateForPause(true);
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+
+        if (inputHandler != null)
+        {
+            inputHandler.SetGameplayInputBlocked(true);
+        }
     }
 
-    public static void ClosePauseUI(this UIManager uiManager)
+    public static void ClosePauseUI(this UIManager uiManager, PlayerInputHandler inputHandler = null)
     {
-        uiManager.CloseUI(UIRootType.PopupUI, UIType.PauseUI);
+        uiManager.ClosePopupUI(UIType.PauseUI);
 
         Time.timeScale = 1f;
-        SetCursorStateForPause(false);
-    }
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
 
-    public static void TogglePauseUI(this UIManager uiManager)
-    {
-        bool isOpened = uiManager.IsUIOpened(UIRootType.PopupUI, UIType.PauseUI);
+        if (inputHandler == null)
+        {
+            inputHandler = UnityEngine.Object.FindFirstObjectByType<PlayerInputHandler>();
+        }
 
-        if (isOpened)
-            uiManager.ClosePauseUI();
-        else
-            uiManager.OpenPauseUI();
-    }
-
-    private static void SetCursorStateForPause(bool isPauseOpen)
-    {
-        Cursor.visible = isPauseOpen;
-        Cursor.lockState = isPauseOpen ? CursorLockMode.None : CursorLockMode.Locked;
+        if (inputHandler != null)
+        {
+            inputHandler.SetGameplayInputBlocked(false);
+        }
     }
 
 }
