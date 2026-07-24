@@ -3,7 +3,7 @@
 public interface IQuickSlotConsumeHandler
 {
     // 처리 가능한 아이템 타입인지 확인
-    bool CanHandleType( string useItemType );
+    bool CanHandleType( ItemData itemData );
 
     // 아이템 효과 실행
     void UseItem( ItemData itemData );
@@ -43,10 +43,10 @@ public class PlayerQuickSlotHandler : MonoBehaviour
             return;
         }
 
-        // 해당 itemData를 처리할 수 있는 핸들러를 찾아 실행
+        // 해당 itemData들을 처리할 수 있는 핸들러를 찾아 실행
         for (int i = 0; i < _handlers.Length; i++)
         {
-            if (_handlers[i].CanHandleType(itemData.UseItemType))
+            if (_handlers[i].CanHandleType(itemData))
             {
                 _handlers[i].UseItem(itemData);
                 break;

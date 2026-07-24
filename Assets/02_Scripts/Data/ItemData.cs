@@ -54,69 +54,48 @@ public class ItemData : BaseData
     public string IconPath;
     public string PrefabPath;
 
-    public string UseItemType;              // [0] 아이템 타입
+    public string UseItemType;
     public string UseItemParameterList;
-    public string[] UseItemParameters;
+    // public string[] UseItemParameters;
 
-    public float PreUseDelay;               // [1] 사용 준비 시간 (초)
-    public int   HpVariation;               // [2] 체력 변화량
-    public float Duration;                  // [3] 지속 및 대기 시간    
-    public float EffectRange;               // [4] 범위 (폭발 등)
+    // 파싱된 키-값 데이터를 보관할 딕셔너리
+    public Dictionary<string, float> ItemParameters = new Dictionary<string, float>();
 
     public void ParseUseItemParameters( )
     {
-        /*if (UseItemParameterList == null || UseItemParameterList == "")
-            UseItemParameters = Array.Empty<string>();
-        else
-            UseItemParameters = UseItemParameterList.Split(',');*/
-
-        UseItemType = null;
-        PreUseDelay = 0f;
-        HpVariation = 0;
-        Duration = 0f;
-        EffectRange = 0f;
+        ItemParameters.Clear();
         if (string.IsNullOrWhiteSpace(UseItemParameterList))
         {
-            UseItemParameters = Array.Empty<string>();
-
             return;
         }
 
-        UseItemParameters = UseItemParameterList.Split(',');
-
-        // 사용 아이템 타입 (string)
-        if (UseItemParameters.Length > 0)
+        string[] pairs = UseItemParameterList.Split(',');
+        for (int i = 0; i < pairs.Length; i++)
         {
-            UseItemType = UseItemParameters[0].Trim();
-        }
-
-        // 사용 준비 시간 (float)
-        if (UseItemParameters.Length > 1)
-        {
-            float.TryParse(UseItemParameters[1], out PreUseDelay);
-        }
-
-        // 데미지 / 회복량 (int)
-        if (UseItemParameters.Length > 2)
-        {
-            int.TryParse(UseItemParameters[2], out HpVariation);
-        }
-
-        // 지속 및 대기 시간 (float)
-        if (UseItemParameters.Length > 3)
-        {
-            float.TryParse(UseItemParameters[3], out Duration);
-        }
-
-        // 아이템 효과 범위 (float)
-        if (UseItemParameters.Length > 4)
-        {
-            float.TryParse(UseItemParameters[4], out EffectRange);
-
+            string[] keyValue = pairs[i].Split(':');
+            if (keyValue.Length == 2)
+            {
+                string key = keyValue[0].Trim();
+                if (float.TryParse(keyValue[1].Trim(), out float value))
+                {
+                    ItemParameters[key] = value;
+                }
+            }
         }
     }
+   
+    public bool TryGetParameter( string key, out float value )
+    {
+        if (ItemParameters.Count == 0 && !string.IsNullOrWhiteSpace(UseItemParameterList))
+        {
+            ParseUseItemParameters();
+        }
 
+        return ItemParameters.TryGetValue(key, out value);
+    }
 }
+
+
 
 
 [System.Serializable]
