@@ -419,7 +419,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c499a7b7ec7a78d47a6f9104a6d58369, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShopObj
-  InputHandler: {fileID: 2594667027422455901, guid: 8ebafffe615a3c14ba7c39008c071e01, type: 3}
 --- !u!1 &3056138344448036589
 GameObject:
   m_ObjectHideFlags: 0
@@ -1447,7 +1446,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c8f44933a8534140b75f17209bf652f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StashObj
-  InputHandler: {fileID: 2594667027422455901, guid: 8ebafffe615a3c14ba7c39008c071e01, type: 3}
 --- !u!1 &8937089600298941585
 GameObject:
   m_ObjectHideFlags: 0

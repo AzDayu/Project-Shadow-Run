@@ -187,7 +187,14 @@ public class StashUI : UIBase
 
     public void CloseStashUI()
     {
-        UIManager.Instance.CloseContentUI(UIType.StashUI);
+        if (Lobby.Instance != null)
+        {
+            Lobby.Instance.CloseCurrentTargetUI();
+        }
+        else
+        {
+            UIManager.Instance.CloseContentUI(UIType.StashUI);
+        }
     }
 
     private void OnSlotHoverEnter(string dataId)

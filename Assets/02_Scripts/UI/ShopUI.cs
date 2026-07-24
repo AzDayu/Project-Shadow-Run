@@ -203,7 +203,14 @@ public class ShopUI : UIBase
 
     public void CloseShopUI()
     {
-        UIManager.Instance.CloseContentUI(UIType.ShopUI);
+        if (Lobby.Instance != null)
+        {
+            Lobby.Instance.CloseCurrentTargetUI();
+        }
+        else
+        {
+            UIManager.Instance.CloseContentUI(UIType.ShopUI);
+        }
     }
 
     // ==========================================
