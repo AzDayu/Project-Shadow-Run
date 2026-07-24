@@ -103,7 +103,14 @@ public class InventoryManager : MonoBehaviour
 
             int addCount = Mathf.Min(item.MaxStackCount, remainCount);
 
-            InventoryItems.Add(new ItemModel{ItemId = item.Id,CurrentStackCount = addCount});
+            ItemModel newItemModel = new ItemModel
+            {
+                InstanceId = Guid.NewGuid().ToString(),
+                ItemId = item.Id,
+                CurrentStackCount = addCount
+            };
+
+            InventoryItems.Add(newItemModel);
 
             remainCount -= addCount;
         }
@@ -260,6 +267,37 @@ public class InventoryManager : MonoBehaviour
         if (itemModel.CurrentStackCount < count)
             return false;
 
+        if (PlayerStatus.Instance == null || GameObjectManager.Instance == null)
+            return false;
+
+        ItemData itemData = DataManager.Instance.GetItemData(itemModel.ItemId);
+
+        if (itemData == null || string.IsNullOrWhiteSpace(itemData.PrefabPath))
+            return false;
+
+        GameObject itemPrefab = Resources.Load<GameObject>(itemData.PrefabPath);
+
+        if (itemPrefab == null)
+        {
+            Debug.LogError($"드롭할 아이템 프리팹을 찾을 수 없습니다. Path: {itemData.PrefabPath}");
+            return false;
+        }
+
+        if (itemPrefab.GetComponent<FieldItem>() == null)
+        {
+            Debug.LogError($"드롭할 아이템 프리팹에 FieldItem이 없습니다. Prefab: {itemPrefab.name}");
+            return false;
+        }
+
+        ItemModel droppedItemModel = CreateDroppedItemModel(itemModel, count);
+        Transform playerTransform = PlayerStatus.Instance.transform;
+        Vector3 dropPosition = playerTransform.position + playerTransform.forward * 1.5f + Vector3.up * 0.5f;
+
+        GameObject droppedObject = GameObjectManager.Instance.SpawnObject(itemPrefab, dropPosition, playerTransform.rotation);
+
+        FieldItem fieldItem = droppedObject.GetComponent<FieldItem>();
+        fieldItem.Initialize(droppedItemModel, itemData);
+
         bool wasRegistered = IsRegisteredInQuickSlot(itemModel);
 
         bool wasEquipped = IsEquippedItem(itemModel);
@@ -284,6 +322,29 @@ public class InventoryManager : MonoBehaviour
 
         OnInventoryChanged?.Invoke();
         return true;
+    }
+
+    private ItemModel CreateDroppedItemModel(ItemModel itemModel, int count)
+    {
+        if (itemModel is WeaponModel weaponModel)
+        {
+            return new WeaponModel
+            {
+                InstanceId = weaponModel.InstanceId,
+                ItemId = weaponModel.ItemId,
+                CurrentStackCount = 1,
+                CurrentAmmo = weaponModel.CurrentAmmo,
+                CurrentDurability = weaponModel.CurrentDurability,
+                AttachedParts = weaponModel.AttachedParts == null ? new List<ItemModel>() : new List<ItemModel>(weaponModel.AttachedParts)
+            };
+        }
+
+        return new ItemModel
+        {
+            InstanceId = Guid.NewGuid().ToString(),
+            ItemId = itemModel.ItemId,
+            CurrentStackCount = count
+        };
     }
 
     public bool TryRegisterQuickSlot(int inventorySlotIndex, int quickSlotIndex)

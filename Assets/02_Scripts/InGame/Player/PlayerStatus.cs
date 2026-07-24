@@ -35,6 +35,8 @@ public class PlayerStatus : MonoBehaviour, IDamageable
             Model = new PlayerModel();
         }
 
+        NormalizeLoadedInventory();
+
         if (Model.MaxHP <= 0f)
         {
             Model.MaxHP = MaxHP;
@@ -47,6 +49,60 @@ public class PlayerStatus : MonoBehaviour, IDamageable
 
         ViewModel = new PlayerStatusViewModel();
         ViewModel.InitPlayerViewModel(Model);
+    }
+
+    private void NormalizeLoadedInventory()
+    {
+        if (Model.InventoryItems == null)
+            Model.InventoryItems = new System.Collections.Generic.List<ItemModel>();
+
+        foreach (ItemModel inventoryItem in Model.InventoryItems)
+        {
+            if (inventoryItem == null)
+                continue;
+
+            if (string.IsNullOrWhiteSpace(inventoryItem.InstanceId))
+                inventoryItem.InstanceId = System.Guid.NewGuid().ToString();
+        }
+
+        System.Collections.Generic.HashSet<string> connectedInstanceIds = new System.Collections.Generic.HashSet<string>();
+
+        Model.QuickSlotOne = FindInventoryItem(Model.QuickSlotOne, connectedInstanceIds);
+        Model.QuickSlotTwo = FindInventoryItem(Model.QuickSlotTwo, connectedInstanceIds);
+        Model.QuickSlotThree = FindInventoryItem(Model.QuickSlotThree, connectedInstanceIds);
+    }
+
+    private ItemModel FindInventoryItem(ItemModel quickSlotItem, System.Collections.Generic.HashSet<string> connectedInstanceIds)
+    {
+        if (quickSlotItem == null)
+            return null;
+
+        if (!string.IsNullOrWhiteSpace(quickSlotItem.InstanceId))
+        {
+            foreach (ItemModel inventoryItem in Model.InventoryItems)
+            {
+                if (inventoryItem == null || inventoryItem.InstanceId != quickSlotItem.InstanceId)
+                    continue;
+
+                if (!connectedInstanceIds.Add(inventoryItem.InstanceId))
+                    return null;
+
+                return inventoryItem;
+            }
+        }
+
+        foreach (ItemModel inventoryItem in Model.InventoryItems)
+        {
+            if (inventoryItem == null || inventoryItem.ItemId != quickSlotItem.ItemId)
+                continue;
+
+            if (!connectedInstanceIds.Add(inventoryItem.InstanceId))
+                continue;
+
+            return inventoryItem;
+        }
+
+        return null;
     }
 
     public void TakeDamage(float damage)
