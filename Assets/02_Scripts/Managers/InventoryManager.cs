@@ -695,7 +695,7 @@ public class InventoryManager : MonoBehaviour
 
     public bool TryAddWeapon(WeaponData weaponData)
     {
-        return TryAddWeapon(weaponData, GetInstanceID().ToString());
+        return TryAddWeapon(weaponData, Guid.NewGuid().ToString());
     }
 
     public bool TryAddWeapon(WeaponData weaponData, string instanceId)
@@ -939,7 +939,7 @@ public class InventoryManager : MonoBehaviour
         {
             switch (GetQuickSlot(SelectedQuickSlotIndex).ItemId)
             {
-                case string value when value.Contains("Weapon_AR"):
+                case string value when value.Contains("Weapon_AR") || value.Contains("Weapon_SMG") || value.Contains("Weapon_SR") || value.Contains("Weapon_SG"):
                     return WeaponType.Rifle;
                 case string value when value.Contains("Weapon_Pistol"):
                     return WeaponType.Pistol;

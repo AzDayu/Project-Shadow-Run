@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3223355697433087430}
   m_Layer: 11
-  m_Name: 'Muzzle '
+  m_Name: Muzzle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -41,7 +41,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5867581962509876575}
   m_Layer: 11
-  m_Name: 'LeftHandGrip '
+  m_Name: LeftHandGrip
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -56,7 +56,7 @@ Transform:
   m_GameObject: {fileID: 6187060862730192301}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.031, z: 0.406}
+  m_LocalPosition: {x: 0, y: -0.085, z: 0.414}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -72,7 +72,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6258605361807916526}
   m_Layer: 11
-  m_Name: 'RightHandGrip '
+  m_Name: RightHandGrip
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -235,9 +235,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1023706028061482334}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c2519891469166e439f8010fbe2dc69c, type: 3}
+  m_Script: {fileID: 11500000, guid: 72244c3af6444f66a434c0af297ba853, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::WeaponRifle
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponShotgun
 --- !u!120 &3975676776263961719
 LineRenderer:
   serializedVersion: 3

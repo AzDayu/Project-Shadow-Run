@@ -253,10 +253,32 @@ MonoBehaviour:
     Count: 3
   - ItemId: Item_Loot_Tablet
     Count: 1
-  - ItemId: Item_Weapon_AR_01
-    Count: 1
   - ItemId: Item_Ammo_556
     Count: 8
+  - ItemId: Item_Ammo_762
+    Count: 8
+  - ItemId: Item_Ammo_9mm
+    Count: 8
+  - ItemId: Item_Ammo_45
+    Count: 8
+  - ItemId: Item_Ammo_556
+    Count: 8
+  - ItemId: Item_Ammo_12G
+    Count: 8
+  - ItemId: Item_Weapon_AR_02
+    Count: 1
+  - ItemId: Weapon_Pistol_01
+    Count: 1
+  - ItemId: Weapon_Pistol_02
+    Count: 1
+  - ItemId: Item_Weapon_SG_01
+    Count: 1
+  - ItemId: Item_Weapon_SMG_01
+    Count: 1
+  - ItemId: Item_Weapon_SR_01
+    Count: 1
+  - ItemId: Item_Weapon_Pistol_01
+    Count: 1
 --- !u!1 &383023749
 GameObject:
   m_ObjectHideFlags: 0
