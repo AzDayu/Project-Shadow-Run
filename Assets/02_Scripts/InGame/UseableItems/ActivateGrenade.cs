@@ -7,9 +7,13 @@ public class ActivateGrenade : MonoBehaviour
 
     private string _poolAddress;
 
+    public bool IsActivated { get; private set; }
+
     // 생성 직후 투척력 전달 및 폭발 코루틴 시작
     public void InitGrenade( ItemData itemData, Vector3 throwDirection, float throwForce )
     {
+        IsActivated = true;
+
         _poolAddress = itemData.PrefabPath;
 
         StopAllCoroutines();
@@ -56,6 +60,8 @@ public class ActivateGrenade : MonoBehaviour
             itemData.TryGetParameter("Radius", out float radius);
             // TODO: 연막 효과 처리
         }
+
+        IsActivated = false;
 
         ObjectPoolManager.Instance.ReturnToPool(_poolAddress, gameObject);
     }

@@ -16,6 +16,10 @@ public class FieldItem : MonoBehaviour
         if (InventoryManager.Instance == null || ItemModel == null || ItemData == null)
             return false;
 
+        // 활성화 상태 일 때 줍지 못하도록 처리 (수류탄 등)
+        if (TryGetComponent<ActivateGrenade>(out var grenade) && grenade.IsActivated)
+            return false;
+
         if (ItemData is WeaponData)
             return TryPickupWeapon();
 
