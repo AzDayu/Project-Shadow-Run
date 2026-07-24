@@ -10,11 +10,12 @@ public class PlayerWeaponController : MonoBehaviour
     public bool IsReloading => _isReloading;
 
     [SerializeField] private Transform PlayerWeaponSocket;
-    [SerializeField] private Camera MainCamera;
-    [SerializeField] private PlayerInputHandler InputHandler;
-    [SerializeField] private LayerMask AimLayerMask = ~0;
+    [SerializeField] private LayerMask AimLayerMask = Physics.AllLayers;
     [SerializeField, Min(0f)] private float MaxSpreadAngle = 10f;
 
+    private Camera MainCamera;
+    private PlayerInputHandler InputHandler;
+    private PlayerAnimeController AnimeController;
     private GameObject _currentWeaponObject;
     private ItemModel _currentWeaponModel;
     private WeaponData _currentWeaponData;
@@ -32,6 +33,9 @@ public class PlayerWeaponController : MonoBehaviour
 
         if (InputHandler == null)
             InputHandler = GetComponent<PlayerInputHandler>();
+
+        if (AnimeController == null)
+            AnimeController = GetComponent<PlayerAnimeController>();
 
         if (MainCamera == null)
             Debug.LogError("PlayerWeaponController: MainCamera를 찾을 수 없습니다.");
@@ -121,6 +125,10 @@ public class PlayerWeaponController : MonoBehaviour
         Vector3 fireDirection = (aimPoint - _currentMuzzle.position).normalized;
         fireDirection = ApplyAccuracy(fireDirection);
         _currentWeapon.Fire(_currentMuzzle.position, fireDirection);
+
+        if (AnimeController != null)
+            AnimeController.Fire();
+
         _nextFireTime = Time.time + _currentWeapon.AttackInterval;
         NotifyAmmoChanged();
     }
@@ -251,13 +259,13 @@ public class PlayerWeaponController : MonoBehaviour
 
         _currentWeaponObject = Instantiate(weaponPrefab, PlayerWeaponSocket);
         _currentWeaponObject.transform.localPosition = Vector3.zero;
-        _currentWeaponObject.transform.localRotation = Quaternion.identity;
         _currentWeaponObject.transform.localScale = Vector3.one;
         _currentWeaponModel = weaponModel;
         _currentWeaponData = weaponData;
 
         DisableWorldItemComponents(_currentWeaponObject);
         FindWeaponComponents(weaponData);
+        AnimeController?.SwapWeaponPosture();
     }
 
     private void FindWeaponComponents(WeaponData weaponData)

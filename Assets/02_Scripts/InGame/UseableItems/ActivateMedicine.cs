@@ -3,89 +3,110 @@ using UnityEngine;
 
 public class ActivateMedicine : MonoBehaviour, IQuickSlotConsumeHandler
 {
-    private Coroutine _healingCoroutine;
+    private Coroutine _regenCoroutine;
 
     private void OnDisable( )
     {
-        if (_healingCoroutine != null)
+        if (_regenCoroutine != null)
         {
-            StopCoroutine(_healingCoroutine);
-            _healingCoroutine = null;
+            StopCoroutine(_regenCoroutine);
+            _regenCoroutine = null;
         }
     }
 
-    public bool CanHandleType( string useItemType )
+    public bool CanHandleType( ItemData itemData )
     {
-        return useItemType == "Medicine";
+        if (itemData == null)
+        {
+            return false;
+        }
+
+        // ItemType이 Consumable이면서 UseItemType이 맞는 경우만 처리
+        bool isConsumable = itemData.ItemType == "Consumable";
+        bool isValidUseType = itemData.UseItemType == "HealStat" ||
+                             itemData.UseItemType == "BuffStat";
+
+        return isConsumable && isValidUseType;
     }
 
     public void UseItem( ItemData itemData )
     {
         if (itemData == null)
-            return;
-
-        if (_healingCoroutine != null)
         {
-            StopCoroutine(_healingCoroutine);
+            Debug.LogError("ItemData is null."); return;
         }
 
-        OnHealing(itemData);
+        // 즉시 회복 처리
+        if (itemData.UseItemType == "HealStat")
+        {
+            if (itemData.TryGetParameter("HealAmount", out float healAmount))
+            {
+                if (PlayerStatus.Instance != null)
+                {
+                    PlayerStatus.Instance.RecoverHP(healAmount);
+                }
+            }
+        }
+        // 지속형(버프) 처리
+        else if (itemData.UseItemType == "BuffStat")
+        {
+            ApplyBuff(itemData);
+        }
     }
 
-    public void OnHealing( ItemData itemData )
+    private void ApplyBuff( ItemData itemData )
     {
-        if (itemData == null)
+        // 공통 지속시간 가져오기 (없으면 기본 60초)
+        if (!itemData.TryGetParameter("Duration", out float duration) || duration <= 0f)
         {
-            return;
+            duration = 60f;
         }
 
-        if (_healingCoroutine != null)
+        // 지속 체력 회복 (RegenHP)
+        if (itemData.TryGetParameter("RegenHP", out float totalRegen) && totalRegen > 0f)
         {
-            StopCoroutine(_healingCoroutine);
+            if (_regenCoroutine != null)
+            {
+                StopCoroutine(_regenCoroutine);
+            }
+            _regenCoroutine = StartCoroutine(RegenRoutine(totalRegen, duration));
         }
 
-        _healingCoroutine = StartCoroutine(RecoveryRoutine(itemData));
-    }
-
-    private IEnumerator RecoveryRoutine( ItemData itemData )
-    {
-        float useDelay = itemData.PreUseDelay; // 대기 시간
-        int totalHealAmount = itemData.HpVariation; // 총 회복량
-        float healingDuration = itemData.Duration; // 회복 지속 시간
-
-        //  대기 시간
-        if (useDelay > 0f)
+        if (itemData.TryGetParameter("IgnorePain", out float reducePain))
         {
-            yield return new WaitForSeconds(useDelay);
-        }
-
-        //  체력 회복
-        if (healingDuration <= 0f)
-        {
-            // 즉시 회복
             if (PlayerStatus.Instance != null)
             {
-                PlayerStatus.Instance.RecoverHP(totalHealAmount);
+                // Todo: 진통제 사용으로 300만큼의 고통 감소 효과를 적용하는 로직을 구현해야 합니다.
             }
         }
-        else
+
+        if (itemData.TryGetParameter("SpeedBoost", out float speedBoost))
         {
-            // 지속 회복
-            float timer = 0f;
-            while (timer < healingDuration)
+            if (PlayerStatus.Instance != null)
             {
-                timer += Time.deltaTime;
-                float perHealTick = ( totalHealAmount / healingDuration ) * Time.deltaTime;
-
-                if (PlayerStatus.Instance != null && PlayerStatus.Instance.Model != null)
-                {
-                    PlayerStatus.Instance.RecoverHP(perHealTick);
-                }
-                yield return null;
+                //Todo: 속도 증가 효과 60을 적용하는 로직을 구현해야 합니다.
             }
         }
 
-        _healingCoroutine = null;
+    }
 
+    private IEnumerator RegenRoutine( float totalRegen, float duration )
+    {
+         float timer = 0f;
+
+         while (timer < duration)
+         {
+            timer += Time.deltaTime;
+            float tickHeal = ( totalRegen / duration ) * Time.deltaTime;
+
+            if (PlayerStatus.Instance != null)
+            {
+                PlayerStatus.Instance.RecoverHP(tickHeal);
+            }
+
+            yield return null;
+         }
+
+        _regenCoroutine = null;
     }
 }

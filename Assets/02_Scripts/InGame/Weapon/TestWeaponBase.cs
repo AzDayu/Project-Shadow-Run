@@ -1,6 +1,15 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+public struct ShotVisualData
+{
+    public bool HasHit;
+    public Vector3 StartPoint;
+    public Vector3 EndPoint;
+    public Vector3 HitNormal;
+    public Transform HitTransform;
+}
+
 public interface IDamageable
 {
     void TakeDamage(float damage);//DamageInfo구조체를 만들어 전달하면 더 많은 정보를 전달할수 있음
@@ -15,6 +24,8 @@ public interface IBattleAgent
 
 public class TestWeaponBase : MonoBehaviour
 {
+    public event System.Action<ShotVisualData> ShotFired;
+
     protected WeaponData _weaponData;
     protected WeaponModel _weaponModel;
 
@@ -108,11 +119,19 @@ public class TestWeaponBase : MonoBehaviour
         if (_weaponModel != null)
             _weaponModel.CurrentAmmo = _remainBullets;
 
-        //Vector3 direction = (targetPosition - firePosition).normalized;
-        if (Physics.Raycast(firePosition, direction.normalized, out RaycastHit hit, _currentWeaponStat.Range))
+        Vector3 fireDirection = direction.normalized;
+
+        if (Physics.Raycast(firePosition, fireDirection, out RaycastHit hit, _currentWeaponStat.Range))
         {
-            Debug.DrawRay(firePosition, direction * hit.distance, Color.red, _currentWeaponStat.Range);
-           
+            Debug.DrawRay(firePosition, fireDirection * hit.distance, Color.red, _currentWeaponStat.Range);
+
+            Debug.Log(
+                $"총알 충돌 대상: {hit.transform.name}, " +
+                $"Root: {hit.transform.root.name}, " +
+                $"Layer: {LayerMask.LayerToName(hit.transform.gameObject.layer)}, " +
+                $"HitPoint: {hit.point}"
+            );
+
             if (hit.transform.TryGetComponent<IDamageable>(out var damageable))
             { 
                 Debug.Log($"명중{_remainBullets}발 남음");
@@ -123,10 +142,32 @@ public class TestWeaponBase : MonoBehaviour
             {
                 Debug.Log($"빗나감{_remainBullets}발 남음");
             }
+
+            ShotVisualData visualData = new ShotVisualData
+            {
+                HasHit = true,
+                StartPoint = firePosition,
+                EndPoint = hit.point,
+                HitNormal = hit.normal,
+                HitTransform = hit.transform
+            };
+
+            ShotFired?.Invoke(visualData);
         }
         else
         {
             Debug.Log($"빗나감{_remainBullets}발 남음");
+
+            ShotVisualData visualData = new ShotVisualData
+            {
+                HasHit = false,
+                StartPoint = firePosition,
+                EndPoint = firePosition + fireDirection * _currentWeaponStat.Range,
+                HitNormal = Vector3.zero,
+                HitTransform = null
+            };
+
+            ShotFired?.Invoke(visualData);
         }
 
     }
