@@ -8,6 +8,7 @@ public class PlayerWeaponController : MonoBehaviour
     public int CurrentAmmo => _currentWeapon == null ? 0 : _currentWeapon.RemainBullets;
     public int CurrentReserveAmmo => GetCurrentReserveAmmo();
     public bool IsReloading => _isReloading;
+    public Transform CurrentLeftHandGrip { get; private set; }
 
     [SerializeField] private Transform PlayerWeaponSocket;
     [SerializeField] private LayerMask AimLayerMask = Physics.AllLayers;
@@ -312,11 +313,11 @@ public class PlayerWeaponController : MonoBehaviour
 
         foreach (Transform childTransform in childTransforms)
         {
-            if (childTransform.name != "Muzzle")
-                continue;
+            if (childTransform.name == "LeftHandGrip")
+                CurrentLeftHandGrip = childTransform;
 
-            _currentMuzzle = childTransform;
-            break;
+            if (childTransform.name == "Muzzle")
+                _currentMuzzle = childTransform;
         }
 
         if (_currentMuzzle == null)
@@ -345,6 +346,7 @@ public class PlayerWeaponController : MonoBehaviour
         _currentWeaponData = null;
         _currentWeapon = null;
         _currentMuzzle = null;
+        CurrentLeftHandGrip = null;
 
         if (wasReloading)
             OnReloadStateChanged?.Invoke(false);
