@@ -221,6 +221,7 @@ public class PlayerWeaponController : MonoBehaviour
         if (selectedItem == null)
         {
             RemoveCurrentWeapon();
+            AnimeController?.SwapWeaponPosture();
             return;
         }
 
@@ -229,6 +230,7 @@ public class PlayerWeaponController : MonoBehaviour
         if (weaponData == null)
         {
             RemoveCurrentWeapon();
+            AnimeController?.SwapWeaponPosture();
             return;
         }
 
