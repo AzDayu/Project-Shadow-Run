@@ -25,7 +25,7 @@ public enum UIType
     ShopUI,
     ShopItemPopupUI,
     StashUI,
-    StartUI,
+    TitleUI,
     PauseUI
 }
 
@@ -120,9 +120,9 @@ public static class UIManagerExtension
             : CursorLockMode.Locked;
     }
 
-    public static void OpenStartUI(this UIManager uiManager)
+    public static void OpenTitleUI(this UIManager uiManager)
     {
-        var uiBase = uiManager.OpenUI(UIRootType.PopupUI, UIType.StartUI);
+        var uiBase = uiManager.OpenUI(UIRootType.VeryFrontUI, UIType.TitleUI);
         if (uiBase == null)
         {
             Debug.LogWarning($"UI가 생성되지 않았습니다");
@@ -131,9 +131,9 @@ public static class UIManagerExtension
         SetInventoryCursorState(true);
     }
 
-    public static void CloseStartUI(this UIManager uiManager)
+    public static void CloseTitleUI(this UIManager uiManager)
     {
-        uiManager.CloseUI(UIRootType.PopupUI, UIType.StartUI);
+        uiManager.CloseUI(UIRootType.VeryFrontUI, UIType.TitleUI);
         SetInventoryCursorState(false);
     }
 
