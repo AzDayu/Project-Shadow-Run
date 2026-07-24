@@ -69,6 +69,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 440891885b9d3964b8cfc0b542c8a007, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2659180001395315760}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 440891885b9d3964b8cfc0b542c8a007, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4724428152210344623}
   m_SourcePrefab: {fileID: 100100000, guid: 440891885b9d3964b8cfc0b542c8a007, type: 3}
 --- !u!1 &7218426515285424186 stripped
 GameObject:
@@ -138,3 +141,15 @@ CapsuleCollider:
   m_Height: 1.0000739
   m_Direction: 1
   m_Center: {x: -0.01785262, y: 0.013115212, z: -0.005084425}
+--- !u!114 &4724428152210344623
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7218426515285424186}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d00ae1d7ca94119bd881c232a0964e8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FieldItem

@@ -256,7 +256,7 @@ MonoBehaviour:
   - ItemId: Item_Weapon_AR_01
     Count: 1
   - ItemId: Item_Ammo_556
-    Count: 100
+    Count: 8
 --- !u!1 &383023749
 GameObject:
   m_ObjectHideFlags: 0
